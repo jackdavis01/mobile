@@ -1,3 +1,6 @@
+8 Queens: Privacy policy
+---------------------------------
+
 Welcome to the 8 Queens Performance Banckmark App!
 
 This is an open source App developed by Jack Davis. The source code is available on GitHub under the MIT license; the App is also available on Google Play.
