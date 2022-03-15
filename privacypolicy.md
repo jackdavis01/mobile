@@ -9,7 +9,7 @@ I take privacy very seriously. I know how irritating it is when Apps collect you
 
 I have not programmed this App to collect any personally identifiable information. All data created by you is stored on your device only, and can be simply erased by clearing the App's data or uninstalling it.
 
-If you find any security vulnerability that has been inadvertently caused by me, or have any question regarding how the App protectes your privacy, please send me an email and I will surely try to fix it/help you.
+If you find any security vulnerability that has been inadvertently caused by me, or have any question regarding how the App protects your privacy, please send me an email and I will surely try to fix it/help you.
 
 Yours sincerely,
 Jack Davis
