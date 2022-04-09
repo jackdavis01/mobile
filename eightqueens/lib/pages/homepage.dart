@@ -1,12 +1,13 @@
 import 'dart:isolate';
 import 'dart:math';
 import "package:async/async.dart";
-import 'package:eightqueens/isolates/findsolutions.dart';
-import 'package:eightqueens/isolates/multithreadedfindsolutions.dart';
-import 'package:eightqueens/pages/infopage.dart';
-import 'package:eightqueens/widgets/boxwidgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../isolates/findsolutions.dart';
+import '../isolates/multithreadedfindsolutions.dart';
+import '../widgets/boxwidgets.dart';
+import 'infopage.dart';
+import 'resultpage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key, required this.title}) : super(key: key);
@@ -30,7 +31,7 @@ class _HomePageState extends State<HomePage> {
   int _iThreadsStarted = 1;
   DateTime _dtStart = DateTime.now();
   DateTime _dtProgress = DateTime.now();
-  Duration _dNow = const Duration(days: 0);
+  Duration _dElapsed = const Duration(days: 0);
   Duration _dFirstFrame = const Duration(days: 0);
   int _iFrameCount = 0;
   int _iFPS = 0;
@@ -53,6 +54,36 @@ class _HomePageState extends State<HomePage> {
   late StreamQueue<dynamic> _sqdEvents;
   final List<SendPort> _lsendPort = <SendPort>[];
   final List<StreamQueue<dynamic>> _lsqdEvents = <StreamQueue<dynamic>>[];
+
+  final Color cVeryFast = Colors.lightGreen.shade100;
+  int iSpeed = 0;
+  final int imsLimitVeryFast1 = 18000;
+  final int imsLimitVeryFast2 = 13500;
+  final int imsLimitVeryFast4 = 10000;
+  final Color cFast =
+      Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 3), Colors.lightGreen.shade100);
+  final int imsLimitFast1 = 22000;
+  final int imsLimitFast2 = 16500;
+  final int imsLimitFast4 = 12000;
+  final Color cBetterThanAverage =
+      Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 3 * 2), Colors.lightGreen.shade100);
+  final int imsLimitBetterThanAverage1 = 27000;
+  final int imsLimitBetterThanAverage2 = 20000;
+  final int imsLimitBetterThanAverage4 = 14000;
+  final Color cAverage = Colors.yellow.shade100;
+  final int imsLimitAverage1 = 33000;
+  final int imsLimitAverage2 = 25000;
+  final int imsLimitAverage4 = 17000;
+  final Color cSlowerThanAverage =
+      Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 2), Colors.orange.shade100);
+  final int imsLimitSlowerThanAverage1 = 64000;
+  final int imsLimitSlowerThanAverage2 = 40000;
+  final int imsLimitSlowerThanAverage4 = 20000;
+  final Color cSlow = Colors.orange.shade100;
+  final int imsLimitSlow1 = 100000;
+  final int imsLimitSlow2 = 60000;
+  final int imsLimitSlow4 = 26000;
+  final Color cVerySlow = Colors.red.shade100;
 
   @override
   initState() {
@@ -163,7 +194,7 @@ class _HomePageState extends State<HomePage> {
       _solutionCounter = 0;
       _dtStart = DateTime.now();
       _dtProgress = DateTime.now();
-      _dNow = const Duration(days: 0);
+      _dElapsed = const Duration(days: 0);
       _dFirstFrame = const Duration(days: 0);
       _iFrameCount = 0;
       _iFPS = 0;
@@ -196,7 +227,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _frameDisplay() async {
     _dtProgress = DateTime.now();
-    _dNow = _dtProgress.difference(_dtStart);
+    _dElapsed = _dtProgress.difference(_dtStart);
     _sendPort.send(_waitms);
     try {
       var vLD = await _sqdEvents.next;
@@ -228,7 +259,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _frameDisplayForMultiThreads() async {
     //debugPrint(".");
     _dtProgress = DateTime.now();
-    _dNow = _dtProgress.difference(_dtStart);
+    _dElapsed = _dtProgress.difference(_dtStart);
     _iPort++;
     if (_iPort >= _n24Threads) _iPort = 0;
     _lsendPort[_iPort].send([_waitms, _iFPS]);
@@ -287,18 +318,57 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Widget ddWaitType(double dFontSizeScale0) {
+  Widget wddWaitType(double dFontSizeScale0) {
     final List<DropdownMenuItem<dynamic>>? lddItems = _lsWaitItems.map((String items) {
       return DropdownMenuItem(
         value: items,
         child: Text(items, style: TextStyle(fontSize: 22 * dFontSizeScale0)),
       );
     }).toList();
-    return DropdownButton(
-        items: lddItems,
-        value: _ddWaitValue,
-        itemHeight: 7 * dFontSizeScale0 + kMinInteractiveDimension,
-        onChanged: onChangedDDWait);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        DropdownButton(
+            items: lddItems,
+            value: _ddWaitValue,
+            itemHeight: 7 * dFontSizeScale0 + kMinInteractiveDimension,
+            onChanged: onChangedDDWait),
+        Tooltip(
+            message:
+                "If you want to see the right solutions for the 8 Queens problem choose '1 sec' or '5 sec' at 'No Wait'.",
+            preferBelow: false,
+            triggerMode: TooltipTriggerMode.tap,
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(left: 60, right: 60),
+            decoration:
+                BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
+            textStyle: const TextStyle(color: Colors.white, fontSize: 20),
+            showDuration: const Duration(seconds: 10),
+            child: Padding(
+                padding: const EdgeInsets.only(right: 16, bottom: 4, left: 12, top: 4),
+                child: Transform.scale(
+                    scale: dFontSizeScale0 * 1.36,
+                    child: const Icon(Icons.info_outline, color: Colors.blue))))
+      ],
+    );
+  }
+
+  Widget wDisplayNumbers(double dFontSizeScale0) {
+    return Column(
+      children: [
+        Text('Combinations checked:', style: TextStyle(fontSize: 20 * dFontSizeScale0)),
+        Text(
+          '$_stepCounter',
+          style: TextStyle(fontSize: 32 * dFontSizeScale0, color: cNumbers),
+        ),
+        Text('Right solutions:', style: TextStyle(fontSize: 20 * dFontSizeScale0)),
+        Text(
+          '$_solutionCounter',
+          style: TextStyle(fontSize: 32 * dFontSizeScale0, color: cNumbers),
+        ),
+        Text('Time elapsed:', style: TextStyle(fontSize: 20 * dFontSizeScale0)),
+      ],
+    );
   }
 
   void onChangedDDMultiThread(dynamic newValue) {
@@ -330,13 +400,32 @@ class _HomePageState extends State<HomePage> {
         onChanged: onChangedDDMultiThread);
   }
 
+  Widget wTooltipThreads(double dFontSizeScale0) {
+    return Tooltip(
+        message:
+            "You can test the MultiThreaded speed of your device by choosing the '2 Threads' or '4 Threads'.",
+        preferBelow: false,
+        triggerMode: TooltipTriggerMode.tap,
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(left: 60, right: 60),
+        decoration:
+            BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
+        textStyle: const TextStyle(color: Colors.white, fontSize: 20),
+        showDuration: const Duration(seconds: 10),
+        child: Padding(
+            padding: const EdgeInsets.only(right: 16, bottom: 4, left: 4, top: 4),
+            child: Transform.scale(
+                scale: dFontSizeScale0 * 1.36,
+                child: const Icon(Icons.info_outline, color: Colors.blue))));
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (1000000 > (_dNow.inMicroseconds - _dFirstFrame.inMicroseconds)) {
+    if (1000000 > (_dElapsed.inMicroseconds - _dFirstFrame.inMicroseconds)) {
       _iFrameCount++;
       if ((_iFPS < _iFrameCount) && _bStart) _iFPS = _iFrameCount;
     } else {
-      _dFirstFrame = _dNow;
+      _dFirstFrame = _dElapsed;
       _iFPS = _iFrameCount;
       _iFrameCount = 0;
     }
@@ -345,16 +434,148 @@ class _HomePageState extends State<HomePage> {
     // Height (without SafeArea: without status and toolbar)
     EdgeInsets dHeightPadding = MediaQuery.of(context).padding; // .viewPadding;
     dScreenHeight = dScreenHeight - dHeightPadding.top - kToolbarHeight - dHeightPadding.bottom;
-    double dScreenSizePortrait = max(min(dScreenWidth, (dScreenHeight - 100) / 1.54), 200);
-    double dScreenSizeLandscape = min(dScreenWidth / 2.2, dScreenHeight);
-    _dFontSizeScalePortrait = dScreenSizePortrait / 420;
-    _dFontSizeScaleLandscape = dScreenSizeLandscape / 320;
-    Widget wQueenScaledPortrait = Padding(
-        padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
-        child: Transform.scale(scale: 380 / dScreenSizePortrait, child: wQueenImage));
-    Widget wQueenScaledLandscape = Padding(
-        padding: EdgeInsets.only(bottom: dScreenSizeLandscape / 220),
-        child: Transform.scale(scale: 380 / dScreenSizeLandscape, child: wQueenImage));
+    double dScreenSizePortrait = 0;
+    double dScreenSizeLandscape = 0;
+    Widget wQueenScaledPortrait = const SizedBox.shrink();
+    Widget wTimeElapsedPortrait = const SizedBox.shrink();
+    Widget wQueenScaledLandscape = const SizedBox.shrink();
+    Widget wTimeElapsedLandscape = const SizedBox.shrink();
+
+    Orientation currentOrientation = MediaQuery.of(context).orientation;
+    if (Orientation.portrait == currentOrientation) {
+      dScreenSizePortrait = max(min(dScreenWidth, (dScreenHeight - 100) / 1.54), 200);
+      _dFontSizeScalePortrait = dScreenSizePortrait / 420;
+      wQueenScaledPortrait = Padding(
+          padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
+          child: Transform.scale(scale: 380 / dScreenSizePortrait, child: wQueenImage));
+      wTimeElapsedPortrait = Text(
+        _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
+        style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
+      );
+    } else {
+      dScreenSizeLandscape = min(dScreenWidth / 2.2, dScreenHeight);
+      _dFontSizeScaleLandscape = dScreenSizeLandscape / 320;
+      wQueenScaledLandscape = Padding(
+          padding: EdgeInsets.only(bottom: dScreenSizeLandscape / 220),
+          child: Transform.scale(scale: 380 / dScreenSizeLandscape, child: wQueenImage));
+      wTimeElapsedLandscape = Text(
+          _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
+          style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers));
+    }
+    if (pow(8, 8) == _stepCounter) {
+      Color cResult = cVeryFast;
+      if (1 == _iThreadsStarted) {
+        if (Duration(milliseconds: imsLimitVeryFast1) > _dElapsed) {
+          iSpeed = 7;
+          cResult = cVeryFast;
+        } else if (Duration(milliseconds: imsLimitFast1) > _dElapsed) {
+          iSpeed = 6;
+          cResult = cFast;
+        } else if (Duration(milliseconds: imsLimitBetterThanAverage1) > _dElapsed) {
+          iSpeed = 5;
+          cResult = cBetterThanAverage;
+        } else if (Duration(milliseconds: imsLimitAverage1) > _dElapsed) {
+          iSpeed = 4;
+          cResult = cAverage;
+        } else if (Duration(milliseconds: imsLimitSlowerThanAverage1) > _dElapsed) {
+          iSpeed = 3;
+          cResult = cSlowerThanAverage;
+        } else if (Duration(milliseconds: imsLimitSlow1) > _dElapsed) {
+          iSpeed = 2;
+          cResult = cSlow;
+        } else {
+          iSpeed = 1;
+          cResult = cVerySlow;
+        }
+      }
+      if (2 == _iThreadsStarted) {
+        if (Duration(milliseconds: imsLimitVeryFast2) > _dElapsed) {
+          iSpeed = 7;
+          cResult = cVeryFast;
+        } else if (Duration(milliseconds: imsLimitFast2) > _dElapsed) {
+          iSpeed = 6;
+          cResult = cFast;
+        } else if (Duration(milliseconds: imsLimitBetterThanAverage2) > _dElapsed) {
+          iSpeed = 5;
+          cResult = cBetterThanAverage;
+        } else if (Duration(milliseconds: imsLimitAverage2) > _dElapsed) {
+          iSpeed = 4;
+          cResult = cAverage;
+        } else if (Duration(milliseconds: imsLimitSlowerThanAverage2) > _dElapsed) {
+          iSpeed = 3;
+          cResult = cSlowerThanAverage;
+        } else if (Duration(milliseconds: imsLimitSlow2) > _dElapsed) {
+          iSpeed = 2;
+          cResult = cSlow;
+        } else {
+          iSpeed = 1;
+          cResult = cVerySlow;
+        }
+      }
+      if (4 == _iThreadsStarted) {
+        if (Duration(milliseconds: imsLimitVeryFast4) > _dElapsed) {
+          iSpeed = 7;
+          cResult = cVeryFast;
+        } else if (Duration(milliseconds: imsLimitFast4) > _dElapsed) {
+          iSpeed = 6;
+          cResult = cFast;
+        } else if (Duration(milliseconds: imsLimitBetterThanAverage4) > _dElapsed) {
+          iSpeed = 5;
+          cResult = cBetterThanAverage;
+        } else if (Duration(milliseconds: imsLimitAverage4) > _dElapsed) {
+          iSpeed = 4;
+          cResult = cAverage;
+        } else if (Duration(milliseconds: imsLimitSlowerThanAverage4) > _dElapsed) {
+          iSpeed = 3;
+          cResult = cSlowerThanAverage;
+        } else if (Duration(milliseconds: imsLimitSlow4) > _dElapsed) {
+          iSpeed = 2;
+          cResult = cSlow;
+        } else {
+          iSpeed = 1;
+          cResult = cVerySlow;
+        }
+      }
+      if (Orientation.portrait == currentOrientation) {
+        wTimeElapsedPortrait = ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ResultPage(
+                        speed: iSpeed,
+                        color: cNumbers,
+                        backgroundcolor: cResult,
+                        threads: _iThreadsStarted,
+                        elapsed: _dElapsed)),
+              );
+            },
+            style: ElevatedButton.styleFrom(primary: cResult),
+            child: Text(
+              _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
+              style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
+            ));
+      } else {
+        wTimeElapsedLandscape = ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ResultPage(
+                        speed: iSpeed,
+                        color: cNumbers,
+                        backgroundcolor: cResult,
+                        threads: _iThreadsStarted,
+                        elapsed: _dElapsed)),
+              );
+            },
+            style: ElevatedButton.styleFrom(primary: cResult),
+            child: Text(
+              _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
+              style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers),
+            ));
+      }
+    }
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
@@ -374,64 +595,53 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.white,
         body: OrientationBuilder(builder: (context, orientation) {
           return (orientation == Orientation.portrait)
-              ? Center(
-                  child: Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-                  Container(
-                    width: dScreenSizePortrait,
-                    alignment: Alignment.topCenter,
-                    child: SizedBox(
-                        height: dScreenSizePortrait,
-                        child: ChessTable(
-                            wQueen: Padding(
-                                padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
-                                child: wQueenScaledPortrait),
-                            liPlace: _liPos,
-                            dLeft: 24,
-                            dTop: 16,
-                            dScreenSize: dScreenSizePortrait)),
-                  ),
-                  Text('Combinations checked:',
-                      style: TextStyle(fontSize: 20 * _dFontSizeScalePortrait)),
-                  Text(
-                    '$_stepCounter',
-                    style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
-                  ),
-                  Text('Right solutions:', style: TextStyle(fontSize: 20 * _dFontSizeScalePortrait)),
-                  Text(
-                    '$_solutionCounter',
-                    style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
-                  ),
-                  Text('Time ellapsed:', style: TextStyle(fontSize: 20 * _dFontSizeScalePortrait)),
-                  Text(
-                    _dNow.toString().substring(0, _dNow.toString().indexOf('.') + 4),
-                    style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
-                  ),
-                  ddWaitType(_dFontSizeScalePortrait),
-                  Expanded(
-                      child: Stack(clipBehavior: Clip.none, children: [
-                    Positioned(
-                        left: 0,
-                        bottom: 0,
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Row(children: [
-                            Padding(
-                                padding: const EdgeInsets.only(left: 32, right: 10),
-                                child: ddMultiThread(_dFontSizeScalePortrait))
-                          ]),
-                          const SizedBox(height: 6),
-                          Row(children: [
-                            Padding(
-                                padding: const EdgeInsets.only(left: 32, right: 10),
-                                child: Text('FPS:',
-                                    style: TextStyle(fontSize: 20 * _dFontSizeScalePortrait))),
-                            Text(_iFPS.toString(),
-                                style: TextStyle(
-                                    fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers))
-                          ]),
-                          const SizedBox(height: 26)
-                        ]))
-                  ]))
-                ]))
+              ? Stack(children: [
+                  Center(
+                      child: Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+                    Container(
+                      width: dScreenSizePortrait,
+                      alignment: Alignment.topCenter,
+                      child: SizedBox(
+                          height: dScreenSizePortrait,
+                          child: ChessTable(
+                              wQueen: Padding(
+                                  padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
+                                  child: wQueenScaledPortrait),
+                              liPlace: _liPos,
+                              dLeft: 24,
+                              dTop: 16,
+                              dScreenSize: dScreenSizePortrait)),
+                    ),
+                    wDisplayNumbers(_dFontSizeScalePortrait),
+                    wTimeElapsedPortrait,
+                    wddWaitType(_dFontSizeScalePortrait),
+                    const Spacer(),
+                  ])),
+                  Positioned(
+                      left: 0,
+                      bottom: 0,
+                      child: Padding(
+                          padding: const EdgeInsets.only(left: 32),
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            wTooltipThreads(_dFontSizeScalePortrait),
+                            Row(children: [
+                              Padding(
+                                  padding: const EdgeInsets.only(right: 10),
+                                  child: ddMultiThread(_dFontSizeScalePortrait))
+                            ]),
+                            const SizedBox(height: 6),
+                            Row(children: [
+                              Padding(
+                                  padding: const EdgeInsets.only(right: 10),
+                                  child: Text('FPS:',
+                                      style: TextStyle(fontSize: 20 * _dFontSizeScalePortrait))),
+                              Text(_iFPS.toString(),
+                                  style: TextStyle(
+                                      fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers))
+                            ]),
+                            const SizedBox(height: 26)
+                          ])))
+                ])
               : Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
                   SizedBox(
                       height: dScreenSizeLandscape,
@@ -447,26 +657,9 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Combinations checked:',
-                              style: TextStyle(fontSize: 20 * _dFontSizeScaleLandscape)),
-                          Text(
-                            '$_stepCounter',
-                            style:
-                                TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers),
-                          ),
-                          Text('Right solutions:',
-                              style: TextStyle(fontSize: 20 * _dFontSizeScaleLandscape)),
-                          Text(
-                            '$_solutionCounter',
-                            style:
-                                TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers),
-                          ),
-                          Text('Time ellapsed:',
-                              style: TextStyle(fontSize: 20 * _dFontSizeScaleLandscape)),
-                          Text(_dNow.toString().substring(0, _dNow.toString().indexOf('.') + 4),
-                              style: TextStyle(
-                                  fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers)),
-                          ddWaitType(_dFontSizeScaleLandscape)
+                          wDisplayNumbers(_dFontSizeScaleLandscape),
+                          wTimeElapsedLandscape,
+                          wddWaitType(_dFontSizeScaleLandscape)
                         ],
                       )),
                   Flexible(
@@ -476,6 +669,11 @@ class _HomePageState extends State<HomePage> {
                           Row(
                             children: [
                               const Spacer(),
+                              (2.4 < (dScreenWidth / dScreenHeight))
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(top: 24, right: 4),
+                                      child: wTooltipThreads(_dFontSizeScaleLandscape))
+                                  : const SizedBox.shrink(),
                               Padding(
                                 padding: const EdgeInsets.only(top: 24, right: 10),
                                 child: Text('FPS:',
@@ -493,7 +691,15 @@ class _HomePageState extends State<HomePage> {
                             Padding(
                                 padding: const EdgeInsets.only(top: 4, right: 12),
                                 child: ddMultiThread(_dFontSizeScaleLandscape))
-                          ])
+                          ]),
+                          (2.4 > (dScreenWidth / dScreenHeight))
+                              ? Row(children: [
+                                  const Spacer(),
+                                  Padding(
+                                      padding: const EdgeInsets.only(top: 6, right: 8),
+                                      child: wTooltipThreads(_dFontSizeScaleLandscape))
+                                ])
+                              : const SizedBox.shrink(),
                         ],
                       ))
                 ]);

@@ -17,7 +17,7 @@ class _InfoPageState extends State<InfoPage> {
   String version = "";
   String buildNumber = "";
   String buildMode = "";
-  final String platform = 'Flutter 2.10.2';
+  final String platform = 'Flutter 2.10.4';
   final String author = 'Jack Davis';
 
   @override
@@ -62,7 +62,6 @@ class _InfoPageState extends State<InfoPage> {
           titleSpacing: 0,
           leading: null,
           title: Row(children: <Widget>[
-            //Image.asset(widget.gvi.sAppIconPath, height: 56),
             Expanded(
                 child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
               Padding(
@@ -104,10 +103,29 @@ class _InfoPageState extends State<InfoPage> {
                                       'Eight Queens Performance Benchmark Test '
                                       'And Meter App is a Visual CPU Performance App. '
                                       "You can meter your smart mobile phone's speed "
-                                      'with the Eight Queens Chess Problem solving. '
-                                      'The App finds the 92 solutions from the 16 million '
-                                      "variations where the eight queens don't attack "
-                                      'each other on the 8x8 chess board. '
+                                      'with the Eight Queens Chess Problem solving.',
+                                      textAlign: TextAlign.justify,
+                                      style: TextStyle(fontSize: 17)),
+                                ),
+                                Padding(
+                                    padding: EdgeInsets.only(top: 16),
+                                    child: Text(
+                                      '8 Queens Problem:',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 20, color: Color(0xFF0000A0)),
+                                    )),
+                                Padding(
+                                  padding: EdgeInsets.only(top: 16, bottom: 7, left: 15, right: 15),
+                                  child: Text(
+                                      'The App finds the 92 right solutions from the 16 million '
+                                      "variations where the eight queens don't threat "
+                                      'each other on the 8x8 chessboard.',
+                                      textAlign: TextAlign.justify,
+                                      style: TextStyle(fontSize: 17, color: Color(0xFF0000A0))),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(top: 22, bottom: 7, left: 15, right: 15),
+                                  child: Text(
                                       'Finding the 92 right solutions with an '
                                       'up-to-date, decent smart mobile phone lasts '
                                       'less than a half minute.\n'
