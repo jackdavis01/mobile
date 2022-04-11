@@ -118,7 +118,7 @@ class _InfoPageState extends State<InfoPage> {
                                   padding: EdgeInsets.only(top: 16, bottom: 7, left: 15, right: 15),
                                   child: Text(
                                       'The App finds the 92 right solutions from the 16 million '
-                                      "variations where the eight queens don't threat "
+                                      "variations where the eight queens don't threaten "
                                       'each other on the 8x8 chessboard.',
                                       textAlign: TextAlign.justify,
                                       style: TextStyle(fontSize: 17, color: Color(0xFF0000A0))),
@@ -132,7 +132,15 @@ class _InfoPageState extends State<InfoPage> {
                                       'If you would like to see the right solutions, '
                                       "please choose '1 sec' or '5 sec' wait at 'No Wait'.\n"
                                       "If you would like to check your smart phone's multithreaded "
-                                      "CPU performance please, choose 2 or '4 Threads'.",
+                                      "CPU performance please, choose 2 or '4 Threads'.\n\n"
+                                      'The App uses brute force method to find the right '
+                                      'solutions. Since this App is a Performace Benchmark, '
+                                      'it was not intended to use an algorithm faster than the '
+                                      'brute force method. Any more efficient algorithm would run '
+                                      'too fast on a flagship device.\n\n'
+                                      'Not all iterations are displayed. Only about every 5000th '
+                                      'iteration is displayed. Therefore, outputing to the display '
+                                      'slows down max. 10% on the algorithm.',
                                       textAlign: TextAlign.justify,
                                       style: TextStyle(fontSize: 17)),
                                 )

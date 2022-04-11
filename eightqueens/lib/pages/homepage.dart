@@ -331,7 +331,10 @@ class _HomePageState extends State<HomePage> {
         DropdownButton(
             items: lddItems,
             value: _ddWaitValue,
-            itemHeight: 7 * dFontSizeScale0 + kMinInteractiveDimension,
+            focusColor: Colors.transparent,
+            itemHeight: (1.5 < dFontSizeScale0)
+                ? 24 * (dFontSizeScale0 - 1.5) + kMinInteractiveDimension
+                : kMinInteractiveDimension,
             onChanged: onChangedDDWait),
         Tooltip(
             message:
@@ -345,7 +348,11 @@ class _HomePageState extends State<HomePage> {
             textStyle: const TextStyle(color: Colors.white, fontSize: 20),
             showDuration: const Duration(seconds: 10),
             child: Padding(
-                padding: const EdgeInsets.only(right: 16, bottom: 4, left: 12, top: 4),
+                padding: EdgeInsets.only(
+                    right: 16 * dFontSizeScale0,
+                    bottom: 4 * dFontSizeScale0,
+                    left: 12 * dFontSizeScale0,
+                    top: 4 * dFontSizeScale0),
                 child: Transform.scale(
                     scale: dFontSizeScale0 * 1.36,
                     child: const Icon(Icons.info_outline, color: Colors.blue))))
@@ -396,7 +403,10 @@ class _HomePageState extends State<HomePage> {
     return DropdownButton(
         items: lddItems,
         value: _ddMultiThreadValue,
-        itemHeight: 7 * dFontSizeScale0 + kMinInteractiveDimension,
+        focusColor: Colors.transparent,
+        itemHeight: (1.5 < dFontSizeScale0)
+            ? 24 * (dFontSizeScale0 - 1.5) + kMinInteractiveDimension
+            : kMinInteractiveDimension,
         onChanged: onChangedDDMultiThread);
   }
 
@@ -413,7 +423,7 @@ class _HomePageState extends State<HomePage> {
         textStyle: const TextStyle(color: Colors.white, fontSize: 20),
         showDuration: const Duration(seconds: 10),
         child: Padding(
-            padding: const EdgeInsets.only(right: 16, bottom: 4, left: 4, top: 4),
+            padding: EdgeInsets.only(right: 8 * dFontSizeScale0, top: 4 * dFontSizeScale0),
             child: Transform.scale(
                 scale: dFontSizeScale0 * 1.36,
                 child: const Icon(Icons.info_outline, color: Colors.blue))));
@@ -443,7 +453,7 @@ class _HomePageState extends State<HomePage> {
 
     Orientation currentOrientation = MediaQuery.of(context).orientation;
     if (Orientation.portrait == currentOrientation) {
-      dScreenSizePortrait = max(min(dScreenWidth, (dScreenHeight - 100) / 1.54), 200);
+      dScreenSizePortrait = max(min(dScreenWidth, (dScreenHeight - 100) / 1.58), 200);
       _dFontSizeScalePortrait = dScreenSizePortrait / 420;
       wQueenScaledPortrait = Padding(
           padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
@@ -550,7 +560,14 @@ class _HomePageState extends State<HomePage> {
                         elapsed: _dElapsed)),
               );
             },
-            style: ElevatedButton.styleFrom(primary: cResult),
+            clipBehavior: Clip.none,
+            style: ElevatedButton.styleFrom(
+              /*materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,*/
+              primary: cResult,
+              //padding: EdgeInsets.zero,
+              //maximumSize: const Size(25, 25),
+              /*minimumSize: const Size(0, 0)*/
+            ),
             child: Text(
               _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
               style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
@@ -594,7 +611,8 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: Colors.white,
         body: OrientationBuilder(builder: (context, orientation) {
-          return (orientation == Orientation.portrait)
+          return ((orientation == Orientation.portrait) ||
+                  (currentOrientation == Orientation.portrait))
               ? Stack(children: [
                   Center(
                       child: Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
@@ -608,8 +626,8 @@ class _HomePageState extends State<HomePage> {
                                   padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
                                   child: wQueenScaledPortrait),
                               liPlace: _liPos,
-                              dLeft: 24,
-                              dTop: 16,
+                              /*dLeft: 24,
+                              dTop: 16,*/
                               dScreenSize: dScreenSizePortrait)),
                     ),
                     wDisplayNumbers(_dFontSizeScalePortrait),
@@ -621,7 +639,7 @@ class _HomePageState extends State<HomePage> {
                       left: 0,
                       bottom: 0,
                       child: Padding(
-                          padding: const EdgeInsets.only(left: 32),
+                          padding: EdgeInsets.only(left: 32 * _dFontSizeScalePortrait),
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             wTooltipThreads(_dFontSizeScalePortrait),
                             Row(children: [
@@ -629,7 +647,7 @@ class _HomePageState extends State<HomePage> {
                                   padding: const EdgeInsets.only(right: 10),
                                   child: ddMultiThread(_dFontSizeScalePortrait))
                             ]),
-                            const SizedBox(height: 6),
+                            SizedBox(height: 6 * _dFontSizeScalePortrait),
                             Row(children: [
                               Padding(
                                   padding: const EdgeInsets.only(right: 10),
@@ -639,7 +657,7 @@ class _HomePageState extends State<HomePage> {
                                   style: TextStyle(
                                       fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers))
                             ]),
-                            const SizedBox(height: 26)
+                            SizedBox(height: 26 * _dFontSizeScalePortrait)
                           ])))
                 ])
               : Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
@@ -649,8 +667,6 @@ class _HomePageState extends State<HomePage> {
                       child: ChessTable(
                           wQueen: wQueenScaledLandscape,
                           liPlace: _liPos,
-                          dLeft: 24,
-                          dTop: 16,
                           dScreenSize: dScreenSizeLandscape)),
                   Flexible(
                       flex: 4,
@@ -669,7 +685,7 @@ class _HomePageState extends State<HomePage> {
                           Row(
                             children: [
                               const Spacer(),
-                              (2.4 < (dScreenWidth / dScreenHeight))
+                              (1.76 < (dScreenWidth / dScreenHeight))
                                   ? Padding(
                                       padding: const EdgeInsets.only(top: 24, right: 4),
                                       child: wTooltipThreads(_dFontSizeScaleLandscape))
@@ -692,7 +708,7 @@ class _HomePageState extends State<HomePage> {
                                 padding: const EdgeInsets.only(top: 4, right: 12),
                                 child: ddMultiThread(_dFontSizeScaleLandscape))
                           ]),
-                          (2.4 > (dScreenWidth / dScreenHeight))
+                          (1.76 > (dScreenWidth / dScreenHeight))
                               ? Row(children: [
                                   const Spacer(),
                                   Padding(

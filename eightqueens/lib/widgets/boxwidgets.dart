@@ -142,17 +142,9 @@ class _ChessTableRowState extends State<ChessTableRow> {
 class ChessTable extends StatefulWidget {
   final Widget wQueen;
   final List<int> liPlace;
-  final double dLeft;
-  final double dTop;
   final double dScreenSize;
 
-  const ChessTable(
-      {Key? key,
-      required this.wQueen,
-      required this.liPlace,
-      required this.dLeft,
-      required this.dTop,
-      required this.dScreenSize})
+  const ChessTable({Key? key, required this.wQueen, required this.liPlace, required this.dScreenSize})
       : super(key: key);
 
   @override
@@ -162,8 +154,8 @@ class ChessTable extends StatefulWidget {
 class _ChessTableState extends State<ChessTable> {
   @override
   Widget build(BuildContext context) {
-    double dMarginSize = widget.dScreenSize * 0.06;
-    double dScreenSizeInside = widget.dScreenSize - 2 * dMarginSize;
+    double dMarginSize = widget.dScreenSize * 0.04;
+    double dScreenSizeInside = widget.dScreenSize - 1.75 * dMarginSize;
     double dChessBoxFullSize = dScreenSizeInside / 8;
     if (8 != widget.liPlace.length) {
       widget.liPlace.clear();
