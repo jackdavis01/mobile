@@ -60,8 +60,7 @@ class _HomePageState extends State<HomePage> {
   final int imsLimitVeryFast1 = 18000;
   final int imsLimitVeryFast2 = 13500;
   final int imsLimitVeryFast4 = 10000;
-  final Color cFast =
-      Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 3), Colors.lightGreen.shade100);
+  final Color cFast = Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 3), Colors.lightGreen.shade100);
   final int imsLimitFast1 = 22000;
   final int imsLimitFast2 = 16500;
   final int imsLimitFast4 = 12000;
@@ -74,8 +73,7 @@ class _HomePageState extends State<HomePage> {
   final int imsLimitAverage1 = 33000;
   final int imsLimitAverage2 = 25000;
   final int imsLimitAverage4 = 17000;
-  final Color cSlowerThanAverage =
-      Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 2), Colors.orange.shade100);
+  final Color cSlowerThanAverage = Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 2), Colors.orange.shade100);
   final int imsLimitSlowerThanAverage1 = 64000;
   final int imsLimitSlowerThanAverage2 = 40000;
   final int imsLimitSlowerThanAverage4 = 20000;
@@ -155,8 +153,7 @@ class _HomePageState extends State<HomePage> {
     });
     _lsendPort.clear();
     _lsqdEvents.clear();
-    List<dynamic> ldSqdLd =
-        await multiThreadedFindSolution.startMultiIsolatesInBackground(_n24Threads);
+    List<dynamic> ldSqdLd = await multiThreadedFindSolution.startMultiIsolatesInBackground(_n24Threads);
     for (int i = 0; i < _n24Threads; i++) {
       _lsendPort.add(ldSqdLd[0][i]);
       _lsqdEvents.add(ldSqdLd[1][i]);
@@ -343,8 +340,7 @@ class _HomePageState extends State<HomePage> {
             triggerMode: TooltipTriggerMode.tap,
             padding: const EdgeInsets.all(12),
             margin: const EdgeInsets.only(left: 60, right: 60),
-            decoration:
-                BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
+            decoration: BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
             textStyle: const TextStyle(color: Colors.white, fontSize: 20),
             showDuration: const Duration(seconds: 10),
             child: Padding(
@@ -354,8 +350,7 @@ class _HomePageState extends State<HomePage> {
                     left: 12 * dFontSizeScale0,
                     top: 4 * dFontSizeScale0),
                 child: Transform.scale(
-                    scale: dFontSizeScale0 * 1.36,
-                    child: const Icon(Icons.info_outline, color: Colors.blue))))
+                    scale: dFontSizeScale0 * 1.36, child: const Icon(Icons.info_outline, color: Colors.blue))))
       ],
     );
   }
@@ -412,21 +407,18 @@ class _HomePageState extends State<HomePage> {
 
   Widget wTooltipThreads(double dFontSizeScale0) {
     return Tooltip(
-        message:
-            "You can test the MultiThreaded speed of your device by choosing the '2 Threads' or '4 Threads'.",
+        message: "You can test the MultiThreaded speed of your device by choosing the '2 Threads' or '4 Threads'.",
         preferBelow: false,
         triggerMode: TooltipTriggerMode.tap,
         padding: const EdgeInsets.all(12),
         margin: const EdgeInsets.only(left: 60, right: 60),
-        decoration:
-            BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
+        decoration: BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
         textStyle: const TextStyle(color: Colors.white, fontSize: 20),
         showDuration: const Duration(seconds: 10),
         child: Padding(
             padding: EdgeInsets.only(right: 8 * dFontSizeScale0, top: 4 * dFontSizeScale0),
             child: Transform.scale(
-                scale: dFontSizeScale0 * 1.36,
-                child: const Icon(Icons.info_outline, color: Colors.blue))));
+                scale: dFontSizeScale0 * 1.36, child: const Icon(Icons.info_outline, color: Colors.blue))));
   }
 
   @override
@@ -464,12 +456,11 @@ class _HomePageState extends State<HomePage> {
       );
     } else {
       dScreenSizeLandscape = min(dScreenWidth / 2.2, dScreenHeight);
-      _dFontSizeScaleLandscape = dScreenSizeLandscape / 320;
+      _dFontSizeScaleLandscape = dScreenSizeLandscape / 332;
       wQueenScaledLandscape = Padding(
           padding: EdgeInsets.only(bottom: dScreenSizeLandscape / 220),
           child: Transform.scale(scale: 380 / dScreenSizeLandscape, child: wQueenImage));
-      wTimeElapsedLandscape = Text(
-          _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
+      wTimeElapsedLandscape = Text(_dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
           style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers));
     }
     if (pow(8, 8) == _stepCounter) {
@@ -562,11 +553,7 @@ class _HomePageState extends State<HomePage> {
             },
             clipBehavior: Clip.none,
             style: ElevatedButton.styleFrom(
-              /*materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,*/
               primary: cResult,
-              //padding: EdgeInsets.zero,
-              //maximumSize: const Size(25, 25),
-              /*minimumSize: const Size(0, 0)*/
             ),
             child: Text(
               _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
@@ -589,7 +576,7 @@ class _HomePageState extends State<HomePage> {
             style: ElevatedButton.styleFrom(primary: cResult),
             child: Text(
               _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
-              style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers),
+              style: TextStyle(fontSize: 30 * _dFontSizeScaleLandscape, color: cNumbers),
             ));
       }
     }
@@ -611,8 +598,7 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: Colors.white,
         body: OrientationBuilder(builder: (context, orientation) {
-          return ((orientation == Orientation.portrait) ||
-                  (currentOrientation == Orientation.portrait))
+          return ((orientation == Orientation.portrait) || (currentOrientation == Orientation.portrait))
               ? Stack(children: [
                   Center(
                       child: Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
@@ -651,11 +637,9 @@ class _HomePageState extends State<HomePage> {
                             Row(children: [
                               Padding(
                                   padding: const EdgeInsets.only(right: 10),
-                                  child: Text('FPS:',
-                                      style: TextStyle(fontSize: 20 * _dFontSizeScalePortrait))),
+                                  child: Text('FPS:', style: TextStyle(fontSize: 20 * _dFontSizeScalePortrait))),
                               Text(_iFPS.toString(),
-                                  style: TextStyle(
-                                      fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers))
+                                  style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers))
                             ]),
                             SizedBox(height: 26 * _dFontSizeScalePortrait)
                           ])))
@@ -665,9 +649,7 @@ class _HomePageState extends State<HomePage> {
                       height: dScreenSizeLandscape,
                       width: dScreenSizeLandscape,
                       child: ChessTable(
-                          wQueen: wQueenScaledLandscape,
-                          liPlace: _liPos,
-                          dScreenSize: dScreenSizeLandscape)),
+                          wQueen: wQueenScaledLandscape, liPlace: _liPos, dScreenSize: dScreenSizeLandscape)),
                   Flexible(
                       flex: 4,
                       child: Column(
@@ -692,14 +674,12 @@ class _HomePageState extends State<HomePage> {
                                   : const SizedBox.shrink(),
                               Padding(
                                 padding: const EdgeInsets.only(top: 24, right: 10),
-                                child: Text('FPS:',
-                                    style: TextStyle(fontSize: 20 * _dFontSizeScaleLandscape)),
+                                child: Text('FPS:', style: TextStyle(fontSize: 20 * _dFontSizeScaleLandscape)),
                               ),
                               Padding(
                                   padding: const EdgeInsets.only(top: 24, right: 16),
                                   child: Text(_iFPS.toString(),
-                                      style: TextStyle(
-                                          fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers)))
+                                      style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers)))
                             ],
                           ),
                           Row(children: [
