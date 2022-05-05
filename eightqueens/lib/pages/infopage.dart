@@ -16,7 +16,9 @@ class _InfoPageState extends State<InfoPage> {
   String version = "";
   String buildNumber = "";
   String buildMode = "";
-  final String platform = 'Flutter 2.10.5';
+  final String platform = 'Flutter 2.13.0';
+  final String platformPrerelease = '0.0.pre.893';
+  final String platformChannel = 'master';
   final String author = 'Jack Davis';
 
   @override
@@ -241,6 +243,36 @@ class _InfoPageState extends State<InfoPage> {
                                   ),
                                   Text(
                                     platform,
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Theme.of(context).primaryColorDark,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const Expanded(child: SizedBox.shrink()),
+                                ]),
+                                Row(children: <Widget>[
+                                  const Expanded(child: SizedBox.shrink()),
+                                  const Text(
+                                    'Prerelease: ',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                  Text(
+                                    platformPrerelease,
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Theme.of(context).primaryColorDark,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const Expanded(child: SizedBox.shrink()),
+                                ]),
+                                Row(children: <Widget>[
+                                  const Expanded(child: SizedBox.shrink()),
+                                  const Text(
+                                    'Channel: ',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                  Text(
+                                    platformChannel,
                                     style: TextStyle(
                                         fontSize: 18,
                                         color: Theme.of(context).primaryColorDark,

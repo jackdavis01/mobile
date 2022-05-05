@@ -16,8 +16,8 @@ class FindSolutions {
   Future<List<dynamic>> startIsolateInBackground() async {
     final receivePort = ReceivePort();
     _fSI?.kill();
-    _findSolutionsIsolate = await Isolate.spawn(_findSolutionIsolateEntryPoint, receivePort.sendPort,
-        debugName: "fsThread-single");
+    _findSolutionsIsolate =
+        await Isolate.spawn(_findSolutionIsolateEntryPoint, receivePort.sendPort, debugName: "fsThread-single");
     _fSI = _findSolutionsIsolate;
     // Convert the ReceivePort into a StreamQueue to receive messages from the
     // spawned isolate using a pull-based interface. Events are stored in this
@@ -53,7 +53,7 @@ class FindSolutions {
     for (int i = 0; i < pow(8, 8) - 1; i++) {
       await _stepDisplay();
       if (0 == (i % 997)) {
-        await Future.delayed(const Duration(microseconds: 1));
+        await Future.delayed(Duration.zero);
       }
     }
 
@@ -86,9 +86,6 @@ class FindSolutions {
         }
       }
       _bResume = false;
-    }
-    if (0 == (_stepCounter % 199)) {
-      await Future.delayed(Duration.zero);
     }
   }
 }

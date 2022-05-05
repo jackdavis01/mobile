@@ -6,7 +6,8 @@ import 'stepandcheck.dart';
 
 class MultiTreadedFindSolution {
   int _nThreads = 2;
-  int _iFPS = 0;
+  DateTime _dtStart = DateTime.now().toUtc();
+  int _iComWait = 0;
   final List<Isolate?> _liFS = <Isolate>[];
   final List<Isolate> _liFindSolutions = <Isolate>[];
   final List<Capability> _capsIsolate = <Capability>[];
@@ -25,8 +26,7 @@ class MultiTreadedFindSolution {
     for (int i = 0; i < _nThreads; i++) {
       if (_liFS.asMap().containsKey(i)) _liFS[i]?.kill();
       lreceivePort.add(ReceivePort());
-      _liFindSolutions.add(await Isolate.spawn(
-          _findSolutionIsolateEntryPoint, [i, lreceivePort[i].sendPort],
+      _liFindSolutions.add(await Isolate.spawn(_findSolutionIsolateEntryPoint, [i, lreceivePort[i].sendPort],
           paused: true, debugName: "fsThread-" + i.toString()));
       if (_liFS.asMap().containsKey(i)) {
         _liFS.removeAt(i);
@@ -60,10 +60,11 @@ class MultiTreadedFindSolution {
     //debugPrint(iThreadNo.toString());
 
     receivePort.listen((msg) {
-      if (msg is List) {
-        _iWaitms = msg[0];
-        _iFPS = msg[1];
+      if (msg is int) {
+        _iWaitms = msg;
         _bResume = true;
+        _dtStart = DateTime.now().toUtc();
+        _iComWait = 0;
       }
       _sendFindSolutionState(sendPort);
     });
@@ -82,14 +83,18 @@ class MultiTreadedFindSolution {
 
     liPos = <int>[1, 1, 1, 1, 1, 1, 1, _iLastRowStart];
 
-    await Future.delayed(const Duration(milliseconds: 10));
+    await Future.delayed(Duration(milliseconds: 16 * iThreadNo));
 
     for (int i = 0; i < _nSubSteps; i++) {
       if (0 == (i % 1999)) {
         if (2 < _nThreads) {
-          await Future.delayed(Duration(microseconds: 11987 ~/ (_iFPS + 1)));
+          if (const Duration(milliseconds: 64) < DateTime.now().toUtc().difference(_dtStart)) {
+            _iComWait = _iComWait * 2;
+            _iComWait++;
+          }
+          await Future.delayed(Duration(microseconds: _iComWait));
         } else {
-          await Future.delayed(const Duration(microseconds: 3));
+          await Future.delayed(Duration.zero);
         }
       }
       await _stepController();
@@ -129,14 +134,6 @@ class MultiTreadedFindSolution {
         }
       }
       _bResume = false;
-    }
-    if (0 == (_stepCounter % 9973)) {
-      if (2 < _nThreads) {
-        if (0 < _iFPS) _iFPS = _iFPS ~/ 2;
-        await Future.delayed(const Duration(microseconds: 23));
-      } else {
-        await Future.delayed(const Duration(microseconds: 11));
-      }
     }
   }
 }

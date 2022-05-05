@@ -21,16 +21,20 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final FindSolutions findSolution = FindSolutions();
   final MultiTreadedFindSolution multiThreadedFindSolution = MultiTreadedFindSolution();
+  final int iDisplayDelayConstant = 180000;
+  final int iMinDisplayDelay = 5;
+  final int iMaxDisplayDelay = 24;
   bool _bStart = false;
   bool _bPaused = false;
   int _stepCounter = 0;
+  int _stepCounterPrevious = 0;
   int _solutionCounter = 0;
   bool _bCheckQueensNoAttack = false;
   int _waitms = 0;
   int _iddThreads = 1;
   int _iThreadsStarted = 1;
-  DateTime _dtStart = DateTime.now();
-  DateTime _dtProgress = DateTime.now();
+  DateTime _dtStart = DateTime.now().toUtc();
+  DateTime _dtProgress = DateTime.now().toUtc();
   Duration _dElapsed = const Duration(days: 0);
   Duration _dFirstFrame = const Duration(days: 0);
   int _iFrameCount = 0;
@@ -109,19 +113,23 @@ class _HomePageState extends State<HomePage> {
       _bStart = true;
       _bPaused = false;
       _stepCounter = 0;
+      _stepCounterPrevious = 0;
       _solutionCounter = 0;
     });
     List<dynamic> ldSqdLd = await findSolution.startIsolateInBackground();
     _sendPort = ldSqdLd[0];
     _sqdEvents = ldSqdLd[1];
-    _dtStart = DateTime.now();
-    _dtProgress = DateTime.now();
+    _dtStart = DateTime.now().toUtc();
+    _dtProgress = DateTime.now().toUtc();
     _dFirstFrame = const Duration(days: 0);
     _iFrameCount = 0;
     _liPos = <int>[1, 1, 1, 1, 1, 1, 1, 1];
     do {
       await _frameDisplay();
-      await Future.delayed(const Duration(milliseconds: 8));
+      int iDisplayDelay = iDisplayDelayConstant ~/ (1 + _stepCounter - _stepCounterPrevious);
+      iDisplayDelay = max(iMinDisplayDelay, iDisplayDelay);
+      iDisplayDelay = min(iMaxDisplayDelay, iDisplayDelay);
+      await Future.delayed(Duration(milliseconds: iDisplayDelay));
     } while (_bStart);
     findSolution.stopIsolateInBackground();
     setState(() {});
@@ -149,6 +157,7 @@ class _HomePageState extends State<HomePage> {
       _bStart = true;
       _bPaused = false;
       _stepCounter = 0;
+      _stepCounterPrevious = 0;
       _solutionCounter = 0;
     });
     _lsendPort.clear();
@@ -158,15 +167,18 @@ class _HomePageState extends State<HomePage> {
       _lsendPort.add(ldSqdLd[0][i]);
       _lsqdEvents.add(ldSqdLd[1][i]);
     }
-    _dtStart = DateTime.now();
-    _dtProgress = DateTime.now();
+    _dtStart = DateTime.now().toUtc();
+    _dtProgress = DateTime.now().toUtc();
     _dFirstFrame = const Duration(days: 0);
     _iFrameCount = 0;
     _liPos = <int>[1, 1, 1, 1, 1, 1, 1, 1];
     _iPort = 0;
     do {
       await _frameDisplayForMultiThreads();
-      await Future.delayed(const Duration(milliseconds: 8));
+      int iDisplayDelay = iDisplayDelayConstant ~/ (1 + _stepCounter - _stepCounterPrevious);
+      iDisplayDelay = max(iMinDisplayDelay, iDisplayDelay);
+      iDisplayDelay = min(iMaxDisplayDelay, iDisplayDelay);
+      await Future.delayed(Duration(milliseconds: iDisplayDelay));
     } while (_bStart);
     multiThreadedFindSolution.stopAllIsolatesInBackground();
     setState(() {});
@@ -188,9 +200,10 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _bStart = false;
       _stepCounter = 0;
+      _stepCounterPrevious = 0;
       _solutionCounter = 0;
-      _dtStart = DateTime.now();
-      _dtProgress = DateTime.now();
+      _dtStart = DateTime.now().toUtc();
+      _dtProgress = DateTime.now().toUtc();
       _dElapsed = const Duration(days: 0);
       _dFirstFrame = const Duration(days: 0);
       _iFrameCount = 0;
@@ -223,12 +236,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _frameDisplay() async {
-    _dtProgress = DateTime.now();
+    _dtProgress = DateTime.now().toUtc();
     _dElapsed = _dtProgress.difference(_dtStart);
     _sendPort.send(_waitms);
     try {
       var vLD = await _sqdEvents.next;
       if (vLD is List) {
+        _stepCounterPrevious = _stepCounter;
         setState(() {
           _liPos = vLD[0];
           _stepCounter = vLD[1] + 1;
@@ -255,11 +269,11 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _frameDisplayForMultiThreads() async {
     //debugPrint(".");
-    _dtProgress = DateTime.now();
+    _dtProgress = DateTime.now().toUtc();
     _dElapsed = _dtProgress.difference(_dtStart);
     _iPort++;
     if (_iPort >= _n24Threads) _iPort = 0;
-    _lsendPort[_iPort].send([_waitms, _iFPS]);
+    _lsendPort[_iPort].send(_waitms);
     try {
       var vLD = await _lsqdEvents[_iPort].next;
       if (vLD is List) {
@@ -271,6 +285,7 @@ class _HomePageState extends State<HomePage> {
           iSumMultiStepCounter += liMultiStepCounter[i] + 1;
           iSumMultiSolutionCounter += liMultiSolutionCounter[i];
         }
+        _stepCounterPrevious = _stepCounter;
         setState(() {
           _liPos = vLD[0];
           _stepCounter = iSumMultiStepCounter;
