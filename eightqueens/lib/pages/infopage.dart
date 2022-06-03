@@ -105,10 +105,13 @@ class _InfoPageState extends State<InfoPage> {
                                       '8 Queens Performance Benchmark Test '
                                       'And Meter App is a Visual CPU Performance App. '
                                       "You can meter your smart mobile device's speed "
-                                      'with the Eight Queens Chess Problem solving. '
-                                      'The App runs on Android, on iPhones, on iPads, '
+                                      'with the Eight Queens Chess Problem solving.\n'
+                                      'The App runs on:\n'
+                                      '1. Android.\n'
+                                      '2. iOS: iPhones, iPads, '
                                       'on latest M1 Macintosh desktops, '
-                                      'and on M1 MacBook notebooks.',
+                                      'and on M1 MacBook notebooks.\n'
+                                      '3. Windows desktop.',
                                       textAlign: TextAlign.justify,
                                       style: TextStyle(fontSize: 17)),
                                 ),
