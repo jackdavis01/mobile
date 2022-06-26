@@ -10,13 +10,14 @@ class InfoPage extends StatefulWidget {
 }
 
 class _InfoPageState extends State<InfoPage> {
-  DataPackageInfo dpi = DataPackageInfo(appName: "", packageName: "", version: "", buildNumber: "", buildMode: "");
+  DataPackageInfo dpi =
+      DataPackageInfo(appName: "", packageName: "", version: "", buildNumber: "", buildMode: "");
   String appName = "";
   String packageName = "";
   String version = "";
   String buildNumber = "";
   String buildMode = "";
-  final String platform = 'Flutter 3.0.1';
+  final String platform = 'Flutter 3.0.2';
   final String platformPrerelease = '-';
   final String platformChannel = 'stable';
   final String author = 'Jack Davis';
@@ -67,7 +68,8 @@ class _InfoPageState extends State<InfoPage> {
                 child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
               Padding(
                 padding: const EdgeInsets.only(left: 8),
-                child: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
+                child: IconButton(
+                    icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
               ),
               const Padding(padding: EdgeInsets.only(right: 18), child: Text("Info"))
             ]))
@@ -110,7 +112,8 @@ class _InfoPageState extends State<InfoPage> {
                                       'on latest M1 Macintosh desktops, '
                                       'and on M1 MacBook notebooks.\n'
                                       '3. Windows desktop.\n'
-                                      '4. MacOS desktop.',
+                                      '4. MacOS desktop.\n'
+                                      '5. Linux desktop.',
                                       textAlign: TextAlign.justify,
                                       style: TextStyle(fontSize: 17)),
                                 ),
@@ -160,149 +163,151 @@ class _InfoPageState extends State<InfoPage> {
                           constraints: const BoxConstraints(minWidth: 300, maxWidth: 400),
                           child: Container(
                               padding: const EdgeInsets.only(top: 30, bottom: 30),
-                              child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
-                                const Text(
-                                  'Application Information',
-                                  style: TextStyle(fontSize: 22),
-                                ),
-                                const SizedBox(height: 20),
-                                const Text(
-                                  'Application name: ',
-                                  style: TextStyle(fontSize: 18),
-                                ),
-                                Text(
-                                  appName,
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      color: Theme.of(context).primaryColorDark,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                ("" != packageName)
-                                    ? const Padding(
-                                        padding: EdgeInsets.only(top: 5),
-                                        child: Text(
-                                          'Package name:',
-                                          style: TextStyle(fontSize: 18),
-                                        ))
-                                    : const SizedBox.shrink(),
-                                ("" != packageName)
-                                    ? FittedBox(
-                                        fit: BoxFit.fitWidth,
-                                        child: Text(
-                                          packageName,
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              color: Theme.of(context).primaryColorDark,
-                                              fontWeight: FontWeight.bold),
-                                        ))
-                                    : const SizedBox.shrink(),
-                                const SizedBox(height: 5),
-                                Row(children: <Widget>[
-                                  const Expanded(child: SizedBox.shrink()),
-                                  const Text(
-                                    'Version number: ',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Text(
-                                    version,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context).primaryColorDark,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const Expanded(child: SizedBox.shrink()),
-                                ]),
-                                Row(children: <Widget>[
-                                  const Expanded(child: SizedBox.shrink()),
-                                  const Text(
-                                    'Build number: ',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Text(
-                                    buildNumber,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context).primaryColorDark,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const Expanded(child: SizedBox.shrink()),
-                                ]),
-                                Row(children: <Widget>[
-                                  const Expanded(child: SizedBox.shrink()),
-                                  const Text(
-                                    'Build mode: ',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Text(
-                                    buildMode,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context).primaryColorDark,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const Expanded(child: SizedBox.shrink()),
-                                ]),
-                                Row(children: <Widget>[
-                                  const Expanded(child: SizedBox.shrink()),
-                                  const Text(
-                                    'Platform: ',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Text(
-                                    platform,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context).primaryColorDark,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const Expanded(child: SizedBox.shrink()),
-                                ]),
-                                Row(children: <Widget>[
-                                  const Expanded(child: SizedBox.shrink()),
-                                  const Text(
-                                    'Prerelease: ',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Text(
-                                    platformPrerelease,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context).primaryColorDark,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const Expanded(child: SizedBox.shrink()),
-                                ]),
-                                Row(children: <Widget>[
-                                  const Expanded(child: SizedBox.shrink()),
-                                  const Text(
-                                    'Channel: ',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Text(
-                                    platformChannel,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context).primaryColorDark,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const Expanded(child: SizedBox.shrink()),
-                                ]),
-                                Row(children: <Widget>[
-                                  const Expanded(child: SizedBox.shrink()),
-                                  const Text(
-                                    'Author: ',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Text(
-                                    author,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context).primaryColorDark,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const Expanded(child: SizedBox.shrink()),
-                                ]),
-                              ]))),
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                                    const Text(
+                                      'Application Information',
+                                      style: TextStyle(fontSize: 22),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    const Text(
+                                      'Application name: ',
+                                      style: TextStyle(fontSize: 18),
+                                    ),
+                                    Text(
+                                      appName,
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          color: Theme.of(context).primaryColorDark,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    ("" != packageName)
+                                        ? const Padding(
+                                            padding: EdgeInsets.only(top: 5),
+                                            child: Text(
+                                              'Package name:',
+                                              style: TextStyle(fontSize: 18),
+                                            ))
+                                        : const SizedBox.shrink(),
+                                    ("" != packageName)
+                                        ? FittedBox(
+                                            fit: BoxFit.fitWidth,
+                                            child: Text(
+                                              packageName,
+                                              style: TextStyle(
+                                                  fontSize: 18,
+                                                  color: Theme.of(context).primaryColorDark,
+                                                  fontWeight: FontWeight.bold),
+                                            ))
+                                        : const SizedBox.shrink(),
+                                    const SizedBox(height: 5),
+                                    Row(children: <Widget>[
+                                      const Expanded(child: SizedBox.shrink()),
+                                      const Text(
+                                        'Version number: ',
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                      Text(
+                                        version,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            color: Theme.of(context).primaryColorDark,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const Expanded(child: SizedBox.shrink()),
+                                    ]),
+                                    Row(children: <Widget>[
+                                      const Expanded(child: SizedBox.shrink()),
+                                      const Text(
+                                        'Build number: ',
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                      Text(
+                                        buildNumber,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            color: Theme.of(context).primaryColorDark,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const Expanded(child: SizedBox.shrink()),
+                                    ]),
+                                    Row(children: <Widget>[
+                                      const Expanded(child: SizedBox.shrink()),
+                                      const Text(
+                                        'Build mode: ',
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                      Text(
+                                        buildMode,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            color: Theme.of(context).primaryColorDark,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const Expanded(child: SizedBox.shrink()),
+                                    ]),
+                                    Row(children: <Widget>[
+                                      const Expanded(child: SizedBox.shrink()),
+                                      const Text(
+                                        'Platform: ',
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                      Text(
+                                        platform,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            color: Theme.of(context).primaryColorDark,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const Expanded(child: SizedBox.shrink()),
+                                    ]),
+                                    Row(children: <Widget>[
+                                      const Expanded(child: SizedBox.shrink()),
+                                      const Text(
+                                        'Prerelease: ',
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                      Text(
+                                        platformPrerelease,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            color: Theme.of(context).primaryColorDark,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const Expanded(child: SizedBox.shrink()),
+                                    ]),
+                                    Row(children: <Widget>[
+                                      const Expanded(child: SizedBox.shrink()),
+                                      const Text(
+                                        'Channel: ',
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                      Text(
+                                        platformChannel,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            color: Theme.of(context).primaryColorDark,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const Expanded(child: SizedBox.shrink()),
+                                    ]),
+                                    Row(children: <Widget>[
+                                      const Expanded(child: SizedBox.shrink()),
+                                      const Text(
+                                        'Author: ',
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                      Text(
+                                        author,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            color: Theme.of(context).primaryColorDark,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const Expanded(child: SizedBox.shrink()),
+                                    ]),
+                                  ]))),
                       const SizedBox(height: 20),
                     ]),
                   ]))
