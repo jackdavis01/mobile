@@ -8,7 +8,7 @@ This is an open source App developed by Jack Davis. The source code is available
 The App is available on 5 platforms:
 1. Android: Google Play,
 2. iOS: App Store,
-3. Windows: https://is.dg/8Queens,
+3. Windows: https://is.gd/8Queens,
 4. macOS: App Store,
 5. Linux: Snap Store.
 
