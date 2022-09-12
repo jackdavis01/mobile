@@ -1,5 +1,9 @@
 import 'dart:ui';
+//import 'package:eightqueens/widgets/iframeview.dart';
+import 'package:flutter/foundation.dart' as flutter_foundation;
 import 'package:flutter/material.dart';
+import '../widgets/globalwidgets.dart';
+import '../widgets/webwidgets.dart';
 import 'pages/homepage.dart';
 
 class MainFrame extends StatefulWidget {
@@ -12,27 +16,27 @@ class MainFrame extends StatefulWidget {
 class _MainFrameState extends State<MainFrame> {
   @override
   Widget build(BuildContext context) {
+    if (flutter_foundation.kReleaseMode) {
+      debugPrint = (String? message, {int? wrapWidth}) {};
+    }
     return MaterialApp(
-      //debugShowCheckedModeBanner: false,
-      scrollBehavior: DragPointerDeviceScrollBehavior(),
-      title: '8 Queens',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const HomePage(title: GC.sTitle),
-    );
+        //debugShowCheckedModeBanner: false,
+        scrollBehavior: DragPointerDeviceScrollBehavior(),
+        title: '8 Queens',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: (flutter_foundation.kIsWeb)
+            ? const WebPageWidget()
+            : const HomePage(title: GC.sTitle, headerSize: 0));
   }
-}
-
-class GC {
-  static const String sTitle = '8 Queens Performance Benchmark';
 }
 
 class DragPointerDeviceScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
   @override
-  Set<PointerDeviceKind> get dragDevices => { 
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-  };
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+      };
 }

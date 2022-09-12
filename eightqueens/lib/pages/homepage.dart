@@ -1,8 +1,13 @@
+import 'dart:convert';
 import 'dart:isolate';
 import 'dart:math';
+import '../dartjs/nojsconnection.dart' if (dart.library.html) '../dartjs/jsconnection.dart' as dartjs;
 import "package:async/async.dart";
+import 'package:eightqueens/widgets/webwidgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' as _foundation show kIsWeb;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:collection/collection.dart';
 import '../isolates/findsolutions.dart';
 import '../isolates/multithreadedfindsolutions.dart';
 import '../widgets/boxwidgets.dart';
@@ -10,9 +15,10 @@ import 'infopage.dart';
 import 'resultpage.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key, required this.title}) : super(key: key);
-
   final String title;
+  final double headerSize;
+
+  const HomePage({Key? key, required this.title, required this.headerSize}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -32,17 +38,17 @@ class _HomePageState extends State<HomePage> {
   bool _bCheckQueensNoAttack = false;
   int _waitms = 0;
   int _iddThreads = 1;
-  int _iThreadsStarted = 1;
+  int _nThreadsStarted = 1;
   DateTime _dtStart = DateTime.now().toUtc();
   DateTime _dtProgress = DateTime.now().toUtc();
   Duration _dElapsed = const Duration(days: 0);
   Duration _dFirstFrame = const Duration(days: 0);
   int _iFrameCount = 0;
   int _iFPS = 0;
+  final List<int> _liFrameCount = [];
   List<int> _liPos = <int>[1, 1, 1, 1, 1, 1, 1, 1];
   final List<int> liMultiStepCounter = <int>[];
   final List<int> liMultiSolutionCounter = <int>[];
-  int _n24Threads = 2;
   final List<bool> _lbStart = <bool>[];
   String _ddWaitValue = 'No Wait';
   final List<String> _lsWaitItems = ['No Wait', '1 sec', '5 sec'];
@@ -58,57 +64,96 @@ class _HomePageState extends State<HomePage> {
   late StreamQueue<dynamic> _sqdEvents;
   final List<SendPort> _lsendPort = <SendPort>[];
   final List<StreamQueue<dynamic>> _lsqdEvents = <StreamQueue<dynamic>>[];
+  List<dynamic> _ldvLD = [];
 
-  final Color cVeryFast = Colors.lightGreen.shade100;
   int iSpeed = 0;
+  final Color cLightSpeed =
+      Color.alphaBlend(Colors.blue.shade100.withAlpha(255 ~/ 3 * 2), Colors.lightGreen.shade100);
+  final int imsLimitLightSpeed1 = 8000;
+  final int imsLimitLightSpeed2 = 4000;
+  final int imsLimitLightSpeed4 = 2000;
+  final int imsLimitLightSpeed8 = 1000;
+  final Color cCrazyFast =
+      Color.alphaBlend(Colors.blue.shade100.withAlpha(255 ~/ 3), Colors.lightGreen.shade100);
+  final int imsLimitCrazyFast1 = 12000;
+  final int imsLimitCrazyFast2 = 8000;
+  final int imsLimitCrazyFast4 = 5000;
+  final int imsLimitCrazyFast8 = 2500;
+  final Color cVeryFast = Colors.lightGreen.shade100;
   final int imsLimitVeryFast1 = 18000;
   final int imsLimitVeryFast2 = 13500;
   final int imsLimitVeryFast4 = 10000;
-  final Color cFast = Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 3), Colors.lightGreen.shade100);
+  final int imsLimitVeryFast8 = 5500;
+  final Color cFast =
+      Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 3), Colors.lightGreen.shade100);
   final int imsLimitFast1 = 22000;
   final int imsLimitFast2 = 16500;
   final int imsLimitFast4 = 12000;
+  final int imsLimitFast8 = 8000;
   final Color cBetterThanAverage =
       Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 3 * 2), Colors.lightGreen.shade100);
   final int imsLimitBetterThanAverage1 = 27000;
   final int imsLimitBetterThanAverage2 = 20000;
   final int imsLimitBetterThanAverage4 = 14000;
+  final int imsLimitBetterThanAverage8 = 10500;
   final Color cAverage = Colors.yellow.shade100;
   final int imsLimitAverage1 = 33000;
   final int imsLimitAverage2 = 25000;
   final int imsLimitAverage4 = 17000;
-  final Color cSlowerThanAverage = Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 2), Colors.orange.shade100);
+  final int imsLimitAverage8 = 13000;
+  final Color cSlowerThanAverage =
+      Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 2), Colors.orange.shade100);
   final int imsLimitSlowerThanAverage1 = 64000;
   final int imsLimitSlowerThanAverage2 = 40000;
   final int imsLimitSlowerThanAverage4 = 20000;
+  final int imsLimitSlowerThanAverage8 = 16000;
   final Color cSlow = Colors.orange.shade100;
   final int imsLimitSlow1 = 100000;
   final int imsLimitSlow2 = 60000;
   final int imsLimitSlow4 = 26000;
+  final int imsLimitSlow8 = 20000;
   final Color cVerySlow = Colors.red.shade100;
 
   @override
   initState() {
     super.initState();
+    if (_foundation.kIsWeb) _lsMultiThreadItems.add('8 Threads');
     wQueenImage = SvgPicture.asset(assetQueenName, semanticsLabel: 'Queen :)');
   }
 
-  Future<void> _startCounter() async {
+  Future<void> _startStepCounter() async {
     if (1 == _iddThreads) {
-      _iThreadsStarted = 1;
-      await _startCounterOneThreaded();
+      _nThreadsStarted = 1;
+      if (!_foundation.kIsWeb) {
+        await _startStepCounterOneThreaded();
+      } else {
+        await _startStepCounter4WebOneThreaded();
+      }
     } else if (2 == _iddThreads) {
-      _iThreadsStarted = 2;
-      _n24Threads = 2;
-      await _startCounterMultiThreaded();
+      _nThreadsStarted = 2;
+      if (!_foundation.kIsWeb) {
+        await _startStepCounterMultiThreaded();
+      } else {
+        await _startStepCounter4WebMultiThreaded();
+      }
     } else if (4 == _iddThreads) {
-      _iThreadsStarted = 4;
-      _n24Threads = 4;
-      await _startCounterMultiThreaded();
+      _nThreadsStarted = 4;
+      if (!_foundation.kIsWeb) {
+        await _startStepCounterMultiThreaded();
+      } else {
+        await _startStepCounter4WebMultiThreaded();
+      }
+    } else if (8 == _iddThreads) {
+      _nThreadsStarted = 8;
+      if (!_foundation.kIsWeb) {
+        await _startStepCounterMultiThreaded();
+      } else {
+        await _startStepCounter4WebMultiThreaded();
+      }
     }
   }
 
-  Future<void> _startCounterOneThreaded() async {
+  Future<void> _startStepCounterOneThreaded() async {
     setState(() {
       _bStart = true;
       _bPaused = false;
@@ -123,6 +168,7 @@ class _HomePageState extends State<HomePage> {
     _dtProgress = DateTime.now().toUtc();
     _dFirstFrame = const Duration(days: 0);
     _iFrameCount = 0;
+    _liFrameCount.clear();
     _liPos = <int>[1, 1, 1, 1, 1, 1, 1, 1];
     do {
       await _frameDisplay();
@@ -135,8 +181,8 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
-  Future<void> _startCounterMultiThreaded() async {
-    for (int i = 0; i < _n24Threads; i++) {
+  Future<void> _startStepCounterMultiThreaded() async {
+    for (int i = 0; i < _nThreadsStarted; i++) {
       if (liMultiStepCounter.asMap().containsKey(i)) {
         liMultiStepCounter[i] = 0;
       } else {
@@ -162,8 +208,9 @@ class _HomePageState extends State<HomePage> {
     });
     _lsendPort.clear();
     _lsqdEvents.clear();
-    List<dynamic> ldSqdLd = await multiThreadedFindSolution.startMultiIsolatesInBackground(_n24Threads);
-    for (int i = 0; i < _n24Threads; i++) {
+    List<dynamic> ldSqdLd =
+        await multiThreadedFindSolution.startMultiIsolatesInBackground(_nThreadsStarted);
+    for (int i = 0; i < _nThreadsStarted; i++) {
       _lsendPort.add(ldSqdLd[0][i]);
       _lsqdEvents.add(ldSqdLd[1][i]);
     }
@@ -171,6 +218,7 @@ class _HomePageState extends State<HomePage> {
     _dtProgress = DateTime.now().toUtc();
     _dFirstFrame = const Duration(days: 0);
     _iFrameCount = 0;
+    _liFrameCount.clear();
     _liPos = <int>[1, 1, 1, 1, 1, 1, 1, 1];
     _iPort = 0;
     do {
@@ -184,19 +232,109 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
-  void _stopCounter() {
+  Future<void> _startStepCounter4WebOneThreaded() async {
+    setState(() {
+      _bStart = true;
+      _bPaused = false;
+      _stepCounter = 0;
+      _stepCounterPrevious = 0;
+      _solutionCounter = 0;
+    });
+
+    dartjs.jsCallStartWorker();
+
+    dartjs.jsCallBackSendMessage2Dart(_sendMessage2Dart);
+
+    _dtStart = DateTime.now().toUtc();
+    _dtProgress = DateTime.now().toUtc();
+    _dFirstFrame = const Duration(days: 0);
+    _iFrameCount = 0;
+    _liFrameCount.clear();
+    _liPos = <int>[1, 1, 1, 1, 1, 1, 1, 1];
+    _ldvLD = [];
+    do {
+      await _frameDisplay4Web();
+      int iDisplayDelay = iDisplayDelayConstant ~/ (1 + _stepCounter - _stepCounterPrevious);
+      iDisplayDelay = max(iMinDisplayDelay, iDisplayDelay);
+      iDisplayDelay = min(iMaxDisplayDelay, iDisplayDelay);
+      await Future.delayed(Duration(milliseconds: iDisplayDelay));
+    } while (_bStart);
+    dartjs.jsStopWorker();
+    setState(() {});
+    debugPrint('Dart Message: stop 1');
+  }
+
+  Future<void> _startStepCounter4WebMultiThreaded() async {
+    for (int i = 0; i < _nThreadsStarted; i++) {
+      if (liMultiStepCounter.asMap().containsKey(i)) {
+        liMultiStepCounter[i] = 0;
+      } else {
+        liMultiStepCounter.add(0);
+      }
+      if (liMultiSolutionCounter.asMap().containsKey(i)) {
+        liMultiSolutionCounter[i] = 0;
+      } else {
+        liMultiSolutionCounter.add(0);
+      }
+      if (_lbStart.asMap().containsKey(i)) {
+        _lbStart[i] = true;
+      } else {
+        _lbStart.add(true);
+      }
+    }
+    setState(() {
+      _bStart = true;
+      _bPaused = false;
+      _stepCounter = 0;
+      _stepCounterPrevious = 0;
+      _solutionCounter = 0;
+    });
+
+    dartjs.jsStartMultithreadedWorkers(_nThreadsStarted, _waitms);
+
+    dartjs.jsSendMultithreadedMessage2Dart(_sendMultithreadedMessage2Dart);
+
+    _dtStart = DateTime.now().toUtc();
+    _dtProgress = DateTime.now().toUtc();
+    _dFirstFrame = const Duration(days: 0);
+    _iFrameCount = 0;
+    _liFrameCount.clear();
+    _liPos = <int>[1, 1, 1, 1, 1, 1, 1, 1];
+    _iPort = 0;
+    _ldvLD = [];
+    do {
+      await _frameDisplay4WebForMultiThreads();
+      int iDisplayDelay = iDisplayDelayConstant ~/ (1 + _stepCounter - _stepCounterPrevious);
+      iDisplayDelay = max(iMinDisplayDelay, iDisplayDelay);
+      iDisplayDelay = min(iMaxDisplayDelay, iDisplayDelay);
+      await Future.delayed(Duration(milliseconds: iDisplayDelay));
+    } while (_bStart);
+    dartjs.jsStopMultithreadedWorkers();
+    setState(() {});
+    debugPrint('Dart Message: multithreaded stop');
+  }
+
+  void _stopStepCounter() {
     setState(() {
       _bStart = false;
     });
-    if (1 == _iThreadsStarted) {
-      findSolution.stopIsolateInBackground();
+    if (1 == _nThreadsStarted) {
+      if (!_foundation.kIsWeb) {
+        findSolution.stopIsolateInBackground();
+      } else {
+        dartjs.jsStopWorker();
+      }
     } else {
-      multiThreadedFindSolution.stopAllIsolatesInBackground();
+      if (!_foundation.kIsWeb) {
+        multiThreadedFindSolution.stopAllIsolatesInBackground();
+      } else {
+        dartjs.jsStopMultithreadedWorkers();
+      }
     }
     setState(() {});
   }
 
-  void _resetCounter() {
+  void _resetStepCounter() {
     setState(() {
       _bStart = false;
       _stepCounter = 0;
@@ -208,27 +346,44 @@ class _HomePageState extends State<HomePage> {
       _dFirstFrame = const Duration(days: 0);
       _iFrameCount = 0;
       _iFPS = 0;
+      _liFrameCount.clear();
       _liPos = <int>[1, 1, 1, 1, 1, 1, 1, 1];
     });
     setState(() {});
   }
 
-  void _pauseCounter() {
-    if (1 == _iThreadsStarted) {
-      findSolution.pause();
+  void _pauseStepCounter() {
+    if (1 == _nThreadsStarted) {
+      if (!_foundation.kIsWeb) {
+        findSolution.pause();
+      } else {
+        dartjs.jsPauseWorker();
+      }
     } else {
-      multiThreadedFindSolution.pause();
+      if (!_foundation.kIsWeb) {
+        multiThreadedFindSolution.pause();
+      } else {
+        dartjs.jsPauseMultithreadedWorkers();
+      }
     }
     setState(() {
       _bPaused = true;
     });
   }
 
-  void _resumeCounter() {
-    if (1 == _iThreadsStarted) {
-      findSolution.resume();
+  void _resumeStepCounter() {
+    if (1 == _nThreadsStarted) {
+      if (!_foundation.kIsWeb) {
+        findSolution.resume();
+      } else {
+        dartjs.jsResumeWorker();
+      }
     } else {
-      multiThreadedFindSolution.resume();
+      if (!_foundation.kIsWeb) {
+        multiThreadedFindSolution.resume();
+      } else {
+        dartjs.jsResumeMultithreadedWorkers();
+      }
     }
     setState(() {
       _bPaused = false;
@@ -268,11 +423,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _frameDisplayForMultiThreads() async {
-    //debugPrint(".");
     _dtProgress = DateTime.now().toUtc();
     _dElapsed = _dtProgress.difference(_dtStart);
     _iPort++;
-    if (_iPort >= _n24Threads) _iPort = 0;
+    if (_iPort >= _nThreadsStarted) _iPort = 0;
     _lsendPort[_iPort].send(_waitms);
     try {
       var vLD = await _lsqdEvents[_iPort].next;
@@ -281,7 +435,7 @@ class _HomePageState extends State<HomePage> {
         liMultiSolutionCounter[_iPort] = vLD[2];
         int iSumMultiStepCounter = 0;
         int iSumMultiSolutionCounter = 0;
-        for (int i = 0; i < _n24Threads; i++) {
+        for (int i = 0; i < _nThreadsStarted; i++) {
           iSumMultiStepCounter += liMultiStepCounter[i] + 1;
           iSumMultiSolutionCounter += liMultiSolutionCounter[i];
         }
@@ -295,13 +449,13 @@ class _HomePageState extends State<HomePage> {
       } else if (null == vLD) {
         _lbStart[_iPort] = false;
         int iStart = 0;
-        for (int i = 0; i < _n24Threads; i++) {
+        for (int i = 0; i < _nThreadsStarted; i++) {
           if (_lbStart[i]) iStart++;
         }
         if (0 == iStart) _bStart = false;
       }
     } on Exception catch (e) {
-      debugPrint(e.toString());
+      debugPrint('Dart error message, mt: Dart, e.toString(): ' + e.toString());
     }
     if (_bCheckQueensNoAttack) {
       if (0 != _waitms) {
@@ -309,6 +463,124 @@ class _HomePageState extends State<HomePage> {
         setState(() {});
         await Future.delayed(Duration(milliseconds: _waitms));
         multiThreadedFindSolution.resume();
+      }
+    }
+    setState(() {});
+    await Future.delayed(Duration.zero);
+  }
+
+  _sendMessage2Dart(var msgJs) {
+    _ldvLD.add(msgJs);
+    //debugPrint('Dart received message, msgJs: ' + msgJs.toString());
+  }
+
+  Future<void> _frameDisplay4Web() async {
+    _dtProgress = DateTime.now().toUtc();
+    _dElapsed = _dtProgress.difference(_dtStart);
+    dartjs.jsReceiveMsgFromDart(_waitms);
+    try {
+      dynamic vLD;
+      const int nWait = 100;
+      int i = 0;
+      do {
+        await Future.delayed(const Duration(milliseconds: 1));
+        i++;
+      } while (_ldvLD.isEmpty && i < nWait);
+
+      //debugPrint('Dart message, ldvLD: ' + ldvLD.toString() + ', i: ' + i.toString());
+
+      if (_ldvLD.isEmpty) {
+        vLD = [jsonEncode(_liPos), _stepCounter - 1, _solutionCounter, false];
+      } else {
+        vLD = _ldvLD.removeAt(0);
+      }
+
+      if (vLD is List) {
+        _stepCounterPrevious = _stepCounter;
+        setState(() {
+          _liPos = jsonDecode(vLD[0]).cast<int>();
+          _stepCounter = vLD[1] + 1;
+          _solutionCounter = vLD[2];
+          _bCheckQueensNoAttack = vLD[3];
+        });
+      } else if (null == vLD) {
+        _bStart = false;
+      }
+    } on Exception catch (e) {
+      debugPrint(e.toString());
+    }
+    if (_bCheckQueensNoAttack) {
+      if (0 != _waitms) {
+        dartjs.jsPauseWorker();
+        setState(() {});
+        await Future.delayed(Duration(milliseconds: _waitms));
+        dartjs.jsResumeWorker();
+      }
+    }
+    setState(() {});
+    await Future.delayed(Duration.zero);
+  }
+
+  _sendMultithreadedMessage2Dart(List<dynamic> mtMsgJs) {
+    _ldvLD.add(mtMsgJs);
+    //debugPrint('Multithreaded Dart received message, mtMsgJs: $mtMsgJs');
+  }
+
+  Future<void> _frameDisplay4WebForMultiThreads() async {
+    _dtProgress = DateTime.now().toUtc();
+    _dElapsed = _dtProgress.difference(_dtStart);
+    _iPort++;
+    if (_iPort >= _nThreadsStarted) _iPort = 0;
+    dartjs.jsReceiveMultithreadedMsgFromDart(_iPort, _waitms);
+    try {
+      dynamic vLD;
+      const int nWait = 100;
+      int i = 0;
+      do {
+        await Future.delayed(const Duration(milliseconds: 1));
+        i++;
+      } while (_ldvLD.isEmpty && i < nWait);
+
+      //debugPrint('Dart message, ldvLD: $_ldvLD, i: $i');
+
+      if (_ldvLD.isNotEmpty) {
+        vLD = _ldvLD.removeAt(0);
+        if (vLD[1] is List) {
+          int iPort = vLD[0];
+          liMultiStepCounter[iPort] = vLD[1][1];
+          liMultiSolutionCounter[iPort] = vLD[1][2];
+          int iSumMultiStepCounter = 0;
+          int iSumMultiSolutionCounter = 0;
+          for (int i = 0; i < _nThreadsStarted; i++) {
+            iSumMultiStepCounter += liMultiStepCounter[i] + 1;
+            iSumMultiSolutionCounter += liMultiSolutionCounter[i];
+          }
+          _stepCounterPrevious = _stepCounter;
+          setState(() {
+            _liPos = jsonDecode(vLD[1][0]).cast<int>();
+            _stepCounter = iSumMultiStepCounter;
+            _solutionCounter = iSumMultiSolutionCounter;
+            _bCheckQueensNoAttack = vLD[1][3];
+          });
+        } else if (null == vLD[1]) {
+          int iPort = vLD[0];
+          _lbStart[iPort] = false;
+          int iStart = 0;
+          for (int i = 0; i < _nThreadsStarted; i++) {
+            if (_lbStart[i]) iStart++;
+          }
+          if (0 == iStart) _bStart = false;
+        }
+      }
+    } on Exception catch (e) {
+      debugPrint('Dart error message, mt: Js, e.toString(): ' + e.toString());
+    }
+    if (_bCheckQueensNoAttack) {
+      if (0 != _waitms) {
+        dartjs.jsPauseMultithreadedWorkers();
+        setState(() {});
+        await Future.delayed(Duration(milliseconds: _waitms));
+        dartjs.jsResumeMultithreadedWorkers();
       }
     }
     setState(() {});
@@ -355,7 +627,8 @@ class _HomePageState extends State<HomePage> {
             triggerMode: TooltipTriggerMode.tap,
             padding: const EdgeInsets.all(12),
             margin: const EdgeInsets.only(left: 60, right: 60),
-            decoration: BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
+            decoration:
+                BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
             textStyle: const TextStyle(color: Colors.white, fontSize: 20),
             showDuration: const Duration(seconds: 10),
             child: Padding(
@@ -365,7 +638,8 @@ class _HomePageState extends State<HomePage> {
                     left: 12 * dFontSizeScale0,
                     top: 4 * dFontSizeScale0),
                 child: Transform.scale(
-                    scale: dFontSizeScale0 * 1.36, child: const Icon(Icons.info_outline, color: Colors.blue))))
+                    scale: dFontSizeScale0 * 1.36,
+                    child: const Icon(Icons.info_outline, color: Colors.blue))))
       ],
     );
   }
@@ -397,6 +671,8 @@ class _HomePageState extends State<HomePage> {
       iddThreads = 2;
     } else if (_lsMultiThreadItems[2] == _ddMultiThreadValue) {
       iddThreads = 4;
+    } else if (_lsMultiThreadItems[3] == _ddMultiThreadValue) {
+      iddThreads = 8;
     }
     setState(() {
       _iddThreads = iddThreads;
@@ -422,178 +698,35 @@ class _HomePageState extends State<HomePage> {
 
   Widget wTooltipThreads(double dFontSizeScale0) {
     return Tooltip(
-        message: "You can test the MultiThreaded speed of your device by choosing the '2 Threads' or '4 Threads'.",
+        message:
+            "You can test the MultiThreaded speed of your device by choosing '2 Threads', '4 Threads' or '8 Threads'.",
         preferBelow: false,
         triggerMode: TooltipTriggerMode.tap,
         padding: const EdgeInsets.all(12),
         margin: const EdgeInsets.only(left: 60, right: 60),
-        decoration: BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
+        decoration:
+            BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
         textStyle: const TextStyle(color: Colors.white, fontSize: 20),
         showDuration: const Duration(seconds: 10),
         child: Padding(
             padding: EdgeInsets.only(right: 8 * dFontSizeScale0, top: 4 * dFontSizeScale0),
             child: Transform.scale(
-                scale: dFontSizeScale0 * 1.36, child: const Icon(Icons.info_outline, color: Colors.blue))));
+                scale: dFontSizeScale0 * 1.36,
+                child: const Icon(Icons.info_outline, color: Colors.blue))));
   }
 
   @override
   Widget build(BuildContext context) {
-    if (1000000 > (_dElapsed.inMicroseconds - _dFirstFrame.inMicroseconds)) {
+    if (200000 > (_dElapsed.inMicroseconds - _dFirstFrame.inMicroseconds)) {
       _iFrameCount++;
-      if ((_iFPS < _iFrameCount) && _bStart) _iFPS = _iFrameCount;
     } else {
       _dFirstFrame = _dElapsed;
-      _iFPS = _iFrameCount;
+      _liFrameCount.add(_iFrameCount);
+      if (5 < _liFrameCount.length) {
+        _liFrameCount.removeAt(0);
+      }
+      _iFPS = _liFrameCount.sum * (6 - _liFrameCount.length);
       _iFrameCount = 0;
-    }
-    double dScreenWidth = MediaQuery.of(context).size.width;
-    double dScreenHeight = MediaQuery.of(context).size.height;
-    // Height (without SafeArea: without status and toolbar)
-    EdgeInsets dHeightPadding = MediaQuery.of(context).padding; // .viewPadding;
-    dScreenHeight = dScreenHeight - dHeightPadding.top - kToolbarHeight - dHeightPadding.bottom;
-    double dScreenSizePortrait = 0;
-    double dScreenSizeLandscape = 0;
-    Widget wQueenScaledPortrait = const SizedBox.shrink();
-    Widget wTimeElapsedPortrait = const SizedBox.shrink();
-    Widget wQueenScaledLandscape = const SizedBox.shrink();
-    Widget wTimeElapsedLandscape = const SizedBox.shrink();
-
-    Orientation currentOrientation = MediaQuery.of(context).orientation;
-    if (Orientation.portrait == currentOrientation) {
-      dScreenSizePortrait = max(min(dScreenWidth, (dScreenHeight - 100) / 1.58), 200);
-      _dFontSizeScalePortrait = dScreenSizePortrait / 420;
-      wQueenScaledPortrait = Padding(
-          padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
-          child: Transform.scale(scale: 380 / dScreenSizePortrait, child: wQueenImage));
-      wTimeElapsedPortrait = Text(
-        _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
-        style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
-      );
-    } else {
-      dScreenSizeLandscape = min(dScreenWidth / 2.2, dScreenHeight);
-      _dFontSizeScaleLandscape = dScreenSizeLandscape / 332;
-      wQueenScaledLandscape = Padding(
-          padding: EdgeInsets.only(bottom: dScreenSizeLandscape / 220),
-          child: Transform.scale(scale: 380 / dScreenSizeLandscape, child: wQueenImage));
-      wTimeElapsedLandscape = Text(_dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
-          style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers));
-    }
-    if (pow(8, 8) == _stepCounter) {
-      Color cResult = cVeryFast;
-      if (1 == _iThreadsStarted) {
-        if (Duration(milliseconds: imsLimitVeryFast1) > _dElapsed) {
-          iSpeed = 7;
-          cResult = cVeryFast;
-        } else if (Duration(milliseconds: imsLimitFast1) > _dElapsed) {
-          iSpeed = 6;
-          cResult = cFast;
-        } else if (Duration(milliseconds: imsLimitBetterThanAverage1) > _dElapsed) {
-          iSpeed = 5;
-          cResult = cBetterThanAverage;
-        } else if (Duration(milliseconds: imsLimitAverage1) > _dElapsed) {
-          iSpeed = 4;
-          cResult = cAverage;
-        } else if (Duration(milliseconds: imsLimitSlowerThanAverage1) > _dElapsed) {
-          iSpeed = 3;
-          cResult = cSlowerThanAverage;
-        } else if (Duration(milliseconds: imsLimitSlow1) > _dElapsed) {
-          iSpeed = 2;
-          cResult = cSlow;
-        } else {
-          iSpeed = 1;
-          cResult = cVerySlow;
-        }
-      }
-      if (2 == _iThreadsStarted) {
-        if (Duration(milliseconds: imsLimitVeryFast2) > _dElapsed) {
-          iSpeed = 7;
-          cResult = cVeryFast;
-        } else if (Duration(milliseconds: imsLimitFast2) > _dElapsed) {
-          iSpeed = 6;
-          cResult = cFast;
-        } else if (Duration(milliseconds: imsLimitBetterThanAverage2) > _dElapsed) {
-          iSpeed = 5;
-          cResult = cBetterThanAverage;
-        } else if (Duration(milliseconds: imsLimitAverage2) > _dElapsed) {
-          iSpeed = 4;
-          cResult = cAverage;
-        } else if (Duration(milliseconds: imsLimitSlowerThanAverage2) > _dElapsed) {
-          iSpeed = 3;
-          cResult = cSlowerThanAverage;
-        } else if (Duration(milliseconds: imsLimitSlow2) > _dElapsed) {
-          iSpeed = 2;
-          cResult = cSlow;
-        } else {
-          iSpeed = 1;
-          cResult = cVerySlow;
-        }
-      }
-      if (4 == _iThreadsStarted) {
-        if (Duration(milliseconds: imsLimitVeryFast4) > _dElapsed) {
-          iSpeed = 7;
-          cResult = cVeryFast;
-        } else if (Duration(milliseconds: imsLimitFast4) > _dElapsed) {
-          iSpeed = 6;
-          cResult = cFast;
-        } else if (Duration(milliseconds: imsLimitBetterThanAverage4) > _dElapsed) {
-          iSpeed = 5;
-          cResult = cBetterThanAverage;
-        } else if (Duration(milliseconds: imsLimitAverage4) > _dElapsed) {
-          iSpeed = 4;
-          cResult = cAverage;
-        } else if (Duration(milliseconds: imsLimitSlowerThanAverage4) > _dElapsed) {
-          iSpeed = 3;
-          cResult = cSlowerThanAverage;
-        } else if (Duration(milliseconds: imsLimitSlow4) > _dElapsed) {
-          iSpeed = 2;
-          cResult = cSlow;
-        } else {
-          iSpeed = 1;
-          cResult = cVerySlow;
-        }
-      }
-      if (Orientation.portrait == currentOrientation) {
-        wTimeElapsedPortrait = ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ResultPage(
-                        speed: iSpeed,
-                        color: cNumbers,
-                        backgroundcolor: cResult,
-                        threads: _iThreadsStarted,
-                        elapsed: _dElapsed)),
-              );
-            },
-            clipBehavior: Clip.none,
-            style: ElevatedButton.styleFrom(
-              primary: cResult,
-            ),
-            child: Text(
-              _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
-              style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
-            ));
-      } else {
-        wTimeElapsedLandscape = ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ResultPage(
-                        speed: iSpeed,
-                        color: cNumbers,
-                        backgroundcolor: cResult,
-                        threads: _iThreadsStarted,
-                        elapsed: _dElapsed)),
-              );
-            },
-            style: ElevatedButton.styleFrom(primary: cResult),
-            child: Text(
-              _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
-              style: TextStyle(fontSize: 30 * _dFontSizeScaleLandscape, color: cNumbers),
-            ));
-      }
     }
     return Scaffold(
         appBar: AppBar(
@@ -612,177 +745,404 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         backgroundColor: Colors.white,
-        body: OrientationBuilder(builder: (context, orientation) {
-          return ((orientation == Orientation.portrait) || (currentOrientation == Orientation.portrait))
-              ? Stack(children: [
-                  Center(
-                      child: Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-                    Container(
-                      width: dScreenSizePortrait,
-                      alignment: Alignment.topCenter,
-                      child: SizedBox(
-                          height: dScreenSizePortrait,
-                          child: ChessTable(
-                              wQueen: Padding(
-                                  padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
-                                  child: wQueenScaledPortrait),
-                              liPlace: _liPos,
-                              /*dLeft: 24,
-                              dTop: 16,*/
-                              dScreenSize: dScreenSizePortrait)),
-                    ),
-                    wDisplayNumbers(_dFontSizeScalePortrait),
-                    wTimeElapsedPortrait,
-                    wddWaitType(_dFontSizeScalePortrait),
-                    const Spacer(),
-                  ])),
-                  Positioned(
-                      left: 0,
-                      bottom: 0,
-                      child: Padding(
-                          padding: EdgeInsets.only(left: 32 * _dFontSizeScalePortrait),
-                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            wTooltipThreads(_dFontSizeScalePortrait),
-                            Row(children: [
-                              Padding(
-                                  padding: const EdgeInsets.only(right: 10),
-                                  child: ddMultiThread(_dFontSizeScalePortrait))
-                            ]),
-                            SizedBox(height: 6 * _dFontSizeScalePortrait),
-                            Row(children: [
-                              Padding(
-                                  padding: const EdgeInsets.only(right: 10),
-                                  child: Text('FPS:', style: TextStyle(fontSize: 20 * _dFontSizeScalePortrait))),
-                              Text(_iFPS.toString(),
-                                  style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers))
-                            ]),
-                            SizedBox(height: 26 * _dFontSizeScalePortrait)
-                          ])))
-                ])
-              : Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-                  SizedBox(
-                      height: dScreenSizeLandscape,
-                      width: dScreenSizeLandscape,
+        body: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+          debugPrint('constraints.maxWidth: ${constraints.maxWidth}');
+          debugPrint('constraints.maxHeight: ${constraints.maxHeight}');
+          //double dScreenWidth = MediaQuery.of(context).size.width;
+          //double dScreenHeight = MediaQuery.of(context).size.height;
+          double dScreenWidth = constraints.maxWidth;
+          double dScreenHeight = constraints.maxHeight;
+          //debugPrint("ScreenWidth: ${dScreenWidth.toStringAsFixed(2)}");
+          //debugPrint("ScreenHeight: ${dScreenHeight.toStringAsFixed(2)}");
+          // Height (without SafeArea: without status and toolbar)
+          //EdgeInsets dHeightPadding = MediaQuery.of(context).padding; // .viewPadding;
+          dScreenHeight = max(
+              dScreenHeight // -
+              //widget.headerSize -
+              //dHeightPadding.top -
+              //kToolbarHeight -
+              //dHeightPadding.bottom
+              ,
+              0);
+          debugPrint("ScreenWidth: ${dScreenWidth.toStringAsFixed(2)}");
+          debugPrint("ScreenHeight-: ${dScreenHeight.toStringAsFixed(2)}");
+          double dScreenSizePortrait = 0;
+          double dScreenSizeLandscape = 0;
+          Widget wQueenScaledPortrait = const SizedBox.shrink();
+          Widget wTimeElapsedPortrait = const SizedBox.shrink();
+          Widget wQueenScaledLandscape = const SizedBox.shrink();
+          Widget wTimeElapsedLandscape = const SizedBox.shrink();
+
+          Orientation currentOrientation = Orientation.landscape;
+          if (dScreenWidth < dScreenHeight) currentOrientation = Orientation.portrait;
+          if (Orientation.portrait == currentOrientation) {
+            dScreenSizePortrait = max(min(dScreenWidth, (dScreenHeight - 100) / 1.58), 200);
+            _dFontSizeScalePortrait = dScreenSizePortrait / 420;
+            wQueenScaledPortrait = Padding(
+                padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
+                child: Transform.scale(scale: 380 / dScreenSizePortrait, child: wQueenImage));
+            wTimeElapsedPortrait = Text(
+              _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
+              style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
+            );
+          } else {
+            dScreenSizeLandscape = min(dScreenWidth / 2.2, dScreenHeight);
+            _dFontSizeScaleLandscape = dScreenSizeLandscape / 332;
+            wQueenScaledLandscape = Padding(
+                padding: EdgeInsets.only(bottom: dScreenSizeLandscape / 220),
+                child: Transform.scale(scale: 380 / dScreenSizeLandscape, child: wQueenImage));
+            wTimeElapsedLandscape = Text(
+                _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
+                style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers));
+          }
+          if (pow(8, 8) == _stepCounter) {
+            Color cResult = cVeryFast;
+            if (1 == _nThreadsStarted) {
+              if (Duration(milliseconds: imsLimitLightSpeed1) > _dElapsed) {
+                iSpeed = 9;
+                cResult = cLightSpeed;
+              } else if (Duration(milliseconds: imsLimitCrazyFast1) > _dElapsed) {
+                iSpeed = 8;
+                cResult = cCrazyFast;
+              } else if (Duration(milliseconds: imsLimitVeryFast1) > _dElapsed) {
+                iSpeed = 7;
+                cResult = cVeryFast;
+              } else if (Duration(milliseconds: imsLimitFast1) > _dElapsed) {
+                iSpeed = 6;
+                cResult = cFast;
+              } else if (Duration(milliseconds: imsLimitBetterThanAverage1) > _dElapsed) {
+                iSpeed = 5;
+                cResult = cBetterThanAverage;
+              } else if (Duration(milliseconds: imsLimitAverage1) > _dElapsed) {
+                iSpeed = 4;
+                cResult = cAverage;
+              } else if (Duration(milliseconds: imsLimitSlowerThanAverage1) > _dElapsed) {
+                iSpeed = 3;
+                cResult = cSlowerThanAverage;
+              } else if (Duration(milliseconds: imsLimitSlow1) > _dElapsed) {
+                iSpeed = 2;
+                cResult = cSlow;
+              } else {
+                iSpeed = 1;
+                cResult = cVerySlow;
+              }
+            } else if (2 == _nThreadsStarted) {
+              if (Duration(milliseconds: imsLimitLightSpeed2) > _dElapsed) {
+                iSpeed = 9;
+                cResult = cLightSpeed;
+              } else if (Duration(milliseconds: imsLimitCrazyFast2) > _dElapsed) {
+                iSpeed = 8;
+                cResult = cCrazyFast;
+              } else if (Duration(milliseconds: imsLimitVeryFast2) > _dElapsed) {
+                iSpeed = 7;
+                cResult = cVeryFast;
+              } else if (Duration(milliseconds: imsLimitFast2) > _dElapsed) {
+                iSpeed = 6;
+                cResult = cFast;
+              } else if (Duration(milliseconds: imsLimitBetterThanAverage2) > _dElapsed) {
+                iSpeed = 5;
+                cResult = cBetterThanAverage;
+              } else if (Duration(milliseconds: imsLimitAverage2) > _dElapsed) {
+                iSpeed = 4;
+                cResult = cAverage;
+              } else if (Duration(milliseconds: imsLimitSlowerThanAverage2) > _dElapsed) {
+                iSpeed = 3;
+                cResult = cSlowerThanAverage;
+              } else if (Duration(milliseconds: imsLimitSlow2) > _dElapsed) {
+                iSpeed = 2;
+                cResult = cSlow;
+              } else {
+                iSpeed = 1;
+                cResult = cVerySlow;
+              }
+            } else if (4 == _nThreadsStarted) {
+              if (Duration(milliseconds: imsLimitLightSpeed4) > _dElapsed) {
+                iSpeed = 9;
+                cResult = cLightSpeed;
+              } else if (Duration(milliseconds: imsLimitCrazyFast4) > _dElapsed) {
+                iSpeed = 8;
+                cResult = cCrazyFast;
+              } else if (Duration(milliseconds: imsLimitVeryFast4) > _dElapsed) {
+                iSpeed = 7;
+                cResult = cVeryFast;
+              } else if (Duration(milliseconds: imsLimitFast4) > _dElapsed) {
+                iSpeed = 6;
+                cResult = cFast;
+              } else if (Duration(milliseconds: imsLimitBetterThanAverage4) > _dElapsed) {
+                iSpeed = 5;
+                cResult = cBetterThanAverage;
+              } else if (Duration(milliseconds: imsLimitAverage4) > _dElapsed) {
+                iSpeed = 4;
+                cResult = cAverage;
+              } else if (Duration(milliseconds: imsLimitSlowerThanAverage4) > _dElapsed) {
+                iSpeed = 3;
+                cResult = cSlowerThanAverage;
+              } else if (Duration(milliseconds: imsLimitSlow4) > _dElapsed) {
+                iSpeed = 2;
+                cResult = cSlow;
+              } else {
+                iSpeed = 1;
+                cResult = cVerySlow;
+              }
+            } else if (8 == _nThreadsStarted) {
+              if (Duration(milliseconds: imsLimitLightSpeed8) > _dElapsed) {
+                iSpeed = 9;
+                cResult = cLightSpeed;
+              } else if (Duration(milliseconds: imsLimitCrazyFast8) > _dElapsed) {
+                iSpeed = 8;
+                cResult = cCrazyFast;
+              } else if (Duration(milliseconds: imsLimitVeryFast8) > _dElapsed) {
+                iSpeed = 7;
+                cResult = cVeryFast;
+              } else if (Duration(milliseconds: imsLimitFast8) > _dElapsed) {
+                iSpeed = 6;
+                cResult = cFast;
+              } else if (Duration(milliseconds: imsLimitBetterThanAverage8) > _dElapsed) {
+                iSpeed = 5;
+                cResult = cBetterThanAverage;
+              } else if (Duration(milliseconds: imsLimitAverage8) > _dElapsed) {
+                iSpeed = 4;
+                cResult = cAverage;
+              } else if (Duration(milliseconds: imsLimitSlowerThanAverage8) > _dElapsed) {
+                iSpeed = 3;
+                cResult = cSlowerThanAverage;
+              } else if (Duration(milliseconds: imsLimitSlow8) > _dElapsed) {
+                iSpeed = 2;
+                cResult = cSlow;
+              } else {
+                iSpeed = 1;
+                cResult = cVerySlow;
+              }
+            }
+            if (Orientation.portrait == currentOrientation) {
+              wTimeElapsedPortrait = ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ResultPage(
+                              speed: iSpeed,
+                              color: cNumbers,
+                              backgroundcolor: cResult,
+                              threads: _nThreadsStarted,
+                              elapsed: _dElapsed)),
+                    );
+                  },
+                  clipBehavior: Clip.none,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: cResult,
+                  ),
+                  child: Text(
+                    _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
+                    style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
+                  ));
+            } else {
+              wTimeElapsedLandscape = ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ResultPage(
+                              speed: iSpeed,
+                              color: cNumbers,
+                              backgroundcolor: cResult,
+                              threads: _nThreadsStarted,
+                              elapsed: _dElapsed)),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: cResult),
+                  child: Text(
+                    _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
+                    style: TextStyle(fontSize: 30 * _dFontSizeScaleLandscape, color: cNumbers),
+                  ));
+            }
+          }
+          if (constraints.maxWidth < constraints.maxHeight) {
+            return Stack(children: [
+              Center(
+                  child: Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+                Container(
+                  width: dScreenSizePortrait,
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                      height: dScreenSizePortrait,
                       child: ChessTable(
-                          wQueen: wQueenScaledLandscape, liPlace: _liPos, dScreenSize: dScreenSizeLandscape)),
-                  Flexible(
-                      flex: 4,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                          wQueen: Padding(
+                              padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
+                              child: wQueenScaledPortrait),
+                          liPlace: _liPos,
+                          /*dLeft: 24,
+                              dTop: 16,*/
+                          dScreenSize: dScreenSizePortrait)),
+                ),
+                wDisplayNumbers(_dFontSizeScalePortrait),
+                wTimeElapsedPortrait,
+                wddWaitType(_dFontSizeScalePortrait),
+                const Spacer(),
+              ])),
+              Positioned(
+                  left: 0,
+                  bottom: 0,
+                  child: Padding(
+                      padding: EdgeInsets.only(left: 32 * _dFontSizeScalePortrait),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        wTooltipThreads(_dFontSizeScalePortrait),
+                        Row(children: [
+                          Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: ddMultiThread(_dFontSizeScalePortrait))
+                        ]),
+                        SizedBox(height: 6 * _dFontSizeScalePortrait),
+                        Row(children: [
+                          Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: Text('FPS:',
+                                  style: TextStyle(fontSize: 20 * _dFontSizeScalePortrait))),
+                          Text(_iFPS.toString(),
+                              style:
+                                  TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers))
+                        ]),
+                        SizedBox(height: 26 * _dFontSizeScalePortrait)
+                      ])))
+            ]);
+          } else {
+            return Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+              SizedBox(
+                  height: dScreenSizeLandscape,
+                  width: dScreenSizeLandscape,
+                  child: ChessTable(
+                      wQueen: wQueenScaledLandscape,
+                      liPlace: _liPos,
+                      dScreenSize: dScreenSizeLandscape)),
+              Flexible(
+                  flex: 4,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      wDisplayNumbers(_dFontSizeScaleLandscape),
+                      wTimeElapsedLandscape,
+                      wddWaitType(_dFontSizeScaleLandscape)
+                    ],
+                  )),
+              Flexible(
+                  flex: 3,
+                  child: Column(
+                    children: [
+                      Row(
                         children: [
-                          wDisplayNumbers(_dFontSizeScaleLandscape),
-                          wTimeElapsedLandscape,
-                          wddWaitType(_dFontSizeScaleLandscape)
-                        ],
-                      )),
-                  Flexible(
-                      flex: 3,
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              const Spacer(),
-                              (1.76 < (dScreenWidth / dScreenHeight))
-                                  ? Padding(
-                                      padding: const EdgeInsets.only(top: 24, right: 4),
-                                      child: wTooltipThreads(_dFontSizeScaleLandscape))
-                                  : const SizedBox.shrink(),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 24, right: 10),
-                                child: Text('FPS:', style: TextStyle(fontSize: 20 * _dFontSizeScaleLandscape)),
-                              ),
-                              Padding(
-                                  padding: const EdgeInsets.only(top: 24, right: 16),
-                                  child: Text(_iFPS.toString(),
-                                      style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers)))
-                            ],
-                          ),
-                          Row(children: [
-                            const Spacer(),
-                            Padding(
-                                padding: const EdgeInsets.only(top: 4, right: 12),
-                                child: ddMultiThread(_dFontSizeScaleLandscape))
-                          ]),
-                          (1.76 > (dScreenWidth / dScreenHeight))
-                              ? Row(children: [
-                                  const Spacer(),
-                                  Padding(
-                                      padding: const EdgeInsets.only(top: 6, right: 8),
-                                      child: wTooltipThreads(_dFontSizeScaleLandscape))
-                                ])
+                          const Spacer(),
+                          (1.76 < (dScreenWidth / dScreenHeight))
+                              ? Padding(
+                                  padding: const EdgeInsets.only(top: 24, right: 4),
+                                  child: wTooltipThreads(_dFontSizeScaleLandscape))
                               : const SizedBox.shrink(),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 24, right: 10),
+                            child: Text('FPS:',
+                                style: TextStyle(fontSize: 20 * _dFontSizeScaleLandscape)),
+                          ),
+                          Padding(
+                              padding: const EdgeInsets.only(top: 24, right: 16),
+                              child: Text(_iFPS.toString(),
+                                  style: TextStyle(
+                                      fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers)))
                         ],
-                      ))
-                ]);
+                      ),
+                      Row(children: [
+                        const Spacer(),
+                        Padding(
+                            padding: const EdgeInsets.only(top: 4, right: 12),
+                            child: ddMultiThread(_dFontSizeScaleLandscape))
+                      ]),
+                      (1.76 > (dScreenWidth / dScreenHeight))
+                          ? Row(children: [
+                              const Spacer(),
+                              Padding(
+                                  padding: const EdgeInsets.only(top: 6, right: 8),
+                                  child: wTooltipThreads(_dFontSizeScaleLandscape))
+                            ])
+                          : const SizedBox.shrink(),
+                    ],
+                  ))
+            ]);
+          }
         }),
-        floatingActionButton: OrientationBuilder(builder: (context, orientation) {
-          return (orientation == Orientation.portrait)
-              ? Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  ElevatedButton(
-                      child: Padding(
-                          padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
-                          child: (!_bPaused)
-                              ? const Text("Pause", style: TextStyle(fontSize: 20))
-                              : const Text("Resume", style: TextStyle(fontSize: 20))),
-                      style: ButtonStyle(
-                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
-                      onPressed: (_bStart)
-                          ? (_bPaused)
-                              ? _resumeCounter
-                              : _pauseCounter
-                          : null),
-                  const SizedBox(width: 16),
-                  ElevatedButton(
-                      child: Padding(
-                          padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
-                          child: (!_bStart)
-                              ? (0 == _stepCounter)
-                                  ? const Text("Start", style: TextStyle(fontSize: 20))
-                                  : const Text("Reset", style: TextStyle(fontSize: 20))
-                              : const Text("Stop", style: TextStyle(fontSize: 20))),
-                      style: ButtonStyle(
-                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
-                      onPressed: (!_bStart)
+        floatingActionButton:
+            LayoutBuilder(builder: (BuildContext context, BoxConstraints floatingConstraints) {
+          double realFloatingConstraintsMaxHeight =
+              max(floatingConstraints.maxHeight - GVW.dWebWidgetHeaderHeight, 0);
+          if (floatingConstraints.maxWidth < (realFloatingConstraintsMaxHeight)) {
+            // portrait
+            debugPrint('floatingConstraints.maxWidth: ${floatingConstraints.maxWidth}');
+            debugPrint('realFloatingConstraintsMaxHeight: $realFloatingConstraintsMaxHeight');
+            return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+              ElevatedButton(
+                  child: Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
+                      child: (!_bPaused)
+                          ? const Text("Pause", style: TextStyle(fontSize: 20))
+                          : const Text("Resume", style: TextStyle(fontSize: 20))),
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+                  onPressed: (_bStart)
+                      ? (_bPaused)
+                          ? _resumeStepCounter
+                          : _pauseStepCounter
+                      : null),
+              const SizedBox(width: 16),
+              ElevatedButton(
+                  child: Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
+                      child: (!_bStart)
                           ? (0 == _stepCounter)
-                              ? _startCounter
-                              : _resetCounter
-                          : _stopCounter)
-                ])
-              : Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  ElevatedButton(
-                      child: Padding(
-                          padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
-                          child: (!_bPaused)
-                              ? const Text("Pause", style: TextStyle(fontSize: 20))
-                              : const Text("Resume", style: TextStyle(fontSize: 20))),
-                      style: ButtonStyle(
-                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
-                      onPressed: (_bStart)
-                          ? (_bPaused)
-                              ? _resumeCounter
-                              : _pauseCounter
-                          : null),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                      child: Padding(
-                          padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
-                          child: (!_bStart)
-                              ? (0 == _stepCounter)
-                                  ? const Text("Start", style: TextStyle(fontSize: 20))
-                                  : const Text("Reset", style: TextStyle(fontSize: 20))
-                              : const Text("Stop", style: TextStyle(fontSize: 20))),
-                      style: ButtonStyle(
-                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
-                      onPressed: (!_bStart)
+                              ? const Text("Start", style: TextStyle(fontSize: 20))
+                              : const Text("Reset", style: TextStyle(fontSize: 20))
+                          : const Text("Stop", style: TextStyle(fontSize: 20))),
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+                  onPressed: (!_bStart)
+                      ? (0 == _stepCounter)
+                          ? _startStepCounter
+                          : _resetStepCounter
+                      : _stopStepCounter)
+            ]);
+          } else {
+            return Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+              ElevatedButton(
+                  child: Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
+                      child: (!_bPaused)
+                          ? const Text("Pause", style: TextStyle(fontSize: 20))
+                          : const Text("Resume", style: TextStyle(fontSize: 20))),
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+                  onPressed: (_bStart)
+                      ? (_bPaused)
+                          ? _resumeStepCounter
+                          : _pauseStepCounter
+                      : null),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                  child: Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
+                      child: (!_bStart)
                           ? (0 == _stepCounter)
-                              ? _startCounter
-                              : _resetCounter
-                          : _stopCounter)
-                ]);
+                              ? const Text("Start", style: TextStyle(fontSize: 20))
+                              : const Text("Reset", style: TextStyle(fontSize: 20))
+                          : const Text("Stop", style: TextStyle(fontSize: 20))),
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+                  onPressed: (!_bStart)
+                      ? (0 == _stepCounter)
+                          ? _startStepCounter
+                          : _resetStepCounter
+                      : _stopStepCounter)
+            ]);
+          }
         }));
   }
 }

@@ -1,16 +1,20 @@
-8 Queens: Privacy policy
+
+# 8 Queens: Privacy policy
+
 ---------------------------------
 
 Welcome to the 8 Queens Performance Benckmark App!
 
-This is an open source App developed by Jack Davis. The source code is available on GitHub under the MIT license: https://github.com/jackdavis01/mobile/tree/main/eightqueens.
+This is an open source App developed by Jack Davis. The source code is available on GitHub under the MIT license: <https://github.com/jackdavis01/mobile/tree/main/eightqueens>.
 
-The App is available on 5 platforms:
+The App is available on 6 platforms:
+
 1. Android: Google Play,
 2. iOS: App Store,
-3. Windows: https://is.gd/8Queens,
+3. Windows: <https://is.gd/8Queens>,
 4. macOS: App Store,
 5. Linux: Snap Store.
+6. Web version on any platform.
 
 Search for "8 Queens" or "8 Queens Performance".
 

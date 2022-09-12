@@ -68,6 +68,8 @@ class ChessTableRow extends StatefulWidget {
 }
 
 class _ChessTableRowState extends State<ChessTableRow> {
+  final Color cBrownBright = const Color(0xFFEEEAE8);
+  final Color cBrownDarker = const Color(0xFFCDBFBA);
   @override
   Widget build(BuildContext context) {
     double dChessBoxFullSize = widget.dChessBoxFullSize;
@@ -77,56 +79,56 @@ class _ChessTableRowState extends State<ChessTableRow> {
     return Stack(
       children: [
         ChessBox(
-            backGroundColor: Colors.brown.withAlpha((bBrightFirst) ? 32 : 96),
+            backGroundColor: (bBrightFirst) ? cBrownBright : cBrownDarker,
             wInside: (1 == widget.iWInside) ? wQueen : const SizedBox.shrink(),
             dLeft: widget.dLeft,
             dTop: widget.dTop,
             dWidth: dChessBoxSize,
             dHeight: dChessBoxSize),
         ChessBox(
-            backGroundColor: Colors.brown.withAlpha((bBrightFirst) ? 96 : 32),
+            backGroundColor: (bBrightFirst) ? cBrownDarker : cBrownBright,
             wInside: (2 == widget.iWInside) ? wQueen : const SizedBox.shrink(),
             dLeft: widget.dLeft + dChessBoxFullSize,
             dTop: widget.dTop,
             dWidth: dChessBoxSize,
             dHeight: dChessBoxSize),
         ChessBox(
-            backGroundColor: Colors.brown.withAlpha((bBrightFirst) ? 32 : 96),
+            backGroundColor: (bBrightFirst) ? cBrownBright : cBrownDarker,
             wInside: (3 == widget.iWInside) ? wQueen : const SizedBox.shrink(),
             dLeft: widget.dLeft + 2 * dChessBoxFullSize,
             dTop: widget.dTop,
             dWidth: dChessBoxSize,
             dHeight: dChessBoxSize),
         ChessBox(
-            backGroundColor: Colors.brown.withAlpha((bBrightFirst) ? 96 : 32),
+            backGroundColor: (bBrightFirst) ? cBrownDarker : cBrownBright,
             wInside: (4 == widget.iWInside) ? wQueen : const SizedBox.shrink(),
             dLeft: widget.dLeft + 3 * dChessBoxFullSize,
             dTop: widget.dTop,
             dWidth: dChessBoxSize,
             dHeight: dChessBoxSize),
         ChessBox(
-            backGroundColor: Colors.brown.withAlpha((bBrightFirst) ? 32 : 96),
+            backGroundColor: (bBrightFirst) ? cBrownBright : cBrownDarker,
             wInside: (5 == widget.iWInside) ? wQueen : const SizedBox.shrink(),
             dLeft: widget.dLeft + 4 * dChessBoxFullSize,
             dTop: widget.dTop,
             dWidth: dChessBoxSize,
             dHeight: dChessBoxSize),
         ChessBox(
-            backGroundColor: Colors.brown.withAlpha((bBrightFirst) ? 96 : 32),
+            backGroundColor: (bBrightFirst) ? cBrownDarker : cBrownBright,
             wInside: (6 == widget.iWInside) ? wQueen : const SizedBox.shrink(),
             dLeft: widget.dLeft + 5 * dChessBoxFullSize,
             dTop: widget.dTop,
             dWidth: dChessBoxSize,
             dHeight: dChessBoxSize),
         ChessBox(
-            backGroundColor: Colors.brown.withAlpha((bBrightFirst) ? 32 : 96),
+            backGroundColor: (bBrightFirst) ? cBrownBright : cBrownDarker,
             wInside: (7 == widget.iWInside) ? wQueen : const SizedBox.shrink(),
             dLeft: widget.dLeft + 6 * dChessBoxFullSize,
             dTop: widget.dTop,
             dWidth: dChessBoxSize,
             dHeight: dChessBoxSize),
         ChessBox(
-            backGroundColor: Colors.brown.withAlpha((bBrightFirst) ? 96 : 32),
+            backGroundColor: (bBrightFirst) ? cBrownDarker : cBrownBright,
             wInside: (8 == widget.iWInside) ? wQueen : const SizedBox.shrink(),
             dLeft: widget.dLeft + 7 * dChessBoxFullSize,
             dTop: widget.dTop,

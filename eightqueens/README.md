@@ -4,7 +4,7 @@ A Flutter project that demonstrates the power, versatility and multi-platform na
 
 ## Getting Started
 
-This project contains the source code for the 8 Queens App and all the resources needed to build it on the 5 available platforms.
+This project contains the source code for the 8 Queens App and all the resources needed to build it on the 6 available platforms.
 
 ## 8 Queens: Instructions
 
@@ -17,6 +17,7 @@ This project contains the source code for the 8 Queens App and all the resources
 3. Windows desktop: <https://is.gd/8Queens>
 4. MacOS desktop: App Store
 5. Linux desktop: Snap Store
+6. Web version on any platform.
 
 Search for "8 Queens" or "8 Queens Performance".
 
@@ -33,6 +34,8 @@ If you would like to check your smart phone's multithreaded CPU performance plea
 The App uses brute force method to find the right solutions. Since this App is a Performace Benchmark, it was not intended to use an algorithm faster than the brute force method. Any more efficient algorithm would run too fast on a flagship device.
 
 Not all iterations are displayed. Only about every 5000th iteration is displayed. Therefore, outputing to the display slows down max. 10% on the algorithm.
+
+The Web version is not suitable for comparative speed testing, so download the App for the platform. The Web version runs at different speeds in different browsers. For example, in Firefox it's extremely slow and Chrome can produce surprising results even on slow devices in multi-threaded mode.
 
 ### License
 

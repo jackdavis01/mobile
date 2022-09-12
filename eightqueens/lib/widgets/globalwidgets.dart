@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+class GC {
+  static const String sTitle = '8 Queens Performance Benchmark';
+}
+
 class RoundedContainer extends StatefulWidget {
   final Widget child;
   final double width;

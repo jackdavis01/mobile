@@ -27,7 +27,9 @@ class _ResultPageState extends State<ResultPage> {
     'Average',
     'Better than Average',
     'Fast',
-    'Very fast'
+    'Very fast',
+    'Crazy fast',
+    'Light speed'
   ];
   String _sRank = "";
   @override
