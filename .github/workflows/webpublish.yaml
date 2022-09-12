@@ -7,8 +7,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eightqueens
 
     steps:
       - uses: actions/checkout@v2 # Only works with v2
       - uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
       - uses: jackdavis01/mobile@main
