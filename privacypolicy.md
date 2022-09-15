@@ -14,7 +14,7 @@ The App is available on 6 platforms:
 3. Windows: <https://is.gd/8Queens>,
 4. macOS: App Store,
 5. Linux: Snap Store.
-6. Web version on any platform.
+6. Web version on any platform: <https://jackdavis01.github.io/mobile>
 
 Search for "8 Queens" or "8 Queens Performance".
 
