@@ -1,30 +1,30 @@
-class FindSolutionsController {
-  _fSW = undefined
-  _findSolutionsWorker = undefined
-  _findSolutionsWorkerEntryPoint = 'js/findsolutionsthread.js'
+const FindSolutionsController = {
+  fSW : undefined,
+  findSolutionsWorker : undefined,
+  findSolutionsWorkerEntryPoint : 'js/findsolutionsthread.js',
 
   async startWorkerInBackground() {
     if ("undefined" !== typeof(Worker)) {
-      if (undefined != this._fSW) {
-        this._fSW.terminate()
-        this._findSolutionsWorker = undefined
-        this._fSW = undefined
+      if (undefined != this.fSW) {
+        this.fSW.terminate()
+        this.findSolutionsWorker = undefined
+        this.fSW = undefined
         console.log('Js Message: Worker reset')
       }
-      this._findSolutionsWorker =
-          new Worker(this._findSolutionsWorkerEntryPoint);
-      this._fSW = this._findSolutionsWorker;
+      this.findSolutionsWorker =
+          new Worker(this.findSolutionsWorkerEntryPoint)
+      this._fSW = this.findSolutionsWorker
 
       console.log('Js Message: Worker started')
-      console.log('Js Message: Worker: ' + JSON.stringify(this._findSolutionsWorker))
+      console.log('Js Message: Worker: ' + JSON.stringify(this.findSolutionsWorker))
 
-      this._findSolutionsWorker.onmessage = (msgEvent) => {
+      this.findSolutionsWorker.onmessage = (msgEvent) => {
         sendMessage2Dart(msgEvent.data)
       }
 
       console.log('Js Message: Worker onmessage initiated')
 
-      this._findSolutionsWorker.onerror = (err) => {
+      this.findSolutionsWorker.onerror = (err) => {
         console.log('Js Message: Err from Worker: ' + JSON.stringify(err))
       }
 
@@ -35,47 +35,45 @@ class FindSolutionsController {
     }
     console.log('Js Message: startWorker end')
     return
-  }
+  },
 
   receiveMsgFromDartMethod(waitms) {
-    this._findSolutionsWorker.postMessage(waitms)
-  }
+    this.findSolutionsWorker.postMessage(waitms)
+  },
 
   stopWorkerInBackground() {
-    this._findSolutionsWorker.terminate();
-  }
+    this.findSolutionsWorker.terminate();
+  },
 
   pause() {
-    this._findSolutionsWorker.postMessage('pause')
-  }
+    this.findSolutionsWorker.postMessage('pause')
+  },
 
   resume() {
-    this._findSolutionsWorker.postMessage('resume')
+    this.findSolutionsWorker.postMessage('resume')
   }
 }
 
-const FindSolutionsControllerJsObject = new FindSolutionsController()
-
 function receiveMsgFromDart(waitms) {
-  FindSolutionsControllerJsObject.receiveMsgFromDartMethod(waitms)
+  FindSolutionsController.receiveMsgFromDartMethod(waitms)
 }
 
 function startWorker() {
   console.log('Worker Message: startWorker')
-  FindSolutionsControllerJsObject.startWorkerInBackground()
+  FindSolutionsController.startWorkerInBackground()
 }
 
 function stopWorker() {
   console.log('Worker Message: stopWorker')
-  FindSolutionsControllerJsObject.stopWorkerInBackground()
+  FindSolutionsController.stopWorkerInBackground()
 }
 
 function pauseWorker() {
   console.log('Worker Message: pauseWorker')
-  FindSolutionsControllerJsObject.pause()
+  FindSolutionsController.pause()
 }
 
 function resumeWorker() {
   console.log('Worker Message: resumeWorker')
-  FindSolutionsControllerJsObject.resume()
+  FindSolutionsController.resume()
 }
