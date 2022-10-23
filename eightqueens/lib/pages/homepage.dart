@@ -5,12 +5,13 @@ import '../dartjs/nojsconnection.dart' if (dart.library.html) '../dartjs/jsconne
 import "package:async/async.dart";
 import 'package:eightqueens/widgets/webwidgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' as _foundation show kIsWeb;
+import 'package:flutter/foundation.dart' as _foundation show kIsWeb, kReleaseMode;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:collection/collection.dart';
 import '../isolates/findsolutions.dart';
 import '../isolates/multithreadedfindsolutions.dart';
 import '../widgets/boxwidgets.dart';
+import 'configpage.dart';
 import 'infopage.dart';
 import 'resultpage.dart';
 
@@ -241,7 +242,7 @@ class _HomePageState extends State<HomePage> {
       _solutionCounter = 0;
     });
 
-    dartjs.jsCallStartWorker();
+    dartjs.jsCallStartWorker(_foundation.kReleaseMode);
 
     dartjs.jsCallBackSendMessage2Dart(_sendMessage2Dart);
 
@@ -290,7 +291,7 @@ class _HomePageState extends State<HomePage> {
       _solutionCounter = 0;
     });
 
-    dartjs.jsStartMultithreadedWorkers(_nThreadsStarted, _waitms);
+    dartjs.jsStartMultithreadedWorkers(_nThreadsStarted, _waitms, _foundation.kReleaseMode);
 
     dartjs.jsSendMultithreadedMessage2Dart(_sendMultithreadedMessage2Dart);
 
@@ -732,6 +733,18 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           title: Text(widget.title),
           actions: [
+            (_foundation.kIsWeb)
+                ? IconButton(
+                    icon: const Icon(Icons.settings),
+                    tooltip: 'Config Page',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ConfigPage()),
+                      );
+                    },
+                  )
+                : const SizedBox.shrink(),
             IconButton(
               icon: const Icon(Icons.info),
               tooltip: 'Info Page',

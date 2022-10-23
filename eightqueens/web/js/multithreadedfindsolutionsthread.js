@@ -1,4 +1,8 @@
-console.log('Multithreaded Worker Message: First line')
+const params = new URLSearchParams(location.search);
+const bRelease = 'true' === params.get("bRelease");
+if (bRelease) { console.log = function () {} }
+
+console.log('Multithreaded Worker Message: Loaded, bRelease: ', bRelease)
 
 async function delayed(ms) {
   return await new Promise(resolve => setTimeout(resolve, ms))

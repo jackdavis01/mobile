@@ -3,7 +3,7 @@ const FindSolutionsController = {
   findSolutionsWorker : undefined,
   findSolutionsWorkerEntryPoint : 'js/findsolutionsthread.js',
 
-  async startWorkerInBackground() {
+  async startWorkerInBackground(bRelease) {
     if ("undefined" !== typeof(Worker)) {
       if (undefined != this.fSW) {
         this.fSW.terminate()
@@ -12,7 +12,7 @@ const FindSolutionsController = {
         console.log('Js Message: Worker reset')
       }
       this.findSolutionsWorker =
-          new Worker(this.findSolutionsWorkerEntryPoint)
+          new Worker(this.findSolutionsWorkerEntryPoint + '?bRelease=' + bRelease)
       this._fSW = this.findSolutionsWorker
 
       console.log('Js Message: Worker started')
@@ -58,9 +58,10 @@ function receiveMsgFromDart(waitms) {
   FindSolutionsController.receiveMsgFromDartMethod(waitms)
 }
 
-function startWorker() {
+function startWorker(bRelease0) {
+  if (bRelease0) { console.log = function () {} }
   console.log('Worker Message: startWorker')
-  FindSolutionsController.startWorkerInBackground()
+  FindSolutionsController.startWorkerInBackground(bRelease0)
 }
 
 function stopWorker() {

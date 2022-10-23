@@ -1,12 +1,12 @@
 // No need js connection
 
-void jsCallStartWorker() {}
+void jsCallStartWorker(bool bRelease) {}
 
 void jsCallBackSendMessage2Dart(Function sendMessage2Dart) {}
 
 void jsStopWorker() {}
 
-void jsStartMultithreadedWorkers(int nThreadsStarted, int waitms) {}
+void jsStartMultithreadedWorkers(int nThreadsStarted, int waitms, bool bRelease) {}
 
 void jsSendMultithreadedMessage2Dart(Function sendMultithreadedMessage2Dart) {}
 

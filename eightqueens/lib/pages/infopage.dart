@@ -221,6 +221,18 @@ class _InfoPageState extends State<InfoPage> {
                                       'multi-threaded mode.',
                                       textAlign: TextAlign.justify,
                                       style: TextStyle(fontSize: 17)),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(top: 0, bottom: 0, left: 15, right: 15),
+                                  child: Text(
+                                      'For higher browser compatibility, the rendering type of the '
+                                      'Web version can be set on the Config page to Auto, HTML or '
+                                      'CanvasKit. To open the Config page, tap the cogwheel icon in '
+                                      'the top right corner. HTML rendering is compatible with more '
+                                      'browsers than CanvasKit, while the latter rendering '
+                                      'results in a faster runtime.',
+                                      textAlign: TextAlign.justify,
+                                      style: TextStyle(fontSize: 17)),
                                 )
                               ]))),
                   const SizedBox(height: 20),

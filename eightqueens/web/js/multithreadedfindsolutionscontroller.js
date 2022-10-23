@@ -4,7 +4,7 @@ const MultithreadedFindSolutionsController = {
   mtFindSolutionsWorkerEntryPoint : 'js/multithreadedfindsolutionsthread.js',
   nThreads : 2,
 
-  async startMultithreadedWorkersInBackground(nThreads0, waitms0) {
+  async startMultithreadedWorkersInBackground(nThreads0, waitms0, bRelease) {
     this.nThreads = nThreads0
     if ("undefined" !== typeof(Worker)) {
       for (let iPort = 0; iPort < this.nThreads; iPort++) {
@@ -15,7 +15,7 @@ const MultithreadedFindSolutionsController = {
           console.log('Js Mt Message: Worker reset')
         }
         this.mtFindSolutionsWorker[iPort] =
-            new Worker(this.mtFindSolutionsWorkerEntryPoint);
+            new Worker(this.mtFindSolutionsWorkerEntryPoint + '?bRelease=' + bRelease);
         this.mtFSW[iPort] = this.mtFindSolutionsWorker[iPort];
 
         console.log('Js Mt Message: Worker started: ' + iPort)
@@ -68,9 +68,10 @@ function receiveMultithreadedMsgFromDart(iPort, waitms) {
   MultithreadedFindSolutionsController.receiveMsgFromDartMethod(iPort, waitms)
 }
 
-function startMultithreadedWorkers(nThreads, waitms) {
+function startMultithreadedWorkers(nThreads, waitms, bRelease0) {
+  if (bRelease0) { console.log = function () {} }
   console.log('Js Mt Message: startMultithreadedWorkers, nThreads: ' + nThreads + ', waitms: ' + waitms)
-  MultithreadedFindSolutionsController.startMultithreadedWorkersInBackground(nThreads, waitms)
+  MultithreadedFindSolutionsController.startMultithreadedWorkersInBackground(nThreads, waitms, bRelease0)
 }
 
 function stopMultithreadedWorkers() {

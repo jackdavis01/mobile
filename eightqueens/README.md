@@ -37,6 +37,8 @@ Not all iterations are displayed. Only about every 5000th iteration is displayed
 
 The Web version is not suitable for comparative speed testing, so download the App for the platform. The Web version runs at different speeds in different browsers. For example, in Firefox it's extremely slow and Chrome can produce surprising results even on slow devices in multi-threaded mode.
 
+For higher browser compatibility, the rendering type of the Web version can be set on the Config page to Auto, HTML or CanvasKit. To open the Config page, tap the cogwheel icon in the top right corner. HTML rendering is compatible with more browsers than CanvasKit, while the latter rendering results in a faster runtime.
+
 ### License
 
 MIT license: <https://choosealicense.com/licenses/mit>

@@ -1,8 +1,8 @@
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:js' as js;
 
-void jsCallStartWorker() {
-  js.context.callMethod('startWorker', []);
+void jsCallStartWorker(bool bRelease) {
+  js.context.callMethod('startWorker', [bRelease]);
 }
 
 void jsCallBackSendMessage2Dart(Function sendMessage2Dart) {
@@ -13,8 +13,8 @@ void jsStopWorker() {
   js.context.callMethod('stopWorker', []);
 }
 
-void jsStartMultithreadedWorkers(int nThreadsStarted, int waitms) {
-  js.context.callMethod('startMultithreadedWorkers', [nThreadsStarted, waitms]);
+void jsStartMultithreadedWorkers(int nThreadsStarted, int waitms, bool bRelease) {
+  js.context.callMethod('startMultithreadedWorkers', [nThreadsStarted, waitms, bRelease]);
 }
 
 void jsSendMultithreadedMessage2Dart(Function sendMultithreadedMessage2Dart) {
