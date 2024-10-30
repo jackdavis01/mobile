@@ -1096,7 +1096,7 @@ class _HomePageState extends State<HomePage> {
                           ? const Text("Pause", style: TextStyle(fontSize: 20))
                           : const Text("Resume", style: TextStyle(fontSize: 20))),
                   style: ButtonStyle(
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
                   onPressed: (_bStart)
                       ? (_bPaused)
@@ -1113,7 +1113,7 @@ class _HomePageState extends State<HomePage> {
                               : const Text("Reset", style: TextStyle(fontSize: 20))
                           : const Text("Stop", style: TextStyle(fontSize: 20))),
                   style: ButtonStyle(
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
                   onPressed: (!_bStart)
                       ? (0 == _stepCounter)
@@ -1130,7 +1130,7 @@ class _HomePageState extends State<HomePage> {
                           ? const Text("Pause", style: TextStyle(fontSize: 20))
                           : const Text("Resume", style: TextStyle(fontSize: 20))),
                   style: ButtonStyle(
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
                   onPressed: (_bStart)
                       ? (_bPaused)
@@ -1147,7 +1147,7 @@ class _HomePageState extends State<HomePage> {
                               : const Text("Reset", style: TextStyle(fontSize: 20))
                           : const Text("Stop", style: TextStyle(fontSize: 20))),
                   style: ButtonStyle(
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
                   onPressed: (!_bStart)
                       ? (0 == _stepCounter)

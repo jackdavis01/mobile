@@ -24,6 +24,7 @@ class _MainFrameState extends State<MainFrame> {
         scrollBehavior: DragPointerDeviceScrollBehavior(),
         title: '8 Queens',
         theme: ThemeData(
+          useMaterial3: false,
           primarySwatch: Colors.blue,
         ),
         home: (flutter_foundation.kIsWeb)

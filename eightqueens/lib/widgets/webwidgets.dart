@@ -98,7 +98,7 @@ class _WebPageWidgetState extends State<WebPageWidget> {
                         expandedHeaderPadding: EdgeInsets.zero,
                         expansionCallback: ((panelIndex, isExpanded) {
                           setState(() {
-                            bIsExpanded = !isExpanded;
+                            bIsExpanded = isExpanded;
                           });
                         }),
                         children: [

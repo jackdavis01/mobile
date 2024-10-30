@@ -17,7 +17,7 @@ class _InfoPageState extends State<InfoPage> {
   String version = "";
   String buildNumber = "";
   String buildMode = "";
-  final String platform = 'Flutter 3.3.1';
+  final String platform = 'Flutter 3.24.3';
   final String platformPrerelease = '-';
   final String platformChannel = 'stable';
   final String author = 'Jack Davis';
@@ -88,9 +88,9 @@ class _InfoPageState extends State<InfoPage> {
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
                           padding: const EdgeInsets.only(top: 30, bottom: 30),
-                          child: Column(
+                          child: const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const <Widget>[
+                              children: [
                                 Padding(
                                     padding: EdgeInsets.only(bottom: 5.0),
                                     child: Center(
