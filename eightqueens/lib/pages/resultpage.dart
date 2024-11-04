@@ -1,4 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'admobtest/admobtestpage.dart';
+import '../parameters/globals.dart';
+import 'contributionpage.dart';
 import '../widgets/globalwidgets.dart';
 
 class ResultPage extends StatefulWidget {
@@ -16,10 +21,13 @@ class ResultPage extends StatefulWidget {
       required this.elapsed})
       : super(key: key);
   @override
-  _ResultPageState createState() => _ResultPageState();
+  ResultPageState createState() => ResultPageState();
 }
 
-class _ResultPageState extends State<ResultPage> {
+class ResultPageState extends State<ResultPage> {
+
+  _openAdModTestPage() => () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => const AdMobTestPage()));
+
   final List<String> lsRank = [
     'Very slow',
     'Slow',
@@ -48,78 +56,211 @@ class _ResultPageState extends State<ResultPage> {
                 child: IconButton(
                     icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
               ),
-              const Padding(padding: EdgeInsets.only(right: 18), child: Text("Result"))
+              const Padding(padding: EdgeInsets.only(right: 18), child: Text("Result")),
+              const SizedBox(width: 36)
             ]))
           ]),
         ),
         backgroundColor: Colors.blue.shade50,
-        body: ListView(physics: const BouncingScrollPhysics(), children: <Widget>[
-          Padding(
-              padding: const EdgeInsets.only(left: 15, top: 20, right: 15),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-                      RoundedContainer(
-                          width: double.infinity,
-                          constraints: const BoxConstraints(minWidth: 300, maxWidth: 400),
-                          margin: const EdgeInsets.all(0.0),
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                              padding: const EdgeInsets.only(top: 30, bottom: 30),
-                              child: Column(children: <Widget>[
-                                const Padding(
-                                    padding: EdgeInsets.only(bottom: 5.0),
-                                    child: Text(
-                                      '8 Queens',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 32),
-                                    )),
-                                const Padding(
-                                    padding: EdgeInsets.only(bottom: 5.0),
-                                    child: Text(
-                                      'Speed Result',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 24),
-                                    )),
-                                const Padding(
-                                    padding: EdgeInsets.only(top: 22, bottom: 7, left: 15, right: 15),
-                                    child: Text('Threads, Time Elapsed',
-                                        textAlign: TextAlign.justify,
-                                        style: TextStyle(fontSize: 20))),
-                                const Padding(
-                                    padding: EdgeInsets.only(top: 4, bottom: 15, left: 15, right: 15),
-                                    child: Text('Rank:',
-                                        textAlign: TextAlign.justify,
-                                        style: TextStyle(fontSize: 20))),
-                                Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                        color: widget.backgroundcolor,
-                                        borderRadius: BorderRadius.circular(6)),
-                                    child: IntrinsicWidth(
-                                        child: Column(mainAxisSize: MainAxisSize.min, children: [
-                                      Text(
-                                          widget.threads.toString() +
-                                              "t: " +
-                                              widget.elapsed.toString().substring(
-                                                  0, widget.elapsed.toString().indexOf('.') + 4),
-                                          style: TextStyle(
-                                              fontSize: 28,
-                                              color: widget.color,
-                                              backgroundColor: widget.backgroundcolor)),
-                                      const Divider(thickness: 2, color: Colors.white),
-                                      Text(_sRank,
-                                          style: TextStyle(
-                                              fontSize: 28,
-                                              color: widget.color,
-                                              backgroundColor: widget.backgroundcolor))
-                                    ])))
-                              ]))),
+        body: Stack(
+            alignment: AlignmentDirectional.bottomCenter,
+            children: <Widget>[
+          ListView(physics: const BouncingScrollPhysics(), children: <Widget>[
+            Padding(
+                padding: const EdgeInsets.only(left: 15, top: 20, right: 15),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
+                        RoundedContainer(
+                            width: double.infinity,
+                            constraints: const BoxConstraints(minWidth: 300, maxWidth: 400),
+                            margin: const EdgeInsets.all(0.0),
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                                padding: const EdgeInsets.only(top: 30, bottom: 30),
+                                child: Column(children: <Widget>[
+                                  const Padding(
+                                      padding: EdgeInsets.only(bottom: 5.0),
+                                      child: Text(
+                                        '8 Queens',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(fontSize: 32),
+                                      )),
+                                  const Padding(
+                                      padding: EdgeInsets.only(bottom: 5.0),
+                                      child: Text(
+                                        'Speed Result',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(fontSize: 24),
+                                      )),
+                                  Padding(
+                                      padding: const EdgeInsets.only(top: 22, bottom: 7, left: 15, right: 15),
+                                      child: Text.rich(
+                                                TextSpan(
+                                                  text: 'Threads: ',
+                                                  style: const TextStyle(fontSize: 20),
+                                                  children: <InlineSpan> [
+                                                    TextSpan(
+                                                      text: widget.threads.toString(),
+                                                      style: TextStyle(
+                                                      fontSize: 28,
+                                                      color: widget.color)
+                                                    )
+                                                  ]
+                                                ),
+                                                textAlign: TextAlign.justify,
+                                      ),
+                                  ),
+                                  const Padding(
+                                      padding: EdgeInsets.only(top: 4, bottom: 7, left: 15, right: 15),
+                                      child: Text('Time Elapsed',
+                                          textAlign: TextAlign.justify,
+                                          style: TextStyle(fontSize: 20))),
+                                  const Padding(
+                                      padding: EdgeInsets.only(top: 4, bottom: 15, left: 15, right: 15),
+                                      child: Text('Rank:',
+                                          textAlign: TextAlign.justify,
+                                          style: TextStyle(fontSize: 20))),
+                                  Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                          color: widget.backgroundcolor,
+                                          borderRadius: BorderRadius.circular(6)),
+                                      child: IntrinsicWidth(
+                                          child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                        Text(widget.elapsed.toString().substring(
+                                                0, widget.elapsed.toString().indexOf('.') + 4),
+                                            style: TextStyle(
+                                                fontSize: 28,
+                                                color: widget.color,
+                                                backgroundColor: widget.backgroundcolor)),
+                                        const Divider(thickness: 2, color: Colors.white),
+                                        Text(_sRank,
+                                            style: TextStyle(
+                                                fontSize: 28,
+                                                color: widget.color,
+                                                backgroundColor: widget.backgroundcolor))
+                                      ])))
+                                ]))),
+                        const SizedBox(height: 20),
+                      ]),
+                      ElevatedButton(
+                          child: const Padding(
+                              padding: EdgeInsets.fromLTRB(4, 16, 4, 16),
+                              child: Text("Contribution", style: TextStyle(fontSize: 20))),
+                          style: ButtonStyle(
+                              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+                          onPressed: _openContributionPage(),
+                      ),
                       const SizedBox(height: 20),
-                    ]),
-                  ]))
+                      (GV.bDev)
+                      ? ElevatedButton(
+                          child: const Padding(
+                              padding: EdgeInsets.fromLTRB(4, 16, 4, 16),
+                              child: Text("Start Ad Test", style: TextStyle(fontSize: 20))),
+                          style: ButtonStyle(
+                              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+                          onPressed: _openAdModTestPage(),
+                      )
+                      : const SizedBox.shrink(),
+                      const SizedBox(height: 20),
+                      const SizedBox(height: 64), // ad banner place
+                    ]))
+          ]),
+          _getAdWidget(),
         ]));
   }
+
+  BannerAd? _anchoredAdaptiveAd;
+  bool _isLoaded = false;
+  late Orientation _currentOrientation;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _currentOrientation = MediaQuery.of(context).orientation;
+    _loadAd();
+  }
+
+  /// Load another ad, disposing of the current ad if there is one.
+  Future<void> _loadAd() async {
+    await _anchoredAdaptiveAd?.dispose();
+    setState(() {
+      _anchoredAdaptiveAd = null;
+      _isLoaded = false;
+    });
+
+    final AnchoredAdaptiveBannerAdSize? size =
+        await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+            MediaQuery.of(context).size.width.truncate());
+
+    if (size == null) {
+      debugPrint('Unable to get height of anchored banner.');
+      return;
+    }
+
+    _anchoredAdaptiveAd = BannerAd(
+      adUnitId: Platform.isAndroid
+          ? 'ca-app-pub-4934899671581001/9878983386' // 'ca-app-pub-3940256099942544/9214589741'
+          : 'ca-app-pub-3940256099942544/2435281174',
+      size: size,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (Ad ad) {
+          debugPrint('$ad loaded: ${ad.responseInfo}');
+          setState(() {
+            // When the ad is loaded, get the ad size and use it to set
+            // the height of the ad container.
+            _anchoredAdaptiveAd = ad as BannerAd;
+            _isLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          debugPrint('Anchored adaptive banner failedToLoad: $error');
+          ad.dispose();
+        },
+      ),
+    );
+    return _anchoredAdaptiveAd!.load();
+  }
+
+  /// Gets a widget containing the ad, if one is loaded.
+  ///
+  /// Returns an empty container if no ad is loaded, or the orientation
+  /// has changed. Also loads a new ad if the orientation changes.
+  Widget _getAdWidget() {
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        if (_currentOrientation == orientation &&
+            _anchoredAdaptiveAd != null &&
+            _isLoaded) {
+          return Container(
+            color: Colors.green,
+            width: _anchoredAdaptiveAd!.size.width.toDouble(),
+            height: _anchoredAdaptiveAd!.size.height.toDouble(),
+            child: AdWidget(ad: _anchoredAdaptiveAd!),
+          );
+        }
+        // Reload the ad if the orientation changes.
+        if (_currentOrientation != orientation) {
+          _currentOrientation = orientation;
+          _loadAd();
+        }
+        return Container();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _anchoredAdaptiveAd?.dispose();
+  }
+
+  _openContributionPage() => () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => const ContributionPage()));
+
 }

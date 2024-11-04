@@ -1,17 +1,21 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:window_size/window_size.dart';
-import 'widgets/globalwidgets.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'parameters/globals.dart';
 import 'mainframe.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb) {
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      setWindowTitle(GC.sTitle);
+      setWindowTitle(GV.sTitle);
       setWindowMaxSize(const Size(1120, 800));
       setWindowMinSize(const Size(560, 380));
+    } else if (Platform.isAndroid) {
+      unawaited(MobileAds.instance.initialize());
     }
   }
   runApp(const MainApp());

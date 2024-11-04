@@ -4,6 +4,10 @@
         android:label="8 Queens"
         android:name="${applicationName}"
         android:icon="@mipmap/chess_queen">
+        <!-- AdMob app ID -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-4934899671581001~9993892820"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

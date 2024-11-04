@@ -2,7 +2,7 @@ import 'dart:ui';
 //import 'package:eightqueens/widgets/iframeview.dart';
 import 'package:flutter/foundation.dart' as flutter_foundation;
 import 'package:flutter/material.dart';
-import '../widgets/globalwidgets.dart';
+import '../parameters/globals.dart';
 import '../widgets/webwidgets.dart';
 import 'pages/homepage.dart';
 
@@ -29,7 +29,7 @@ class _MainFrameState extends State<MainFrame> {
         ),
         home: (flutter_foundation.kIsWeb)
             ? const WebPageWidget()
-            : const HomePage(title: GC.sTitle, headerSize: 0));
+            : const HomePage(title: GV.sTitle, headerSize: 0));
   }
 }
 

@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../parameters/globals.dart';
 import 'globalwidgets.dart';
 import '../pages/homepage.dart';
 
@@ -259,7 +260,7 @@ class _WebPageWidgetState extends State<WebPageWidget> {
                               maxHeight: max(
                                   MediaQuery.of(context).size.height - expansionPanelHeight,
                                   minHomePageHeight)),
-                          child: HomePage(title: GC.sTitle, headerSize: expansionPanelHeight))
+                          child: HomePage(title: GV.sTitle, headerSize: expansionPanelHeight))
                     ],
                   ))))
     ]);

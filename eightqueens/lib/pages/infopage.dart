@@ -1,7 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' as _foundation;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../parameters/globals.dart';
 import '../widgets/globalwidgets.dart';
+import 'admobtest/admobtestpage.dart';
+import 'contributionpage.dart';
 
 class InfoPage extends StatefulWidget {
   const InfoPage({Key? key}) : super(key: key);
@@ -56,8 +61,17 @@ class _InfoPageState extends State<InfoPage> {
     return DataPackageInfo.fromList(msdPI);
   }
 
+  void switchDev() {
+    setState(() {
+      GV.bDev = !GV.bDev;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    _openAdModTestPage() => () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => const AdMobTestPage()));
+
     return Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -71,16 +85,19 @@ class _InfoPageState extends State<InfoPage> {
                 child: IconButton(
                     icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
               ),
-              const Padding(padding: EdgeInsets.only(right: 18), child: Text("Info"))
+              const Padding(padding: EdgeInsets.only(right: 18), child: Text("Info")),
+              const SizedBox(width: 36)
             ]))
           ]),
         ),
         backgroundColor: Colors.blue.shade50,
-        body: ListView(physics: const BouncingScrollPhysics(), children: <Widget>[
+        body: Stack(
+            alignment: AlignmentDirectional.bottomCenter,
+            children: <Widget>[ ListView(physics: const BouncingScrollPhysics(), children: <Widget>[
           Padding(
               padding: const EdgeInsets.only(left: 15, top: 20, right: 15),
               child: Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
+                Column(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
                   RoundedContainer(
                       width: double.infinity,
                       constraints: const BoxConstraints(minWidth: 300, maxWidth: 400),
@@ -236,11 +253,14 @@ class _InfoPageState extends State<InfoPage> {
                                 )
                               ]))),
                   const SizedBox(height: 20),
-                  RoundedContainer(
+                  GestureDetector(
+                          onLongPress: switchDev,
+                          child: RoundedContainer(
                       width: double.infinity,
                       margin: const EdgeInsets.all(0.0),
                       padding: const EdgeInsets.all(8.0),
                       constraints: const BoxConstraints(minWidth: 300, maxWidth: 400),
+                      boxshadow: GV.bDev,
                       child: Container(
                           padding: const EdgeInsets.only(top: 30, bottom: 30),
                           child: Column(
@@ -387,12 +407,126 @@ class _InfoPageState extends State<InfoPage> {
                                   ),
                                   const Expanded(child: SizedBox.shrink()),
                                 ]),
-                              ]))),
+                              ])))),
                   const SizedBox(height: 20),
+                  ElevatedButton(
+                      child: const Padding(
+                          padding: EdgeInsets.fromLTRB(4, 16, 4, 16),
+                          child: Text("Contribution", style: TextStyle(fontSize: 20))),
+                      style: ButtonStyle(
+                          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+                      onPressed: _openContributionPage(),
+                  ),
+                  const SizedBox(height: 20),
+                  (GV.bDev)
+                  ? ElevatedButton(
+                      child: const Padding(
+                          padding: EdgeInsets.fromLTRB(4, 16, 4, 16),
+                          child: Text("Start Ad Test", style: TextStyle(fontSize: 20))),
+                      style: ButtonStyle(
+                          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+                      onPressed: _openAdModTestPage()
+                  )
+                  : const SizedBox.shrink(),
+                  const SizedBox(height: 20),
+                  const SizedBox(height: 64), // ad banner place
                 ]),
               ]))
+          ]),
+          _getAdWidget(),
         ]));
   }
+
+  BannerAd? _anchoredAdaptiveAd;
+  bool _isLoaded = false;
+  late Orientation _currentOrientation;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _currentOrientation = MediaQuery.of(context).orientation;
+    _loadAd();
+  }
+
+  /// Load another ad, disposing of the current ad if there is one.
+  Future<void> _loadAd() async {
+    await _anchoredAdaptiveAd?.dispose();
+    setState(() {
+      _anchoredAdaptiveAd = null;
+      _isLoaded = false;
+    });
+
+    final AnchoredAdaptiveBannerAdSize? size =
+        await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+            MediaQuery.of(context).size.width.truncate());
+
+    if (size == null) {
+      debugPrint('Unable to get height of anchored banner.');
+      return;
+    }
+
+    _anchoredAdaptiveAd = BannerAd(
+      adUnitId: Platform.isAndroid
+          ? 'ca-app-pub-4934899671581001/9878983386' // 'ca-app-pub-3940256099942544/9214589741'
+          : 'ca-app-pub-3940256099942544/2435281174',
+      size: size,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (Ad ad) {
+          debugPrint('$ad loaded: ${ad.responseInfo}');
+          setState(() {
+            // When the ad is loaded, get the ad size and use it to set
+            // the height of the ad container.
+            _anchoredAdaptiveAd = ad as BannerAd;
+            _isLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          debugPrint('Anchored adaptive banner failedToLoad: $error');
+          ad.dispose();
+        },
+      ),
+    );
+    return _anchoredAdaptiveAd!.load();
+  }
+
+  /// Gets a widget containing the ad, if one is loaded.
+  ///
+  /// Returns an empty container if no ad is loaded, or the orientation
+  /// has changed. Also loads a new ad if the orientation changes.
+  Widget _getAdWidget() {
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        if (_currentOrientation == orientation &&
+            _anchoredAdaptiveAd != null &&
+            _isLoaded) {
+          return Container(
+            color: Colors.green,
+            width: _anchoredAdaptiveAd!.size.width.toDouble(),
+            height: _anchoredAdaptiveAd!.size.height.toDouble(),
+            child: AdWidget(ad: _anchoredAdaptiveAd!),
+          );
+        }
+        // Reload the ad if the orientation changes.
+        if (_currentOrientation != orientation) {
+          _currentOrientation = orientation;
+          _loadAd();
+        }
+        return Container();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _anchoredAdaptiveAd?.dispose();
+  }
+
+  _openContributionPage() => () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => const ContributionPage()));
+
 }
 
 class DataPackageInfo {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:renderer_switcher/renderer_switcher.dart';
+import '../parameters/globals.dart';
 import '../widgets/globalwidgets.dart';
 
 class ConfigPage extends StatefulWidget {
@@ -72,7 +73,7 @@ class _ConfigPageState extends State<ConfigPage> {
                                 Padding(
                                     padding: const EdgeInsets.only(right: 10),
                                     child: DropdownButton(
-                                        items: GC.lsWebRenderers.map((String item) {
+                                        items: GV.lsWebRenderers.map((String item) {
                                           return DropdownMenuItem(
                                             value: item,
                                             child: Text(item,
@@ -80,13 +81,13 @@ class _ConfigPageState extends State<ConfigPage> {
                                                     fontSize: 18, fontWeight: FontWeight.bold)),
                                           );
                                         }).toList(),
-                                        value: (WebRenderer.auto == GC.wrSwitch)
-                                            ? GC.lsWebRenderers[0]
-                                            : (WebRenderer.html == GC.wrSwitch)
-                                                ? GC.lsWebRenderers[1]
-                                                : (WebRenderer.canvaskit == GC.wrSwitch)
-                                                    ? GC.lsWebRenderers[2]
-                                                    : GC.lsWebRenderers[0],
+                                        value: (WebRenderer.auto == GV.wrSwitch)
+                                            ? GV.lsWebRenderers[0]
+                                            : (WebRenderer.html == GV.wrSwitch)
+                                                ? GV.lsWebRenderers[1]
+                                                : (WebRenderer.canvaskit == GV.wrSwitch)
+                                                    ? GV.lsWebRenderers[2]
+                                                    : GV.lsWebRenderers[0],
                                         onChanged: switchWebRenderer,
                                         focusColor: Colors.white)),
                               ])
@@ -109,21 +110,21 @@ class _ConfigPageState extends State<ConfigPage> {
     // Returns WebRenderer.html, WebRenderer.canvaskit or WebRenderer.auto
     WebRenderer wrSwitch = await RendererSwitcher.getCurrentWebRenderer();
     setState(() {
-      GC.wrSwitch = wrSwitch;
+      GV.wrSwitch = wrSwitch;
     });
   }
 
   void switchWebRenderer(String? value) {
     WebRenderer newValue = WebRenderer.auto;
-    if (value == GC.lsWebRenderers[0]) {
+    if (value == GV.lsWebRenderers[0]) {
       newValue = WebRenderer.auto;
-    } else if (value == GC.lsWebRenderers[1]) {
+    } else if (value == GV.lsWebRenderers[1]) {
       newValue = WebRenderer.html;
-    } else if (value == GC.lsWebRenderers[2]) {
+    } else if (value == GV.lsWebRenderers[2]) {
       newValue = WebRenderer.canvaskit;
     }
     // Switches web renderer to value and reloads the window.
     RendererSwitcher.switchWebRenderer(newValue);
-    GC.wrSwitch = newValue;
+    GV.wrSwitch = newValue;
   }
 }

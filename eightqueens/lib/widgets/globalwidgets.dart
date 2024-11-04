@@ -1,11 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:renderer_switcher/renderer_switcher.dart';
-
-class GC {
-  static const String sTitle = '8 Queens Performance Benchmark';
-  static const List<String> lsWebRenderers = ['Auto', 'HTML', 'CanvasKit'];
-  static WebRenderer wrSwitch = WebRenderer.auto;
-}
 
 class RoundedContainer extends StatefulWidget {
   final double width;
@@ -13,6 +6,7 @@ class RoundedContainer extends StatefulWidget {
   final EdgeInsets margin;
   final EdgeInsets padding;
   final Color backgroundcolor;
+  final bool boxshadow;
   final Widget child;
 
   const RoundedContainer({
@@ -22,6 +16,7 @@ class RoundedContainer extends StatefulWidget {
     required this.margin,
     required this.padding,
     this.backgroundcolor = Colors.white,
+    this.boxshadow = false,
     required this.child,
   }) : super(key: key);
 
@@ -40,9 +35,9 @@ class _RoundedContainerState extends State<RoundedContainer> {
       padding: widget.padding,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-        boxShadow: [
-          BoxShadow(blurRadius: 8.0, spreadRadius: 0.0, color: Colors.black.withOpacity(.16))
-        ],
+        boxShadow: (widget.boxshadow)
+          ? [BoxShadow(blurRadius: 8.0, spreadRadius: 0.0, color: Colors.black.withOpacity(.16))]
+          : [],
         color: widget.backgroundcolor,
       ),
     );

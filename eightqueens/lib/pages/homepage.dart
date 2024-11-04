@@ -66,6 +66,9 @@ class _HomePageState extends State<HomePage> {
   final List<SendPort> _lsendPort = <SendPort>[];
   final List<StreamQueue<dynamic>> _lsqdEvents = <StreamQueue<dynamic>>[];
   List<dynamic> _ldvLD = [];
+  bool _bResultPageOpened = false;
+
+  final GlobalKey<ResultPageState> _resultPageKey = GlobalKey();
 
   int iSpeed = 0;
   final Color cLightSpeed =
@@ -349,6 +352,7 @@ class _HomePageState extends State<HomePage> {
       _iFPS = 0;
       _liFrameCount.clear();
       _liPos = <int>[1, 1, 1, 1, 1, 1, 1, 1];
+      _bResultPageOpened = false;
     });
     setState(() {});
   }
@@ -759,6 +763,38 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: Colors.white,
         body: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+
+          _openResultPage(Color cResult0) {
+            if (null == _resultPageKey.currentState) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ResultPage(
+                        key: _resultPageKey,
+                        speed: iSpeed,
+                        color: cNumbers,
+                        backgroundcolor: cResult0,
+                        threads: _nThreadsStarted,
+                        elapsed: _dElapsed)),
+              );
+            }
+          }
+
+          bool _b5secWaitStarted = false;
+
+          _startOpenResultPageWithin5sec(Color cResult0) async {
+            const int iWaitMsSec = 5000;
+            for (int i = 0; i < iWaitMsSec; i += 100) {
+              await Future.delayed(const Duration(milliseconds: 100));
+              if (pow(8, 8) != _stepCounter || _bResultPageOpened) break;
+            }
+            if (pow(8, 8) == _stepCounter && !_bResultPageOpened) {
+              _bResultPageOpened = true;
+              _openResultPage(cResult0);
+            }
+            _b5secWaitStarted = false;
+          }
+
           debugPrint('constraints.maxWidth: ${constraints.maxWidth}');
           debugPrint('constraints.maxHeight: ${constraints.maxHeight}');
           //double dScreenWidth = MediaQuery.of(context).size.width;
@@ -927,20 +963,13 @@ class _HomePageState extends State<HomePage> {
                 cResult = cVerySlow;
               }
             }
+            if (!_b5secWaitStarted) {
+              _b5secWaitStarted = true;
+              _startOpenResultPageWithin5sec(cResult);
+            }
             if (Orientation.portrait == currentOrientation) {
               wTimeElapsedPortrait = ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ResultPage(
-                              speed: iSpeed,
-                              color: cNumbers,
-                              backgroundcolor: cResult,
-                              threads: _nThreadsStarted,
-                              elapsed: _dElapsed)),
-                    );
-                  },
+                  onPressed: () { _bResultPageOpened = true; _openResultPage(cResult); },
                   clipBehavior: Clip.none,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: cResult,
@@ -951,18 +980,7 @@ class _HomePageState extends State<HomePage> {
                   ));
             } else {
               wTimeElapsedLandscape = ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ResultPage(
-                              speed: iSpeed,
-                              color: cNumbers,
-                              backgroundcolor: cResult,
-                              threads: _nThreadsStarted,
-                              elapsed: _dElapsed)),
-                    );
-                  },
+                  onPressed: () { _bResultPageOpened = true; _openResultPage(cResult); },
                   style: ElevatedButton.styleFrom(backgroundColor: cResult),
                   child: Text(
                     _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
