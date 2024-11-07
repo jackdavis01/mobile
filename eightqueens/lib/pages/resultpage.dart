@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'admobtest/admobtestpage.dart';
 import '../parameters/globals.dart';
+import '../parameters/global_device_info.dart';
 import 'contributionpage.dart';
 import '../widgets/globalwidgets.dart';
 
@@ -146,7 +148,8 @@ class ResultPageState extends State<ResultPage> {
                                 ]))),
                         const SizedBox(height: 20),
                       ]),
-                      ElevatedButton(
+                      (!kIsWeb && 10.0 <= dAndroidVersion)
+                      ? ElevatedButton(
                           child: const Padding(
                               padding: EdgeInsets.fromLTRB(4, 16, 4, 16),
                               child: Text("Contribution", style: TextStyle(fontSize: 20))),
@@ -154,9 +157,10 @@ class ResultPageState extends State<ResultPage> {
                               shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                                   RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
                           onPressed: _openContributionPage(),
-                      ),
+                      )
+                      : const SizedBox.shrink(),
                       const SizedBox(height: 20),
-                      (GV.bDev)
+                      (!kIsWeb && GV.bDev && 10.0 <= dAndroidVersion)
                       ? ElevatedButton(
                           child: const Padding(
                               padding: EdgeInsets.fromLTRB(4, 16, 4, 16),
@@ -171,7 +175,7 @@ class ResultPageState extends State<ResultPage> {
                       const SizedBox(height: 64), // ad banner place
                     ]))
           ]),
-          _getAdWidget(),
+          (!kIsWeb && 10.0 <= dAndroidVersion) ? _getAdWidget() : const SizedBox.shrink(),
         ]));
   }
 
@@ -183,7 +187,7 @@ class ResultPageState extends State<ResultPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _currentOrientation = MediaQuery.of(context).orientation;
-    _loadAd();
+    if (!kIsWeb && 10.0 <= dAndroidVersion) _loadAd();
   }
 
   /// Load another ad, disposing of the current ad if there is one.
