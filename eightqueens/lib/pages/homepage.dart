@@ -11,6 +11,7 @@ import 'package:collection/collection.dart';
 import '../isolates/findsolutions.dart';
 import '../isolates/multithreadedfindsolutions.dart';
 import '../widgets/boxwidgets.dart';
+import '../parameters/rankings.dart';
 import 'configpage.dart';
 import 'infopage.dart';
 import 'resultpage.dart';
@@ -70,58 +71,15 @@ class _HomePageState extends State<HomePage> {
 
   final GlobalKey<ResultPageState> _resultPageKey = GlobalKey();
 
-  int iSpeed = 0;
-  final Color cLightSpeed =
-      Color.alphaBlend(Colors.blue.shade100.withAlpha(255 ~/ 3 * 2), Colors.lightGreen.shade100);
-  final int imsLimitLightSpeed1 = 8000;
-  final int imsLimitLightSpeed2 = 4000;
-  final int imsLimitLightSpeed4 = 2000;
-  final int imsLimitLightSpeed8 = 1000;
-  final Color cCrazyFast =
-      Color.alphaBlend(Colors.blue.shade100.withAlpha(255 ~/ 3), Colors.lightGreen.shade100);
-  final int imsLimitCrazyFast1 = 12000;
-  final int imsLimitCrazyFast2 = 8000;
-  final int imsLimitCrazyFast4 = 5000;
-  final int imsLimitCrazyFast8 = 2500;
-  final Color cVeryFast = Colors.lightGreen.shade100;
-  final int imsLimitVeryFast1 = 18000;
-  final int imsLimitVeryFast2 = 13500;
-  final int imsLimitVeryFast4 = 10000;
-  final int imsLimitVeryFast8 = 5500;
-  final Color cFast =
-      Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 3), Colors.lightGreen.shade100);
-  final int imsLimitFast1 = 22000;
-  final int imsLimitFast2 = 16500;
-  final int imsLimitFast4 = 12000;
-  final int imsLimitFast8 = 8000;
-  final Color cBetterThanAverage =
-      Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 3 * 2), Colors.lightGreen.shade100);
-  final int imsLimitBetterThanAverage1 = 27000;
-  final int imsLimitBetterThanAverage2 = 20000;
-  final int imsLimitBetterThanAverage4 = 14000;
-  final int imsLimitBetterThanAverage8 = 10500;
-  final Color cAverage = Colors.yellow.shade100;
-  final int imsLimitAverage1 = 33000;
-  final int imsLimitAverage2 = 25000;
-  final int imsLimitAverage4 = 17000;
-  final int imsLimitAverage8 = 13000;
-  final Color cSlowerThanAverage =
-      Color.alphaBlend(Colors.yellow.shade100.withAlpha(255 ~/ 2), Colors.orange.shade100);
-  final int imsLimitSlowerThanAverage1 = 64000;
-  final int imsLimitSlowerThanAverage2 = 40000;
-  final int imsLimitSlowerThanAverage4 = 20000;
-  final int imsLimitSlowerThanAverage8 = 16000;
-  final Color cSlow = Colors.orange.shade100;
-  final int imsLimitSlow1 = 100000;
-  final int imsLimitSlow2 = 60000;
-  final int imsLimitSlow4 = 26000;
-  final int imsLimitSlow8 = 20000;
-  final Color cVerySlow = Colors.red.shade100;
+  final Rankings _rks = Rankings();
+  int _iSpeedRank = 0;
+  Color _cSpeedRank = Colors.white;
+  String _sRankName = "Unknown";
 
   @override
   initState() {
     super.initState();
-    if (_foundation.kIsWeb) _lsMultiThreadItems.add('8 Threads');
+    /*if (_foundation.kIsWeb)*/ _lsMultiThreadItems.add('8 Threads');
     wQueenImage = SvgPicture.asset(assetQueenName, semanticsLabel: 'Queen :)');
   }
 
@@ -771,19 +729,20 @@ class _HomePageState extends State<HomePage> {
                 MaterialPageRoute(
                     builder: (context) => ResultPage(
                         key: _resultPageKey,
-                        speed: iSpeed,
+                        speed: _iSpeedRank,
                         color: cNumbers,
                         backgroundcolor: cResult0,
                         threads: _nThreadsStarted,
-                        elapsed: _dElapsed)),
+                        elapsed: _dElapsed,
+                        rankname: _sRankName)),
               );
             }
           }
 
           bool _b5secWaitStarted = false;
 
-          _startOpenResultPageWithin5sec(Color cResult0) async {
-            const int iWaitMsSec = 5000;
+          _startOpenResultPageAfterWait(Color cResult0) async {
+            const int iWaitMsSec = 3000;
             for (int i = 0; i < iWaitMsSec; i += 100) {
               await Future.delayed(const Duration(milliseconds: 100));
               if (pow(8, 8) != _stepCounter || _bResultPageOpened) break;
@@ -795,8 +754,8 @@ class _HomePageState extends State<HomePage> {
             _b5secWaitStarted = false;
           }
 
-          debugPrint('constraints.maxWidth: ${constraints.maxWidth}');
-          debugPrint('constraints.maxHeight: ${constraints.maxHeight}');
+          // ! debugPrint('constraints.maxWidth: ${constraints.maxWidth}');
+          // ! debugPrint('constraints.maxHeight: ${constraints.maxHeight}');
           //double dScreenWidth = MediaQuery.of(context).size.width;
           //double dScreenHeight = MediaQuery.of(context).size.height;
           double dScreenWidth = constraints.maxWidth;
@@ -813,8 +772,8 @@ class _HomePageState extends State<HomePage> {
               //dHeightPadding.bottom
               ,
               0);
-          debugPrint("ScreenWidth: ${dScreenWidth.toStringAsFixed(2)}");
-          debugPrint("ScreenHeight-: ${dScreenHeight.toStringAsFixed(2)}");
+          // ! debugPrint("ScreenWidth: ${dScreenWidth.toStringAsFixed(2)}");
+          // ! debugPrint("ScreenHeight-: ${dScreenHeight.toStringAsFixed(2)}");
           double dScreenSizePortrait = 0;
           double dScreenSizeLandscape = 0;
           Widget wQueenScaledPortrait = const SizedBox.shrink();
@@ -845,134 +804,22 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers));
           }
           if (pow(8, 8) == _stepCounter) {
-            Color cResult = cVeryFast;
-            if (1 == _nThreadsStarted) {
-              if (Duration(milliseconds: imsLimitLightSpeed1) > _dElapsed) {
-                iSpeed = 9;
-                cResult = cLightSpeed;
-              } else if (Duration(milliseconds: imsLimitCrazyFast1) > _dElapsed) {
-                iSpeed = 8;
-                cResult = cCrazyFast;
-              } else if (Duration(milliseconds: imsLimitVeryFast1) > _dElapsed) {
-                iSpeed = 7;
-                cResult = cVeryFast;
-              } else if (Duration(milliseconds: imsLimitFast1) > _dElapsed) {
-                iSpeed = 6;
-                cResult = cFast;
-              } else if (Duration(milliseconds: imsLimitBetterThanAverage1) > _dElapsed) {
-                iSpeed = 5;
-                cResult = cBetterThanAverage;
-              } else if (Duration(milliseconds: imsLimitAverage1) > _dElapsed) {
-                iSpeed = 4;
-                cResult = cAverage;
-              } else if (Duration(milliseconds: imsLimitSlowerThanAverage1) > _dElapsed) {
-                iSpeed = 3;
-                cResult = cSlowerThanAverage;
-              } else if (Duration(milliseconds: imsLimitSlow1) > _dElapsed) {
-                iSpeed = 2;
-                cResult = cSlow;
-              } else {
-                iSpeed = 1;
-                cResult = cVerySlow;
-              }
-            } else if (2 == _nThreadsStarted) {
-              if (Duration(milliseconds: imsLimitLightSpeed2) > _dElapsed) {
-                iSpeed = 9;
-                cResult = cLightSpeed;
-              } else if (Duration(milliseconds: imsLimitCrazyFast2) > _dElapsed) {
-                iSpeed = 8;
-                cResult = cCrazyFast;
-              } else if (Duration(milliseconds: imsLimitVeryFast2) > _dElapsed) {
-                iSpeed = 7;
-                cResult = cVeryFast;
-              } else if (Duration(milliseconds: imsLimitFast2) > _dElapsed) {
-                iSpeed = 6;
-                cResult = cFast;
-              } else if (Duration(milliseconds: imsLimitBetterThanAverage2) > _dElapsed) {
-                iSpeed = 5;
-                cResult = cBetterThanAverage;
-              } else if (Duration(milliseconds: imsLimitAverage2) > _dElapsed) {
-                iSpeed = 4;
-                cResult = cAverage;
-              } else if (Duration(milliseconds: imsLimitSlowerThanAverage2) > _dElapsed) {
-                iSpeed = 3;
-                cResult = cSlowerThanAverage;
-              } else if (Duration(milliseconds: imsLimitSlow2) > _dElapsed) {
-                iSpeed = 2;
-                cResult = cSlow;
-              } else {
-                iSpeed = 1;
-                cResult = cVerySlow;
-              }
-            } else if (4 == _nThreadsStarted) {
-              if (Duration(milliseconds: imsLimitLightSpeed4) > _dElapsed) {
-                iSpeed = 9;
-                cResult = cLightSpeed;
-              } else if (Duration(milliseconds: imsLimitCrazyFast4) > _dElapsed) {
-                iSpeed = 8;
-                cResult = cCrazyFast;
-              } else if (Duration(milliseconds: imsLimitVeryFast4) > _dElapsed) {
-                iSpeed = 7;
-                cResult = cVeryFast;
-              } else if (Duration(milliseconds: imsLimitFast4) > _dElapsed) {
-                iSpeed = 6;
-                cResult = cFast;
-              } else if (Duration(milliseconds: imsLimitBetterThanAverage4) > _dElapsed) {
-                iSpeed = 5;
-                cResult = cBetterThanAverage;
-              } else if (Duration(milliseconds: imsLimitAverage4) > _dElapsed) {
-                iSpeed = 4;
-                cResult = cAverage;
-              } else if (Duration(milliseconds: imsLimitSlowerThanAverage4) > _dElapsed) {
-                iSpeed = 3;
-                cResult = cSlowerThanAverage;
-              } else if (Duration(milliseconds: imsLimitSlow4) > _dElapsed) {
-                iSpeed = 2;
-                cResult = cSlow;
-              } else {
-                iSpeed = 1;
-                cResult = cVerySlow;
-              }
-            } else if (8 == _nThreadsStarted) {
-              if (Duration(milliseconds: imsLimitLightSpeed8) > _dElapsed) {
-                iSpeed = 9;
-                cResult = cLightSpeed;
-              } else if (Duration(milliseconds: imsLimitCrazyFast8) > _dElapsed) {
-                iSpeed = 8;
-                cResult = cCrazyFast;
-              } else if (Duration(milliseconds: imsLimitVeryFast8) > _dElapsed) {
-                iSpeed = 7;
-                cResult = cVeryFast;
-              } else if (Duration(milliseconds: imsLimitFast8) > _dElapsed) {
-                iSpeed = 6;
-                cResult = cFast;
-              } else if (Duration(milliseconds: imsLimitBetterThanAverage8) > _dElapsed) {
-                iSpeed = 5;
-                cResult = cBetterThanAverage;
-              } else if (Duration(milliseconds: imsLimitAverage8) > _dElapsed) {
-                iSpeed = 4;
-                cResult = cAverage;
-              } else if (Duration(milliseconds: imsLimitSlowerThanAverage8) > _dElapsed) {
-                iSpeed = 3;
-                cResult = cSlowerThanAverage;
-              } else if (Duration(milliseconds: imsLimitSlow8) > _dElapsed) {
-                iSpeed = 2;
-                cResult = cSlow;
-              } else {
-                iSpeed = 1;
-                cResult = cVerySlow;
-              }
-            }
+            _iSpeedRank = _rks.getSpeedRank(_nThreadsStarted, _dElapsed);
+            //debugPrint("homepage.dart, build, _iSpeedRank: $_iSpeedRank");
+            _cSpeedRank = _rks.lcRanks[_iSpeedRank];
+            //debugPrint("homepage.dart, build, _cSpeedRank: $_cSpeedRank");
+            _sRankName = _rks.lsRankNames[_iSpeedRank];
+            //debugPrint("homepage.dart, build, _sRankName: $_sRankName");
             if (!_b5secWaitStarted) {
               _b5secWaitStarted = true;
-              _startOpenResultPageWithin5sec(cResult);
+              _startOpenResultPageAfterWait(_cSpeedRank);
             }
             if (Orientation.portrait == currentOrientation) {
               wTimeElapsedPortrait = ElevatedButton(
-                  onPressed: () { _bResultPageOpened = true; _openResultPage(cResult); },
+                  onPressed: () { _bResultPageOpened = true; _openResultPage(_cSpeedRank); },
                   clipBehavior: Clip.none,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: cResult,
+                    backgroundColor: _cSpeedRank,
                   ),
                   child: Text(
                     _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
@@ -980,8 +827,8 @@ class _HomePageState extends State<HomePage> {
                   ));
             } else {
               wTimeElapsedLandscape = ElevatedButton(
-                  onPressed: () { _bResultPageOpened = true; _openResultPage(cResult); },
-                  style: ElevatedButton.styleFrom(backgroundColor: cResult),
+                  onPressed: () { _bResultPageOpened = true; _openResultPage(_cSpeedRank); },
+                  style: ElevatedButton.styleFrom(backgroundColor: _cSpeedRank),
                   child: Text(
                     _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
                     style: TextStyle(fontSize: 30 * _dFontSizeScaleLandscape, color: cNumbers),
@@ -1104,8 +951,8 @@ class _HomePageState extends State<HomePage> {
               max(floatingConstraints.maxHeight - GVW.dWebWidgetHeaderHeight, 0);
           if (floatingConstraints.maxWidth < (realFloatingConstraintsMaxHeight)) {
             // portrait
-            debugPrint('floatingConstraints.maxWidth: ${floatingConstraints.maxWidth}');
-            debugPrint('realFloatingConstraintsMaxHeight: $realFloatingConstraintsMaxHeight');
+            // debugPrint('floatingConstraints.maxWidth: ${floatingConstraints.maxWidth}');
+            // debugPrint('realFloatingConstraintsMaxHeight: $realFloatingConstraintsMaxHeight');
             return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
               ElevatedButton(
                   child: Padding(

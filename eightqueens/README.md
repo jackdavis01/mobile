@@ -31,7 +31,7 @@ Finding the 92 right solutions with an up-to-date, decent smart mobile phone las
 If you would like to see the right solutions, please choose '1 sec' or '5 sec' wait at 'No Wait'.
 If you would like to check your smart phone's multithreaded CPU performance please, choose 2 or '4 Threads'.
 
-The App uses brute force method to find the right solutions. Since this App is a Performace Benchmark, it was not intended to use an algorithm faster than the brute force method. Any more efficient algorithm would run too fast on a flagship device.
+The App uses brute force method to find the right solutions. Since this App is a Performance Benchmark, it was not intended to use an algorithm faster than the brute force method. Any more efficient algorithm would run too fast on a flagship device.
 
 Not all iterations are displayed. Only about every 5000th iteration is displayed. Therefore, outputing to the display slows down max. 10% on the algorithm.
 

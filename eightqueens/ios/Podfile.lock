@@ -1,4 +1,6 @@
 PODS:
+  - device_info_plus (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - Google-Mobile-Ads-SDK (11.10.0):
     - GoogleUserMessagingPlatform (>= 1.1)
@@ -16,6 +18,7 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
+  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - google_mobile_ads (from `.symlinks/plugins/google_mobile_ads/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
@@ -28,6 +31,8 @@ SPEC REPOS:
     - GoogleUserMessagingPlatform
 
 EXTERNAL SOURCES:
+  device_info_plus:
+    :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
     :path: Flutter
   google_mobile_ads:
@@ -40,6 +45,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
 
 SPEC CHECKSUMS:
+  device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   Google-Mobile-Ads-SDK: 13e6e98edfd78ad8d8a791edb927658cc260a56f
   google_mobile_ads: 2a538d8e42b1813809782792e48f8cf4374c2180

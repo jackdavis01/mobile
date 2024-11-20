@@ -1,11 +1,11 @@
 import 'dart:io' show Platform;
+import 'package:eightqueens/parameters/ads.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../widgets/messagedialogs.dart';
 
 // You can also test with your own ad unit IDs by registering your device as a
 // test device. Check the logs for your device's ID value.
-const String testDevice = '73E7637649AE0B651EEC22FC4B4EE31A'; // 'YOUR_DEVICE_ID';
 const int maxFailedLoadAttempts = 3;
 
 class ContributionPage extends StatefulWidget {
@@ -35,7 +35,7 @@ class _ContributionPageState extends State<ContributionPage> {
   void initState() {
     super.initState();
     MobileAds.instance.updateRequestConfiguration(
-        RequestConfiguration(testDeviceIds: [testDevice]));
+        RequestConfiguration(testDeviceIds: [testDeviceAndroid, testDeviceIOS, testDeviceAndroid2, testDeviceAndroid3]));
     _createInterstitialAd();
     _createRewardedAd();
     _createRewardedInterstitialAd();
@@ -44,8 +44,8 @@ class _ContributionPageState extends State<ContributionPage> {
   void _createInterstitialAd() {
     InterstitialAd.load(
         adUnitId: Platform.isAndroid
-            ? 'ca-app-pub-4934899671581001/5660939728' // 'ca-app-pub-3940256099942544/1033173712'
-            : 'ca-app-pub-3940256099942544/4411468910',
+            ? 'ca-app-pub-4934899671581001/5660939728' // 'ca-app-pub- 3940256099942544/1033173712'
+            : 'ca-app-pub-4934899671581001/7435397266',
         request: request,
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (InterstitialAd ad) {
@@ -92,7 +92,7 @@ class _ContributionPageState extends State<ContributionPage> {
     RewardedAd.load(
         adUnitId: Platform.isAndroid
             ? 'ca-app-pub-4934899671581001/9766973170'
-            : 'ca-app-pub-3940256099942544/1712485313',
+            : 'ca-app-pub-4934899671581001/4398170386',
         request: request,
         rewardedAdLoadCallback: RewardedAdLoadCallback(
           onAdLoaded: (RewardedAd ad) {
@@ -142,8 +142,8 @@ class _ContributionPageState extends State<ContributionPage> {
   void _createRewardedInterstitialAd() {
     RewardedInterstitialAd.load(
         adUnitId: Platform.isAndroid
-            ? 'ca-app-pub-4934899671581001/4826240326' // 'ca-app-pub-3940256099942544/5354046379'
-            : 'ca-app-pub-3940256099942544/6978759866',
+            ? 'ca-app-pub-4934899671581001/4826240326' // 'ca-app-pub- 3940256099942544/5354046379'
+            : 'ca-app-pub-4934899671581001/8636928176',
         request: request,
         rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
           onAdLoaded: (RewardedInterstitialAd ad) {

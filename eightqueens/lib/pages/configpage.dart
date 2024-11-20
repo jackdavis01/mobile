@@ -81,11 +81,11 @@ class _ConfigPageState extends State<ConfigPage> {
                                                     fontSize: 18, fontWeight: FontWeight.bold)),
                                           );
                                         }).toList(),
-                                        value: (WebRenderer.auto == GV.wrSwitch)
+                                        value: (WebRenderer.auto == wrGlobalSwitch)
                                             ? GV.lsWebRenderers[0]
-                                            : (WebRenderer.html == GV.wrSwitch)
+                                            : (WebRenderer.html == wrGlobalSwitch)
                                                 ? GV.lsWebRenderers[1]
-                                                : (WebRenderer.canvaskit == GV.wrSwitch)
+                                                : (WebRenderer.canvaskit == wrGlobalSwitch)
                                                     ? GV.lsWebRenderers[2]
                                                     : GV.lsWebRenderers[0],
                                         onChanged: switchWebRenderer,
@@ -110,7 +110,7 @@ class _ConfigPageState extends State<ConfigPage> {
     // Returns WebRenderer.html, WebRenderer.canvaskit or WebRenderer.auto
     WebRenderer wrSwitch = await RendererSwitcher.getCurrentWebRenderer();
     setState(() {
-      GV.wrSwitch = wrSwitch;
+      wrGlobalSwitch = wrSwitch;
     });
   }
 
@@ -124,7 +124,7 @@ class _ConfigPageState extends State<ConfigPage> {
       newValue = WebRenderer.canvaskit;
     }
     // Switches web renderer to value and reloads the window.
+    wrGlobalSwitch = newValue;
     RendererSwitcher.switchWebRenderer(newValue);
-    GV.wrSwitch = newValue;
   }
 }

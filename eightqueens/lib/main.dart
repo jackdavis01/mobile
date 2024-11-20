@@ -20,6 +20,8 @@ void main() async {
       if (10.0 <= dAV) {
         unawaited(MobileAds.instance.initialize());
       }
+    } else if (Platform.isIOS) {
+        unawaited(MobileAds.instance.initialize());
     }
   }
   runApp(const MainApp());

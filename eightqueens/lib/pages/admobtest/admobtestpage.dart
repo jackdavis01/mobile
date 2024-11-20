@@ -13,7 +13,10 @@ import 'webview_example.dart';
 
 // You can also test with your own ad unit IDs by registering your device as a
 // test device. Check the logs for your device's ID value.
-const String testDevice = '73E7637649AE0B651EEC22FC4B4EE31A'; // 'YOUR_DEVICE_ID';
+const String _testDeviceAndroid = '73E7637649AE0B651EEC22FC4B4EE31A'; // 'YOUR_DEVICE_ID';
+const String _testDeviceIOS = 'b14afd9e26b6af7d3e448ec4b3fa0817';
+const String _testDeviceAndroid2 = '08620CC7B9E1A138DBA1EFBAD7AB748A';
+const String _testDeviceAndroid3 = '9A8E66BF5ED524684357387404D023BA';
 const int maxFailedLoadAttempts = 3;
 
 class AdMobTestPage extends StatefulWidget {
@@ -53,7 +56,7 @@ class _AdMobTestPageState extends State<AdMobTestPage> {
   void initState() {
     super.initState();
     MobileAds.instance.updateRequestConfiguration(
-        RequestConfiguration(testDeviceIds: [testDevice]));
+        RequestConfiguration(testDeviceIds: [_testDeviceAndroid, _testDeviceIOS, _testDeviceAndroid2, _testDeviceAndroid3]));
     _createInterstitialAd();
     _createRewardedAd();
     _createRewardedInterstitialAd();
@@ -62,8 +65,8 @@ class _AdMobTestPageState extends State<AdMobTestPage> {
   void _createInterstitialAd() {
     InterstitialAd.load(
         adUnitId: Platform.isAndroid
-            ? 'ca-app-pub-4934899671581001/5660939728' // 'ca-app-pub-3940256099942544/1033173712'
-            : 'ca-app-pub-3940256099942544/4411468910',
+            ? 'ca-app-pub-4934899671581001/5660939728' // 'ca-app-pub- 3940256099942544/1033173712'
+            : 'ca-app-pub-4934899671581001/7435397266',
         request: request,
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (InterstitialAd ad) {
@@ -110,7 +113,7 @@ class _AdMobTestPageState extends State<AdMobTestPage> {
     RewardedAd.load(
         adUnitId: Platform.isAndroid
             ? 'ca-app-pub-4934899671581001/9766973170'
-            : 'ca-app-pub-3940256099942544/1712485313',
+            : 'ca-app-pub-4934899671581001/4398170386',
         request: request,
         rewardedAdLoadCallback: RewardedAdLoadCallback(
           onAdLoaded: (RewardedAd ad) {
@@ -160,8 +163,8 @@ class _AdMobTestPageState extends State<AdMobTestPage> {
   void _createRewardedInterstitialAd() {
     RewardedInterstitialAd.load(
         adUnitId: Platform.isAndroid
-            ? 'ca-app-pub-4934899671581001/4826240326' // 'ca-app-pub-3940256099942544/5354046379'
-            : 'ca-app-pub-3940256099942544/6978759866',
+            ? 'ca-app-pub-4934899671581001/4826240326' // 'ca-app-pub- 3940256099942544/5354046379'
+            : 'ca-app-pub-4934899671581001/8636928176',
         request: request,
         rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
           onAdLoaded: (RewardedInterstitialAd ad) {

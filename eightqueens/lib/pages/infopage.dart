@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../parameters/globals.dart';
 import '../parameters/global_device_info.dart';
+import '../parameters/ads.dart';
 import '../widgets/globalwidgets.dart';
 import 'admobtest/admobtestpage.dart';
 import 'contributionpage.dart';
@@ -23,7 +24,7 @@ class _InfoPageState extends State<InfoPage> {
   String version = "";
   String buildNumber = "";
   String buildMode = "";
-  final String platform = 'Flutter 3.24.4';
+  final String platform = 'Flutter 3.24.5';
   final String platformPrerelease = '-';
   final String platformChannel = 'stable';
   final String author = 'Jack Davis';
@@ -32,6 +33,10 @@ class _InfoPageState extends State<InfoPage> {
   initState() {
     loadPackageInfo();
     super.initState();
+    if (!_foundation.kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion)) {
+      MobileAds.instance.updateRequestConfiguration(
+          RequestConfiguration(testDeviceIds: [testDeviceAndroid, testDeviceIOS, testDeviceAndroid2, testDeviceAndroid3]));
+    }
   }
 
   Future<void> loadPackageInfo() async {
@@ -141,8 +146,8 @@ class _InfoPageState extends State<InfoPage> {
                                   padding: EdgeInsets.only(top: 0, bottom: 0, left: 15, right: 15),
                                   child: Text(
                                       '2.\u{00A0}iOS: iPhones, iPads, '
-                                      'on latest M1 Macintosh desktops, '
-                                      'and on M1 MacBook notebooks.',
+                                      'on M1, M2, M3, M4 Macintosh desktops, '
+                                      'and on M1, M2, M3, M4 MacBook notebooks.',
                                       textAlign: TextAlign.justify,
                                       style: TextStyle(fontSize: 17)),
                                 ),
@@ -212,7 +217,7 @@ class _InfoPageState extends State<InfoPage> {
                                   padding: EdgeInsets.only(top: 0, bottom: 0, left: 15, right: 15),
                                   child: Text(
                                       'The App uses brute force method to find the right '
-                                      'solutions. Since this App is a Performace Benchmark, '
+                                      'solutions. Since this App is a Performance Benchmark, '
                                       'it was not intended to use an algorithm faster than the '
                                       'brute force method. Any more efficient algorithm would run '
                                       'too fast on a flagship device.',
@@ -410,7 +415,7 @@ class _InfoPageState extends State<InfoPage> {
                                 ]),
                               ])))),
                   const SizedBox(height: 20),
-                  (!_foundation.kIsWeb && 10.0 <= dAndroidVersion)
+                  (!_foundation.kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion))
                   ? ElevatedButton(
                       child: const Padding(
                           padding: EdgeInsets.fromLTRB(4, 16, 4, 16),
@@ -422,7 +427,7 @@ class _InfoPageState extends State<InfoPage> {
                   )
                   : const SizedBox.shrink(),
                   const SizedBox(height: 20),
-                  (!_foundation.kIsWeb && GV.bDev && 10.0 <= dAndroidVersion)
+                  (GV.bDev && !_foundation.kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion))
                   ? ElevatedButton(
                       child: const Padding(
                           padding: EdgeInsets.fromLTRB(4, 16, 4, 16),
@@ -438,7 +443,7 @@ class _InfoPageState extends State<InfoPage> {
                 ]),
               ]))
           ]),
-          (!_foundation.kIsWeb && 10.0 <= dAndroidVersion) ? _getAdWidget() : const SizedBox.shrink(),
+          (!_foundation.kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion)) ? _getAdWidget() : const SizedBox.shrink(),
         ]));
   }
 
@@ -450,7 +455,7 @@ class _InfoPageState extends State<InfoPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _currentOrientation = MediaQuery.of(context).orientation;
-    if (!_foundation.kIsWeb && 10.0 <= dAndroidVersion) _loadAd();
+    if (!_foundation.kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion)) _loadAd();
   }
 
   /// Load another ad, disposing of the current ad if there is one.
@@ -472,8 +477,8 @@ class _InfoPageState extends State<InfoPage> {
 
     _anchoredAdaptiveAd = BannerAd(
       adUnitId: Platform.isAndroid
-          ? 'ca-app-pub-4934899671581001/9878983386' // 'ca-app-pub-3940256099942544/9214589741'
-          : 'ca-app-pub-3940256099942544/2435281174',
+          ? 'ca-app-pub-4934899671581001/9878983386' // 'ca-app-pub- 3940256099942544/9214589741'
+          : 'ca-app-pub-4934899671581001/9758308276',
       size: size,
       request: const AdRequest(),
       listener: BannerAdListener(

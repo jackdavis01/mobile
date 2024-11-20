@@ -53,7 +53,7 @@ class FindSolutions {
     for (int i = 0; i < pow(8, 8) - 1; i++) {
       await _stepDisplay();
       if (0 == (i % 997)) {
-        await Future.delayed(Duration.zero);
+        await Future.delayed(const Duration(microseconds: 1));
       }
     }
 

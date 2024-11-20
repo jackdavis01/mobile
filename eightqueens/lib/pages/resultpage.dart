@@ -1,12 +1,14 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'admobtest/admobtestpage.dart';
 import '../parameters/globals.dart';
 import '../parameters/global_device_info.dart';
+import '../parameters/ads.dart';
 import 'contributionpage.dart';
 import '../widgets/globalwidgets.dart';
+import '../widgets/rankrangelist.dart';
 
 class ResultPage extends StatefulWidget {
   final int speed;
@@ -14,13 +16,15 @@ class ResultPage extends StatefulWidget {
   final Color backgroundcolor;
   final int threads;
   final Duration elapsed;
+  final String rankname;
   const ResultPage(
       {Key? key,
       required this.speed,
       required this.color,
       required this.backgroundcolor,
       required this.threads,
-      required this.elapsed})
+      required this.elapsed,
+      required this.rankname})
       : super(key: key);
   @override
   ResultPageState createState() => ResultPageState();
@@ -30,7 +34,7 @@ class ResultPageState extends State<ResultPage> {
 
   _openAdModTestPage() => () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => const AdMobTestPage()));
 
-  final List<String> lsRank = [
+  /*final List<String> lsRank = [
     'Very slow',
     'Slow',
     'Slower than average',
@@ -40,11 +44,9 @@ class ResultPageState extends State<ResultPage> {
     'Very fast',
     'Crazy fast',
     'Light speed'
-  ];
-  String _sRank = "";
+  ];*/
   @override
   Widget build(BuildContext context) {
-    _sRank = lsRank[widget.speed - 1];
     return Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -135,20 +137,21 @@ class ResultPageState extends State<ResultPage> {
                                         Text(widget.elapsed.toString().substring(
                                                 0, widget.elapsed.toString().indexOf('.') + 4),
                                             style: TextStyle(
-                                                fontSize: 28,
+                                                fontSize: 27.2,
                                                 color: widget.color,
                                                 backgroundColor: widget.backgroundcolor)),
                                         const Divider(thickness: 2, color: Colors.white),
-                                        Text(_sRank,
+                                        Center(child: Text(widget.rankname,
+                                            textAlign: TextAlign.center,
                                             style: TextStyle(
-                                                fontSize: 28,
+                                                fontSize: 27.2,
                                                 color: widget.color,
-                                                backgroundColor: widget.backgroundcolor))
+                                                backgroundColor: widget.backgroundcolor)))
                                       ])))
                                 ]))),
                         const SizedBox(height: 20),
                       ]),
-                      (!kIsWeb && 10.0 <= dAndroidVersion)
+                      (!kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion))
                       ? ElevatedButton(
                           child: const Padding(
                               padding: EdgeInsets.fromLTRB(4, 16, 4, 16),
@@ -160,7 +163,7 @@ class ResultPageState extends State<ResultPage> {
                       )
                       : const SizedBox.shrink(),
                       const SizedBox(height: 20),
-                      (!kIsWeb && GV.bDev && 10.0 <= dAndroidVersion)
+                      (GV.bDev && !kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion))
                       ? ElevatedButton(
                           child: const Padding(
                               padding: EdgeInsets.fromLTRB(4, 16, 4, 16),
@@ -171,11 +174,13 @@ class ResultPageState extends State<ResultPage> {
                           onPressed: _openAdModTestPage(),
                       )
                       : const SizedBox.shrink(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
+                      const RankRangeListTitle(),
+                      RankRangeList(),
                       const SizedBox(height: 64), // ad banner place
                     ]))
           ]),
-          (!kIsWeb && 10.0 <= dAndroidVersion) ? _getAdWidget() : const SizedBox.shrink(),
+          (!kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion)) ? _getAdWidget() : const SizedBox.shrink(),
         ]));
   }
 
@@ -184,10 +189,19 @@ class ResultPageState extends State<ResultPage> {
   late Orientation _currentOrientation;
 
   @override
+  void initState() {
+    super.initState();
+    if (!kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion)) {
+      MobileAds.instance.updateRequestConfiguration(
+          RequestConfiguration(testDeviceIds: [testDeviceAndroid, testDeviceIOS, testDeviceAndroid2, testDeviceAndroid3]));
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _currentOrientation = MediaQuery.of(context).orientation;
-    if (!kIsWeb && 10.0 <= dAndroidVersion) _loadAd();
+    if (!kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion)) _loadAd();
   }
 
   /// Load another ad, disposing of the current ad if there is one.
@@ -209,8 +223,8 @@ class ResultPageState extends State<ResultPage> {
 
     _anchoredAdaptiveAd = BannerAd(
       adUnitId: Platform.isAndroid
-          ? 'ca-app-pub-4934899671581001/9878983386' // 'ca-app-pub-3940256099942544/9214589741'
-          : 'ca-app-pub-3940256099942544/2435281174',
+          ? 'ca-app-pub-4934899671581001/9878983386' // 'ca-app-pub- 3940256099942544/9214589741'
+          : 'ca-app-pub-4934899671581001/9758308276',
       size: size,
       request: const AdRequest(),
       listener: BannerAdListener(

@@ -90,8 +90,8 @@ class _ReusableInlineExampleState extends State<ReusableInlineExample> {
     _bannerAd = BannerAd(
         size: AdSize.banner,
         adUnitId: Platform.isAndroid
-            ? 'ca-app-pub-4934899671581001/9878983386' // 'ca-app-pub-3940256099942544/6300978111'
-            : 'ca-app-pub-3940256099942544/2934735716',
+            ? 'ca-app-pub-4934899671581001/9878983386' // 'ca-app-pub- 3940256099942544/6300978111'
+            : 'ca-app-pub-4934899671581001/9758308276',
         listener: BannerAdListener(
           onAdLoaded: (Ad ad) {
             debugPrint('$BannerAd loaded.');
@@ -111,8 +111,8 @@ class _ReusableInlineExampleState extends State<ReusableInlineExample> {
 
     /*_nativeAd = NativeAd(
       adUnitId: Platform.isAndroid
-          ? 'ca-app-pub-4934899671581001/7731735143' //'ca-app-pub-3940256099942544/2247696110'
-          : 'ca-app-pub-3940256099942544/3986624511',
+          ? 'ca-app-pub-4934899671581001/7731735143' //'ca-app-pub- 3940256099942544/2247696110'
+          : 'ca-app-pub-4934899671581001/3628144070',
       request: const AdRequest(),
       factoryId: 'adFactoryExample',
       listener: NativeAdListener(

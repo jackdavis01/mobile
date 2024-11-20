@@ -57,7 +57,7 @@ class MultiTreadedFindSolution {
     final SendPort sendPort = ldISP[1];
     sendPort.send(receivePort.sendPort);
 
-    //debugPrint(iThreadNo.toString());
+    // debugPrint("S iThreadNo: $iThreadNo");
 
     receivePort.listen((msg) {
       if (msg is int) {
@@ -79,11 +79,16 @@ class MultiTreadedFindSolution {
     } else if (4 == _nThreads) {
       _nSubSteps = 2 * (pow(8, 7) as int) - 1;
       _iLastRowStart = 2 * iThreadNo + 1;
+    } else if (8 == _nThreads) {
+      _nSubSteps = (pow(8, 7) as int) - 1;
+      _iLastRowStart = iThreadNo + 1;
     }
 
     liPos = <int>[1, 1, 1, 1, 1, 1, 1, _iLastRowStart];
 
+    // debugPrint("S1 iThreadNo: $iThreadNo, _stepCounter: $_stepCounter");
     await Future.delayed(Duration(milliseconds: 16 * iThreadNo));
+    // debugPrint("S2 iThreadNo: $iThreadNo, _stepCounter: $_stepCounter");
 
     for (int i = 0; i < _nSubSteps; i++) {
       if (0 == (i % 1999)) {
@@ -93,8 +98,9 @@ class MultiTreadedFindSolution {
             _iComWait++;
           }
           await Future.delayed(Duration(microseconds: _iComWait));
+          // debugPrint("P iThreadNo: $iThreadNo, _stepCounter: $_stepCounter");
         } else {
-          await Future.delayed(Duration.zero);
+          await Future.delayed(const Duration(microseconds: 1));
         }
       }
       await _stepController();
@@ -122,8 +128,10 @@ class MultiTreadedFindSolution {
   }
 
   Future<void> _stepController() async {
+    // debugPrint("P1 _stepCounter: $_stepCounter");
     step();
     _stepCounter++;
+    // debugPrint("P2 _stepCounter: $_stepCounter");
     _bCheckQueensNoAttack = checkQueensNoAttack();
     if (_bCheckQueensNoAttack) {
       _solutionCounter++;
