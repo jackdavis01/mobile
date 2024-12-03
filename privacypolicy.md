@@ -22,13 +22,13 @@ I take privacy very seriously. I know how irritating it is when Apps collect you
 
 ---
 
-Privacy Policy Update (4th of November, 2024): Advertising and Data Collection
+Privacy Policy Update (3rd of December, 2024): Advertising and Data Collection
 
-Our app now includes advertisements provided by Google AdMob. Please note the following changes to our data collection practices related to advertising:
+Our app now includes advertisements provided by Google AdMob and ironSource. Please note the following changes to our data collection practices related to advertising:
 
-1. AdMob Integration
+1. AdMob & ironSource Integration
 
-    We have integrated Google AdMob as an advertising provider to deliver ads that may be relevant to you. AdMob may collect and use data to show targeted ads based on your interests.
+    We have integrated Google AdMob and ironSource as an advertising provider to deliver ads that may be relevant to you. AdMob and ironSource may collect and use data to show targeted ads based on your interests.
 
 2. Collection of Advertising ID
 
@@ -37,6 +37,7 @@ Our app now includes advertisements provided by Google AdMob. Please note the fo
 3. Third-Party Data Use
 
     The data collected by Google AdMob is governed by Google’s Privacy Policy and data processing practices. You may review Google’s Privacy Policy for more details on how Google handles your data.
+    The data collected by ironSource is governed by ironSource’s Privacy Policy and data processing practices. You may review ironSource’s Privacy Policy for more details on how ironSource handles your data.
 
 4. Opt-Out Option
 
@@ -46,7 +47,7 @@ Our app now includes advertisements provided by Google AdMob. Please note the fo
 
     - On iOS: Go to Settings > Privacy > Advertising > Limit Ad Tracking.
 
-By continuing to use this app, you agree to the integration of Google AdMob ads and the collection of your Advertising ID for advertising purposes.
+By continuing to use this app, you agree to the integration of Google AdMob & ironSource ads and the collection of your Advertising ID for advertising purposes.
 
 If you have any questions or concerns regarding this update, please contact us, you can find my email address below.
 

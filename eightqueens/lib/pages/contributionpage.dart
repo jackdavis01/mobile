@@ -1,8 +1,12 @@
 import 'dart:io' show Platform;
 import 'package:eightqueens/parameters/ads.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:ironsource_mediation/ironsource_mediation.dart';
 import '../widgets/messagedialogs.dart';
+
+const String appUserId = '511399783462182';
 
 // You can also test with your own ad unit IDs by registering your device as a
 // test device. Check the logs for your device's ID value.
@@ -15,7 +19,7 @@ class ContributionPage extends StatefulWidget {
   _ContributionPageState createState() => _ContributionPageState();
 }
 
-class _ContributionPageState extends State<ContributionPage> {
+class _ContributionPageState extends State<ContributionPage> with ImpressionDataListener, IronSourceInitializationListener, LevelPlayInitListener {
   static const AdRequest request = AdRequest(
     keywords: <String>['foo', 'bar'],
     contentUrl: 'http://foo.com/bar.html',
@@ -31,6 +35,8 @@ class _ContributionPageState extends State<ContributionPage> {
   RewardedInterstitialAd? _rewardedInterstitialAd;
   int _numRewardedInterstitialLoadAttempts = 0;
 
+  final LevelPlayInterstitialAdViewController _lpiavController = LevelPlayInterstitialAdViewController();
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +45,9 @@ class _ContributionPageState extends State<ContributionPage> {
     _createInterstitialAd();
     _createRewardedAd();
     _createRewardedInterstitialAd();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await initIronSource();
+    });
   }
 
   void _createInterstitialAd() {
@@ -201,6 +210,8 @@ class _ContributionPageState extends State<ContributionPage> {
     } else if (null != _interstitialAd) {
       debugPrint('Warning: no rewarded or rewarded interstitial loaded, show interstitial.');
       _showInterstitialAd();
+    } else {
+      _lpiavController.doShowActionInChild();
     }
   }
 
@@ -256,9 +267,220 @@ class _ContributionPageState extends State<ContributionPage> {
                           RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
                   onPressed: _showRewardedOrInterstitialAd,
               ),
+              LevelPlayInterstitialAdSection(lpiavController: _lpiavController),
           ]))
         ),
       ),
     );
+  }
+
+  /// ImpressionData listener --------------------------------------------------///
+  @override
+  void onImpressionSuccess(ImpressionData? impressionData) {
+    debugPrint('Impression Data: $impressionData');
+  }
+
+  /// Initialization listener --------------------------------------------------///
+  @override
+  void onInitializationComplete() {
+    debugPrint('onInitializationComplete');
+  }
+
+  /// LevelPlay Init listener --------------------------------------------------///
+  @override
+  void onInitFailed(LevelPlayInitError error) {
+    debugPrint('onInitFailed ${error.errorMessage}');
+  }
+
+  @override
+  void onInitSuccess(LevelPlayConfiguration configuration) {
+    debugPrint('onInitSuccess isAdQualityEnabled=${configuration.isAdQualityEnabled}');
+    _lpiavController.doLoadActionInChild();
+  }
+
+  // For iOS14 IDFA access
+  // Must be called when the app is in the state UIApplicationStateActive
+  Future<void> checkATT() async {
+    final currentStatus =
+    await ATTrackingManager.getTrackingAuthorizationStatus();
+    debugPrint('ATTStatus: $currentStatus');
+    if (currentStatus == ATTStatus.NotDetermined) {
+      final returnedStatus =
+      await ATTrackingManager.requestTrackingAuthorization();
+      debugPrint('ATTStatus returned: $returnedStatus');
+    }
+    return;
+  }
+
+  /// Enables debug mode for IronSource adapters.
+  /// Validates integration.
+  Future<void> enableDebug() async {
+    await IronSource.setAdaptersDebug(true);
+    // this function doesn't have to be awaited
+    IronSource.validateIntegration();
+  }
+
+  /// Sets regulation parameters for IronSource.
+  Future<void> setRegulationParams() async {
+    // GDPR
+    await IronSource.setConsent(true);
+    await IronSource.setMetaData({
+      // CCPA
+      'do_not_sell': ['false'],
+      // COPPA
+      'is_child_directed': ['false'],
+      'is_test_suite': ['enable']
+    });
+
+    return;
+  }
+
+  /// Initialize iron source SDK.
+  Future<void> initIronSource() async {
+    final appKey = Platform.isAndroid
+        ? "2032760fd"
+        : Platform.isIOS
+        ? "2032a866d"
+        : throw Exception("Unsupported Platform");
+    try {
+      IronSource.setFlutterVersion('3.24.5');
+      IronSource.addImpressionDataListener(this);
+      await enableDebug();
+      await IronSource.shouldTrackNetworkState(true);
+
+      // GDPR, CCPA, COPPA etc
+      await setRegulationParams();
+
+      // Segment info
+      // await setSegment();
+
+      // GAID, IDFA, IDFV
+      String id = await IronSource.getAdvertiserId();
+      debugPrint('AdvertiserID: $id');
+
+      // Do not use AdvertiserID for this.
+      await IronSource.setUserId(appUserId);
+
+      // Authorization Request for IDFA use
+      if (Platform.isIOS) {
+        await checkATT();
+      }
+
+      // Finally, initialize
+      // LevelPlay Init
+      List<AdFormat> legacyAdFormats = [AdFormat.BANNER, AdFormat.REWARDED, AdFormat.INTERSTITIAL, AdFormat.NATIVE_AD];
+      final initRequest = LevelPlayInitRequest(appKey: appKey, legacyAdFormats: legacyAdFormats);
+      await LevelPlay.init(initRequest: initRequest, initListener: this);
+    } on PlatformException catch (e) {
+      debugPrint("$e");
+    }
+  }
+}
+
+class LevelPlayInterstitialAdViewController {
+  Future<void> Function()? _onLoad;
+  Future<void> Function()? _onShow;
+
+  void setOnLoad(Future<void> Function()? onLoad) { _onLoad = onLoad; }
+  void setOnShow(Future<void> Function()? onShow) { _onShow = onShow; }
+
+  Future<void> doLoadActionInChild() async {
+    if (null != _onLoad) {
+      await _onLoad!();
+    }
+  }
+
+  Future<void> doShowActionInChild() async {
+    if (null != _onShow) {
+      await _onShow!();
+    }
+  }
+
+}
+
+/// LevelPlay Interstitial Ad Section ------------------------------------------///
+class LevelPlayInterstitialAdSection extends StatefulWidget {
+  final LevelPlayInterstitialAdViewController lpiavController;
+
+  const LevelPlayInterstitialAdSection({required this.lpiavController, Key? key}) : super(key: key);
+
+  @override
+  _LevelPlayInterstitialAdSectionState createState() => _LevelPlayInterstitialAdSectionState();
+}
+
+class _LevelPlayInterstitialAdSectionState extends State<LevelPlayInterstitialAdSection> with LevelPlayInterstitialAdListener {
+  LevelPlayInterstitialAd? _interstitialAd;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.lpiavController.setOnLoad(_createAndLoadInterstitialAd);
+    widget.lpiavController.setOnShow(_showAd);
+  }
+
+  Future<void> _createAndLoadInterstitialAd() async {
+    _interstitialAd = LevelPlayInterstitialAd(adUnitId: Platform.isAndroid ? 'mc9r5y8eg4w4lxz5' : 'l94310761slwpxhz');
+    _interstitialAd!.setListener(this);
+    _loadAd();
+  }
+
+  Future<void> _loadAd() async {
+    await _interstitialAd?.loadAd();
+  }
+
+  Future<void> _showAd() async {
+    if (_interstitialAd != null && await _interstitialAd!.isAdReady()) {
+      _interstitialAd!.showAd(placementName: 'Achievements');
+    } else {
+      for (int i = 0; i < 5; i++) {
+        if (0 == i) await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(Duration(seconds: i));
+        if (_interstitialAd != null && await _interstitialAd!.isAdReady()) {
+          _interstitialAd!.showAd(placementName: 'Achievements');
+          break;
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  void onAdClicked(LevelPlayAdInfo adInfo) {
+    debugPrint("Interstitial Ad - onAdClicked: $adInfo");
+  }
+
+  @override
+  void onAdClosed(LevelPlayAdInfo adInfo) {
+    debugPrint("Interstitial Ad - onAdClosed: $adInfo");
+    _loadAd();
+  }
+
+  @override
+  void onAdDisplayFailed(LevelPlayAdError error, LevelPlayAdInfo adInfo) {
+    debugPrint("Interstitial Ad - onAdDisplayFailed: adInfo - $adInfo, error - $error");
+  }
+
+  @override
+  void onAdDisplayed(LevelPlayAdInfo adInfo) {
+    debugPrint("Interstitial Ad - onAdDisplayed: $adInfo");
+  }
+
+  @override
+  void onAdInfoChanged(LevelPlayAdInfo adInfo) {
+    debugPrint("Interstitial Ad - onAdInfoChanged: $adInfo");
+  }
+
+  @override
+  void onAdLoadFailed(LevelPlayAdError error) {
+    debugPrint("Interstitial Ad - onAdLoadFailed: $error");
+  }
+
+  @override
+  void onAdLoaded(LevelPlayAdInfo adInfo) {
+    debugPrint("Interstitial Ad - onAdLoaded: $adInfo");
   }
 }

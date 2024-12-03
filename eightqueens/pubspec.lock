@@ -152,6 +152,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  ironsource_mediation:
+    dependency: "direct main"
+    description:
+      name: ironsource_mediation
+      sha256: "53f959c42aad660d6769088f9b58959b23887102e3cd4df3384633d8539cd990"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   js:
     dependency: "direct main"
     description:
