@@ -10,8 +10,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:collection/collection.dart';
 import '../isolates/findsolutions.dart';
 import '../isolates/multithreadedfindsolutions.dart';
+import '../middleware/rankings.dart';
+import '../middleware/certificate.dart';
+import '../middleware/autoregistration.dart';
+import '../middleware/insertresultsorautoreg.dart';
 import '../widgets/boxwidgets.dart';
-import '../parameters/rankings.dart';
 import 'configpage.dart';
 import 'infopage.dart';
 import 'resultpage.dart';
@@ -67,7 +70,9 @@ class _HomePageState extends State<HomePage> {
   final List<SendPort> _lsendPort = <SendPort>[];
   final List<StreamQueue<dynamic>> _lsqdEvents = <StreamQueue<dynamic>>[];
   List<dynamic> _ldvLD = [];
+  bool _b5secWaitStarted = false;
   bool _bResultPageOpened = false;
+  bool _insertResultOrAutoRegStarted = false;
 
   final GlobalKey<ResultPageState> _resultPageKey = GlobalKey();
 
@@ -76,10 +81,18 @@ class _HomePageState extends State<HomePage> {
   Color _cSpeedRank = Colors.white;
   String _sRankName = "Unknown";
 
+  AutoRegLocal arl = AutoRegLocal();
+  late AutoRegMiddleware arm;
+  late InsertResultsOrAutoRegMiddleware iroarm;
+
   @override
   initState() {
     super.initState();
-    /*if (_foundation.kIsWeb)*/ _lsMultiThreadItems.add('8 Threads');
+    CertificatesStorage.load();
+    arm = AutoRegMiddleware(autoRegLocal: arl);
+    iroarm = InsertResultsOrAutoRegMiddleware(autoRegLocal: arl, autoRegMiddleware: arm);
+    arl.initEAutoRegedFromLocal();
+    _lsMultiThreadItems.add('8 Threads');
     wQueenImage = SvgPicture.asset(assetQueenName, semanticsLabel: 'Queen :)');
   }
 
@@ -311,6 +324,7 @@ class _HomePageState extends State<HomePage> {
       _liFrameCount.clear();
       _liPos = <int>[1, 1, 1, 1, 1, 1, 1, 1];
       _bResultPageOpened = false;
+      _insertResultOrAutoRegStarted = false;
     });
     setState(() {});
   }
@@ -739,8 +753,6 @@ class _HomePageState extends State<HomePage> {
             }
           }
 
-          bool _b5secWaitStarted = false;
-
           _startOpenResultPageAfterWait(Color cResult0) async {
             const int iWaitMsSec = 3000;
             for (int i = 0; i < iWaitMsSec; i += 100) {
@@ -752,6 +764,16 @@ class _HomePageState extends State<HomePage> {
               _openResultPage(cResult0);
             }
             _b5secWaitStarted = false;
+          }
+
+          Future<void> _callInsertResultsOrAutoRegAfterWait() async {
+            await Future.delayed(const Duration(milliseconds: 1000));
+            if (!_bStart && 0 < _stepCounter && const Duration(milliseconds: 0) < _dElapsed) {
+              bool success = await iroarm.insertResultOrAutoReg(_nThreadsStarted, _dElapsed);
+              if (success) {
+                _insertResultOrAutoRegStarted = false;
+              }
+            }
           }
 
           // ! debugPrint('constraints.maxWidth: ${constraints.maxWidth}');
@@ -804,6 +826,10 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers));
           }
           if (pow(8, 8) == _stepCounter) {
+            if (!_insertResultOrAutoRegStarted) {
+              _insertResultOrAutoRegStarted = true;
+              _callInsertResultsOrAutoRegAfterWait();
+            }
             _iSpeedRank = _rks.getSpeedRank(_nThreadsStarted, _dElapsed);
             //debugPrint("homepage.dart, build, _iSpeedRank: $_iSpeedRank");
             _cSpeedRank = _rks.lcRanks[_iSpeedRank];

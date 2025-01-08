@@ -7,8 +7,8 @@ import 'package:ironsource_mediation/ironsource_mediation.dart';
 import 'admobtest/admobtestpage.dart';
 import 'ironsourcetest/ironsourcetestpage.dart';
 import '../parameters/globals.dart';
-import '../parameters/global_device_info.dart';
 import '../parameters/ads.dart';
+import '../middleware/deviceinfoplus.dart';
 import 'contributionpage.dart';
 import '../widgets/globalwidgets.dart';
 import '../widgets/rankrangelist.dart';
@@ -212,9 +212,10 @@ class ResultPageState extends State<ResultPage> with ImpressionDataListener, Iro
           RequestConfiguration(testDeviceIds: [testDeviceAndroid, testDeviceIOS, testDeviceAndroid2, testDeviceAndroid3]));
     }
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      debugPrint('ResultPage, initState(), getDeviceInfoModel: ${await getDeviceInfoModel()}');
       await initIronSource();
       await Future.delayed(const Duration(milliseconds: 5000));
-      scrollController.animateTo(420, duration: const Duration(milliseconds: 1000), curve: Curves.easeInOut);
+      if (mounted) scrollController.animateTo(420, duration: const Duration(milliseconds: 1000), curve: Curves.easeInOut);
     });
   }
 
@@ -437,7 +438,7 @@ class _LevelPlayBannerAdViewSectionState extends State<LevelPlayBannerAdViewSect
   }
 
   void _createBannerAdView() {
-    debugPrint("infopage.dart, LevelPlayBannerAdViewSection, _createBannerAdView() Action triggered.");
+    debugPrint("resultpage.dart, LevelPlayBannerAdViewSection, _createBannerAdView() Action triggered.");
     final _bannerKey = GlobalKey<LevelPlayBannerAdViewState>();
     _bannerAdView = LevelPlayBannerAdView(
       key: _bannerKey,

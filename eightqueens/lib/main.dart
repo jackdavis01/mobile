@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:window_size/window_size.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'parameters/globals.dart';
-import '../parameters/global_device_info.dart';
+import 'middleware/deviceinfoplus.dart';
 import 'mainframe.dart';
 
 void main() async {

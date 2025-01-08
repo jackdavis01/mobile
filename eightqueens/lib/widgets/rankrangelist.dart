@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../parameters/rankings.dart';
+import '../middleware/rankings.dart';
 
 class RankRangeListTitle extends StatelessWidget {
   const RankRangeListTitle({Key? key}) : super(key: key);
