@@ -1,10 +1,14 @@
 import 'dart:convert';
 import 'dart:io' as dart_io show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-FlutterSecureStorage fssGlobal = (dart_io.Platform.isAndroid)
+FlutterSecureStorage fssGlobal =
+  (!kIsWeb)
+  ? (dart_io.Platform.isAndroid)
     ? const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true))
-    : const FlutterSecureStorage();
+    : const FlutterSecureStorage()
+  : const FlutterSecureStorage();
 
 class FSSLocalStringList {
   final FlutterSecureStorage storage;
@@ -41,18 +45,18 @@ class FSSLocalStringList {
 }
 
 class FSSLocalInt {
-  final FlutterSecureStorage storage;
+  final FlutterSecureStorage _storage;
   final String _sKey;
-  final int initInt;
+  final int _initInt;
 
-  FSSLocalInt(this.storage, this._sKey, this.initInt);
+  FSSLocalInt(this._storage, this._sKey, this._initInt);
 
   Future<int> get() async {
-    return await _getSharedPreference() ?? initInt;
+    return await _getSharedPreference() ?? _initInt;
   }
 
   Future<int?> _getSharedPreference() async {
-    int iValue = jsonDecode(await storage.read(key: _sKey) ?? jsonEncode(initInt));
+    int iValue = jsonDecode(await _storage.read(key: _sKey) ?? jsonEncode(_initInt));
     return iValue;
   }
 
@@ -61,6 +65,6 @@ class FSSLocalInt {
   }
 
   Future<void> _saveSharedPreference(int iInput) async {
-    await storage.write(key: _sKey, value: jsonEncode(iInput));
+    await _storage.write(key: _sKey, value: jsonEncode(iInput));
   }
 }

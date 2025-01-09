@@ -197,10 +197,10 @@ class InsertResultsDioResponse {
     final dio = DioHttp(dioOptions);
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () =>
         HttpClient(context: CertificateSecurityContext.get(liCert))
-          ..maxConnectionsPerHost =
-              16 /*..badCertificateCallback = (X509Certificate cert, String host, int port) => true*/;
+          ..maxConnectionsPerHost = 16
+          /*..badCertificateCallback = (X509Certificate cert, String host, int port) => true*/;
     try {
-      response = await dio.post("${uri.scheme}://${uri.host}${uri.path}", data: jsonEncode(mBody));
+      response = await dio.postUri(uri, data: jsonEncode(mBody));
       final int statusCode = response.statusCode ?? -1;
       if (statusCode == 200) {
         debugPrint("InsertResultsDioResponse request data: ${jsonEncode(mBody)}");

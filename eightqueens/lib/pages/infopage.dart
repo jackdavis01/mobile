@@ -29,7 +29,7 @@ class _InfoPageState extends State<InfoPage> with ImpressionDataListener, IronSo
   String version = "";
   String buildNumber = "";
   String buildMode = "";
-  final String platform = 'Flutter 3.24.5';
+  final String platform = 'Flutter 3.27.1';
   final String platformPrerelease = '-';
   final String platformChannel = 'stable';
   final String author = 'Jack Davis';
@@ -43,7 +43,7 @@ class _InfoPageState extends State<InfoPage> with ImpressionDataListener, IronSo
       MobileAds.instance.updateRequestConfiguration(
           RequestConfiguration(testDeviceIds: [testDeviceAndroid, testDeviceIOS, testDeviceAndroid2, testDeviceAndroid3]));
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await initIronSource();
+        if (!_foundation.kIsWeb) await initIronSource();
       });
     }
     super.initState();

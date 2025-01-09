@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> {
     CertificatesStorage.load();
     arm = AutoRegMiddleware(autoRegLocal: arl);
     iroarm = InsertResultsOrAutoRegMiddleware(autoRegLocal: arl, autoRegMiddleware: arm);
-    arl.initEAutoRegedFromLocal();
+    if (!_foundation.kIsWeb) arl.initEAutoRegedFromLocal();
     _lsMultiThreadItems.add('8 Threads');
     wQueenImage = SvgPicture.asset(assetQueenName, semanticsLabel: 'Queen :)');
   }
@@ -826,7 +826,7 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers));
           }
           if (pow(8, 8) == _stepCounter) {
-            if (!_insertResultOrAutoRegStarted) {
+            if (!_foundation.kIsWeb && !_insertResultOrAutoRegStarted) {
               _insertResultOrAutoRegStarted = true;
               _callInsertResultsOrAutoRegAfterWait();
             }

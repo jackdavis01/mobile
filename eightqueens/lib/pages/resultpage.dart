@@ -212,8 +212,7 @@ class ResultPageState extends State<ResultPage> with ImpressionDataListener, Iro
           RequestConfiguration(testDeviceIds: [testDeviceAndroid, testDeviceIOS, testDeviceAndroid2, testDeviceAndroid3]));
     }
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      debugPrint('ResultPage, initState(), getDeviceInfoModel: ${await getDeviceInfoModel()}');
-      await initIronSource();
+      if (!kIsWeb) await initIronSource();
       await Future.delayed(const Duration(milliseconds: 5000));
       if (mounted) scrollController.animateTo(420, duration: const Duration(milliseconds: 1000), curve: Curves.easeInOut);
     });

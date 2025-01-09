@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../middleware/fsstorage.dart';
 import '../apinetisolates/apiautoregisolatecontroller.dart';
 
@@ -48,14 +49,40 @@ class AutoRegLocal {
   int get iUserId => _iUserId;
 
   Future<void> initEAutoRegedFromLocal() async {
+    await _clearSecureStorageUserIdOnReinstall();
     int userId = await regedUserIdLocal.get();
-    if (pow(10, _nUserIdLength - 1) <= userId && pow(10, _nUserIdLength) > userId) {
+    await _setEAutoReged(userId);
+    _iUserId = userId;
+    debugPrint("middleware, autoregistration.dart, initEAutoRegedFromLocal() _iUserId: $_iUserId");
+  }
+
+  Future<void> _clearSecureStorageUserIdOnReinstall() async {
+    String key = 'hasRunBefore';
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if(!(prefs.getBool(key) ?? false )) {
+      const resetUserId = -20;
+      await regedUserIdLocal.set(resetUserId);
+      prefs.setBool(key, true);
+      int userId = -6;
+      for (int i = 0; i < 100; i++) {
+        await Future.delayed(const Duration(milliseconds: 2));
+        userId = await regedUserIdLocal.get();
+        if (resetUserId == userId) {
+          debugPrint("middleware, autoregistration.dart, _clearSecureStorageUserIdOnReinstall() userId: $userId, i: $i");
+          break;
+        }
+      }
+      debugPrint("middleware, autoregistration.dart, _clearSecureStorageUserIdOnReinstall() new resetUserId: $resetUserId, local get userId: $userId");
+    }
+  }
+
+  Future<void> _setEAutoReged(int userId0) async {
+    if (pow(10, _nUserIdLength - 1) <= userId0 && pow(10, _nUserIdLength) > userId0) {
       eAutoReged = EAutoReged.reged;
     } else {
       eAutoReged = EAutoReged.unreged;
     }
-    _iUserId = userId;
-    debugPrint("middleware, autoregistration.dart, initEAutoRegedFromLocal() _iUserId: $_iUserId");
   }
 
   Future<void> setUserIdLocal(int userId0) async {
@@ -71,5 +98,6 @@ class AutoRegLocal {
     }
     debugPrint("middleware, autoregistration.dart, setUserIdLocal() new userId0: $userId0, local get userId: $userId, previosus _iUserId: $_iUserId");
     _iUserId = userId0;
+    await _setEAutoReged(_iUserId);
   }
 }

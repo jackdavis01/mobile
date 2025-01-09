@@ -36,7 +36,7 @@ class _RoundedContainerState extends State<RoundedContainer> {
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(12.0)),
         boxShadow: (widget.boxshadow)
-          ? [BoxShadow(blurRadius: 8.0, spreadRadius: 0.0, color: Colors.black.withOpacity(.16))]
+          ? [BoxShadow(blurRadius: 8.0, spreadRadius: 0.0, color: Colors.black.withValues(alpha: .16))]
           : [],
         color: widget.backgroundcolor,
       ),
