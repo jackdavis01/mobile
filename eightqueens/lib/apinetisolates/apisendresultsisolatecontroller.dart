@@ -5,8 +5,8 @@ import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:dio/io.dart';
 import '../parameters/globals.dart';
-import '../parameters/net.dart';
-import '../parameters/globaldio.dart';
+import '../parameters/net.dart' if (dart.library.html) '../parameters/nonet.dart';
+import '../parameters/globaldio.dart' if (dart.library.html) '../parameters/noglobaldio.dart';
 import 'api_isolateglobals.dart';
 import '../middleware/certificate.dart';
 
