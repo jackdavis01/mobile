@@ -5,11 +5,13 @@ import '../dartjs/nojsconnection.dart' if (dart.library.html) '../dartjs/jsconne
 import "package:async/async.dart";
 import 'package:eightqueens/widgets/webwidgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' as _foundation show kIsWeb, kReleaseMode;
+import 'package:flutter/foundation.dart' as _foundation show kIsWeb, kReleaseMode, kProfileMode, kDebugMode;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:collection/collection.dart';
 import '../isolates/findsolutions.dart';
 import '../isolates/multithreadedfindsolutions.dart';
+import '../apinetisolates/api_isolateglobals.dart';
 import '../middleware/rankings.dart';
 import '../middleware/certificate.dart';
 import '../middleware/autoregistration.dart';
@@ -29,7 +31,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   final FindSolutions findSolution = FindSolutions();
   final MultiTreadedFindSolution multiThreadedFindSolution = MultiTreadedFindSolution();
   final int iDisplayDelayConstant = 180000;
@@ -73,6 +75,8 @@ class _HomePageState extends State<HomePage> {
   bool _b5secWaitStarted = false;
   bool _bResultPageOpened = false;
   bool _insertResultOrAutoRegStarted = false;
+  Duration _dElapsedSended = const Duration(days: 0);
+  bool _bThereWasWait = false;
 
   final GlobalKey<ResultPageState> _resultPageKey = GlobalKey();
 
@@ -85,15 +89,55 @@ class _HomePageState extends State<HomePage> {
   late AutoRegMiddleware arm;
   late InsertResultsOrAutoRegMiddleware iroarm;
 
+  DataPackageInfo _dpi = DataPackageInfo(appName: "", packageName: "", version: "", buildNumber: "", buildMode: "");
+
   @override
   initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     CertificatesStorage.load();
+    loadPackageInfo();
     arm = AutoRegMiddleware(autoRegLocal: arl);
     iroarm = InsertResultsOrAutoRegMiddleware(autoRegLocal: arl, autoRegMiddleware: arm);
     if (!_foundation.kIsWeb) arl.initEAutoRegedFromLocal();
     _lsMultiThreadItems.add('8 Threads');
     wQueenImage = SvgPicture.asset(assetQueenName, semanticsLabel: 'Queen :)');
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (AppLifecycleState.resumed == state) {
+      enableNetworkProcesses();
+      debugPrint('AppLifecycleState: $state');
+    } else {
+      disableNetworkProcessesAndKillAllNetworkIsolates();
+      debugPrint('AppLifecycleState: $state');
+    }
+  }
+
+  Future<void> loadPackageInfo() async { _dpi = await loadLocalPackageInfo(); }
+
+  Future<DataPackageInfo> loadLocalPackageInfo() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    Map<String, dynamic> msdPI = <String, dynamic>{};
+    msdPI['appName'] = packageInfo.appName;
+    msdPI['packageName'] = packageInfo.packageName;
+    msdPI['version'] = packageInfo.version;
+    msdPI['buildNumber'] = packageInfo.buildNumber;
+    msdPI['buildMode'] = (_foundation.kReleaseMode)
+        ? "Release"
+        : (_foundation.kProfileMode)
+            ? "Profile"
+            : (_foundation.kDebugMode)
+                ? "Debug"
+                : "Unknown";
+    return DataPackageInfo.fromList(msdPI);
   }
 
   Future<void> _startStepCounter() async {
@@ -136,6 +180,7 @@ class _HomePageState extends State<HomePage> {
       _stepCounterPrevious = 0;
       _solutionCounter = 0;
     });
+    _bThereWasWait = (0 != _waitms);
     List<dynamic> ldSqdLd = await findSolution.startIsolateInBackground();
     _sendPort = ldSqdLd[0];
     _sqdEvents = ldSqdLd[1];
@@ -181,6 +226,7 @@ class _HomePageState extends State<HomePage> {
       _stepCounterPrevious = 0;
       _solutionCounter = 0;
     });
+    _bThereWasWait = (0 != _waitms);
     _lsendPort.clear();
     _lsqdEvents.clear();
     List<dynamic> ldSqdLd =
@@ -571,8 +617,10 @@ class _HomePageState extends State<HomePage> {
       iWaitms = 0;
     } else if (_lsWaitItems[1] == _ddWaitValue) {
       iWaitms = 1000;
+      _bThereWasWait = true;
     } else if (_lsWaitItems[2] == _ddWaitValue) {
       iWaitms = 5000;
+      _bThereWasWait = true;
     }
     setState(() {
       _waitms = iWaitms;
@@ -727,7 +775,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const InfoPage()),
+                  MaterialPageRoute(builder: (context) => InfoPage(dpi: _dpi)),
                 );
               },
             ),
@@ -768,9 +816,11 @@ class _HomePageState extends State<HomePage> {
 
           Future<void> _callInsertResultsOrAutoRegAfterWait() async {
             await Future.delayed(const Duration(milliseconds: 1000));
-            if (!_bStart && 0 < _stepCounter && const Duration(milliseconds: 0) < _dElapsed) {
-              bool success = await iroarm.insertResultOrAutoReg(_nThreadsStarted, _dElapsed);
+            if (!_bStart && 0 < _stepCounter && const Duration(milliseconds: 0) < _dElapsed && _dElapsedSended != _dElapsed && !_bThereWasWait) {
+              int iBuild = int.tryParse(_dpi.buildNumber) ?? -20;
+              bool success = await iroarm.insertResultOrAutoReg(iBuild, _nThreadsStarted, _dElapsed);
               if (success) {
+                _dElapsedSended = _dElapsed;
                 _insertResultOrAutoRegStarted = false;
               }
             }

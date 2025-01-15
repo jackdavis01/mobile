@@ -14,7 +14,7 @@ PODS:
     - Google-Mobile-Ads-SDK (~> 11.10.0)
     - webview_flutter_wkwebview
   - GoogleUserMessagingPlatform (2.7.0)
-  - ironsource_mediation (2.0.0):
+  - ironsource_mediation (3.0.1):
     - Flutter
     - IronSourceSDK (= 8.4.0.0)
   - IronSourceAdQualitySDK (7.22.0)
@@ -95,7 +95,7 @@ SPEC CHECKSUMS:
   Google-Mobile-Ads-SDK: 13e6e98edfd78ad8d8a791edb927658cc260a56f
   google_mobile_ads: 2a538d8e42b1813809782792e48f8cf4374c2180
   GoogleUserMessagingPlatform: a8b56893477f67212fbc8411c139e61d463349f5
-  ironsource_mediation: 9be696c14a967e00834f377c5aa8389331bd500d
+  ironsource_mediation: 5984f014fab6d44fe3707ab058506bf0a1bd5be2
   IronSourceAdQualitySDK: d46d3db3e352793357c5c3aa8b630ea5b98dc15e
   IronSourceSDK: 557a0edad39c2a48a225af07b491c672ca5acd36
   IronSourceUnityAdsAdapter: 825ab31e740d8ca24ab405cd99ff6258d6a62c6b

@@ -41,16 +41,17 @@ class DioInsertResultsIsolate {
       debugPrint = (String? message, {int? wrapWidth}) {};
     }
     SendPort sendPort = ldInput[0];
-    InsertResultsDioPost rardp =
-        InsertResultsDioPost(apiKey: GNet.apiKeyRailway, userId: ldInput[2], modelCode: ldInput[3], os: ldInput[4], udid: ldInput[5], threads: ldInput[6], result: ldInput[7]);
-    InsertResultsDioResponse rardr = await InsertResultsDioResponse.createInsertResultsDioPost(
+    InsertResultsDioPost irdp =
+        InsertResultsDioPost(apiKey: GNet.apiKeyRailway, userId: ldInput[2], modelCode: ldInput[3], os: ldInput[4],
+                             build: ldInput[5], udid: ldInput[6], threads: ldInput[7], result: ldInput[8]);
+    InsertResultsDioResponse irdr = await InsertResultsDioResponse.createInsertResultsDioPost(
         GNet.uriInsertResults, ldInput[1],
-        mBody: rardp.toMap());
-    debugPrint('apinetisolates, apisendresultsisolatecontroller.dart, _insertResultsEntryPoint() rardr: ${rardr.toMap()}');
-    sendPort.send(jsonEncode(rardr.toMap())); //sending data back to main thread's function
+        mBody: irdp.toMap());
+    debugPrint('apinetisolates, apisendresultsisolatecontroller.dart, _insertResultsEntryPoint() irdr: ${irdr.toMap()}');
+    sendPort.send(jsonEncode(irdr.toMap())); //sending data back to main thread's function
   }
 
-  Future<dynamic> _callInsertResultsIsolateApi(int userId0, String modelCode0, String os0, String udid0, int threads0, int result0, int nRetry) async {
+  Future<dynamic> _callInsertResultsIsolateApi(int userId0, String modelCode0, String os0, int build0, String udid0, int threads0, int result0, int nRetry) async {
     bool success = false;
     Answer answer = Answer.fromMap({"userId": "-2", "userName": "-2", "credit": 0});
     List<dynamic> errors = [];
@@ -60,34 +61,39 @@ class DioInsertResultsIsolate {
 
     final Completer cMsg = Completer();
     var receivePort = ReceivePort(); //creating new port to listen data
-    const String sIsolateKey = "isolateRAR";
+    const String sIsolateKey = "isolateIR";
     killNetworkProcessesByIsolateKey(sIsolateKey);
-    Isolate isolateRAR = await Isolate.spawn(_insertResultsEntryPoint, [
+    Isolate isolateIR = await Isolate.spawn(_insertResultsEntryPoint, [
       receivePort.sendPort,
       CertificatesStorage.getCertRailway,
       userId0,
       modelCode0,
       os0,
+      build0,
       udid0,
       threads0,
       result0
     ]); //spawing/creating new thread as isolates.
-    String sIsolateId = "$sIsolateKey-$nRetry-${isolateRAR.hashCode}";
-    mrpiNetIsolates.putIfAbsent(sIsolateId, () => ReceivePortIsolate(receivePort: receivePort, isolate: isolateRAR));
+    String sIsolateId = "$sIsolateKey-$nRetry-${isolateIR.hashCode}";
+    mrpiNetIsolates.putIfAbsent(sIsolateId, () => ReceivePortIsolate(receivePort: receivePort, isolate: isolateIR));
     debugPrint("apinetisolates, apisendresultsisolatecontroller.dart, _callInsertResultsIsolateApi() mrpiNetIsolates.length: ${mrpiNetIsolates.length}");
     receivePort.listen((msg) async {
-      InsertResultsDioResponse rardr = InsertResultsDioResponse.fromMap(json.decode(msg));
-      success = rardr.success; // success can be overwritten
-      errorCode = rardr.errorCode; // errorCode can be overwritten
+      InsertResultsDioResponse irdr = InsertResultsDioResponse.fromMap(json.decode(msg));
+      success = irdr.success; // success can be overwritten
+      errorCode = irdr.errorCode; // errorCode can be overwritten
       try {
-        answer = Answer.fromMap(rardr.answer);
-        info = rardr.info;
+        answer = Answer.fromMap(irdr.answer);
+        info = irdr.info;
+        if (irdr.errors.contains("unregedUserIdOrUdid")) {
+          errorCode = -101;
+          success = true; // notactivated is not an error
+        }
       } catch (e) {
         debugPrint(
             "apinetisolates, apisendresultsisolatecontroller.dart, _callInsertResultsIsolateApi() Exception! e: $e");
       }
-      errors = rardr.errors;
-      apiId = rardr.apiId;
+      errors = irdr.errors;
+      apiId = irdr.apiId;
       List<dynamic> ldMsg = [
         success,
         answer,
@@ -98,21 +104,21 @@ class DioInsertResultsIsolate {
       ];
       cMsg.complete(ldMsg);
       receivePort.close();
-      isolateRAR.kill(priority: Isolate.immediate);
+      isolateIR.kill(priority: Isolate.immediate);
       mrpiNetIsolates.remove(sIsolateId);
       debugPrint('apinetisolates, apisendresultsisolatecontroller.dart, _callInsertResultsIsolateApi() msg: $msg');
     });
     return cMsg.future;
   }
 
-  Future<dynamic> callInsertResultsRetryIsolateApi(int userId0, String modelCode0, String os0, String udid0, int threads0, int result0) async {
+  Future<dynamic> callInsertResultsRetryIsolateApi(int userId0, String modelCode0, String os0, int build0, String udid0, int threads0, int result0) async {
     const int nMaxRetry = nTimeoutRequestRetry4InsertResults;
-    List<dynamic> ldValue = await _callInsertResultsIsolateApi(userId0, modelCode0, os0, udid0, threads0, result0, 0);
+    List<dynamic> ldValue = await _callInsertResultsIsolateApi(userId0, modelCode0, os0, build0, udid0, threads0, result0, 0);
     bool success = ldValue[0];
     int iN = 1;
     while (!success && nMaxRetry >= iN) {
       await Future.delayed(const Duration(milliseconds: iTimeoutRetryDelayMs));
-      ldValue = await _callInsertResultsIsolateApi(userId0, modelCode0, os0, udid0, threads0, result0, iN);
+      ldValue = await _callInsertResultsIsolateApi(userId0, modelCode0, os0, build0, udid0, threads0, result0, iN);
       success = ldValue[0];
       iN++;
     }
@@ -127,15 +133,18 @@ class InsertResultsDioPost {
   final int userId;
   final String modelCode;
   final String os;
+  final int build;
   final String udid;
   final int threads;
   final int result; // millisec
 
-  InsertResultsDioPost({required this.apiKey, required this.userId, required this.modelCode, required this.os, required this.udid, required this.threads, required this.result});
+  InsertResultsDioPost({required this.apiKey, required this.userId, required this.modelCode, required this.os,
+                        required this.build, required this.udid, required this.threads, required this.result});
 
   factory InsertResultsDioPost.fromMap(Map<String, dynamic> map) {
     return InsertResultsDioPost(
-        apiKey: map['apiKey'], userId: map['userId'], modelCode: map['modelCode'], os: map['os'], udid: map['udid'], threads: map['threads'], result: map['result']);
+        apiKey: map['apiKey'], userId: map['userId'], modelCode: map['modelCode'], os: map['os'], build: map['build'],
+        udid: map['udid'], threads: map['threads'], result: map['result']);
   }
 
   Map<String,dynamic> toMap() {
@@ -144,6 +153,7 @@ class InsertResultsDioPost {
     map["userId"] = userId;
     map["modelCode"] = modelCode;
     map["os"] = os;
+    map["build"] = build;
     map["udid"] = udid;
     map["threads"] = threads;
     map["result"] = result;
@@ -158,7 +168,7 @@ class InsertResultsDioResponse {
   final Map<String, dynamic> info;
   final int apiId;
   final int errorCode;
-  static const int _iApiId = 1001;
+  static const int _iApiId = 1002;
 
   InsertResultsDioResponse(
       {required this.success,

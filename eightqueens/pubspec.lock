@@ -244,10 +244,10 @@ packages:
     dependency: "direct main"
     description:
       name: ironsource_mediation
-      sha256: "53f959c42aad660d6769088f9b58959b23887102e3cd4df3384633d8539cd990"
+      sha256: "8bbe9f32e454daceb781e5ecb40b0ab8c6f47f64f97f75ee222da87a83948934"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.1"
   js:
     dependency: "direct main"
     description:

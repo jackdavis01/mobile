@@ -10,49 +10,49 @@ import '../parameters/globaldio.dart' if (dart.library.html) '../parameters/nogl
 import 'api_isolateglobals.dart';
 import '../middleware/certificate.dart';
 
-class AutoRegAnswer {
+class AutoRegTrackingAnswer {
   final String userId;
-  final String userName;
-  final int credit;
+  final bool updated;
+  final bool inserted;
 
-  AutoRegAnswer(
-      {required this.userId, required this.userName, required this.credit});
+  AutoRegTrackingAnswer(
+      {required this.userId, required this.updated, required this.inserted});
 
-  factory AutoRegAnswer.fromMap(Map<String, dynamic> map) {
-    return AutoRegAnswer(
+  factory AutoRegTrackingAnswer.fromMap(Map<String, dynamic> map) {
+    return AutoRegTrackingAnswer(
         userId: map['userId'] ?? "-1",
-        userName: map['userName'] ?? "-1",
-        credit: map['credit'] ?? 0);
+        updated: map['updated'] ?? false,
+        inserted: map['inserted'] ?? false);
   }
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = <String, dynamic>{};
     map["userId"] = userId;
-    map["userName"] = userName;
-    map["credit"] = credit;
+    map["updated"] = updated;
+    map["inserted"] = inserted;
     return map;
   }
 }
 
-class DioAutoRegIsolate {
+class DioAutoRegTrackingIsolate {
 
-  static _requestAutoRegEntryPoint(List<dynamic> ldInput) async {
+  static _autoRegTrackingEntryPoint(List<dynamic> ldInput) async {
     if (bReleaseMode) {
       debugPrint = (String? message, {int? wrapWidth}) {};
     }
     SendPort sendPort = ldInput[0];
-    RequestAutoRegDioPost rardp =
-        RequestAutoRegDioPost(apiKey: GNet.apiKeyRailway, modelCode: ldInput[2], os: ldInput[3], build: ldInput[4], udid: ldInput[5], threads: ldInput[6], result: ldInput[7]);
-    RequestAutoRegDioResponse rardr = await RequestAutoRegDioResponse.createRequestAutoRegDioPost(
-        GNet.uriAutoReg, ldInput[1],
-        mBody: rardp.toMap());
-    debugPrint('apinetisolates, apiautoregisolatecontroller.dart, _requestAutoRegEntryPoint() rardr: ${rardr.toMap()}');
-    sendPort.send(jsonEncode(rardr.toMap())); //sending data back to main thread's function
+    AutoRegTrackingDioPost artdp =
+        AutoRegTrackingDioPost(apiKey: GNet.apiKeyRailwayTracking, type: ldInput[2], userId: ldInput[3], ls: ldInput[4], time: ldInput[5], udid: ldInput[6]);
+    AutoRegTrackingDioResponse artdr = await AutoRegTrackingDioResponse.createAutoRegTrackingDioPost(
+        GNet.uriAutoRegTracking, ldInput[1],
+        mBody: artdp.toMap());
+    debugPrint('apinetisolates, apiautoregtrackingisolatecontroller.dart, _autoRegTrackingEntryPoint() artdr: ${artdr.toMap()}');
+    sendPort.send(jsonEncode(artdr.toMap())); //sending data back to main thread's function
   }
 
-  Future<dynamic> _callRequestAutoRegIsolateApi(String modelCode0, String os0, int build0, String udid0, int threads0, int result0, int nRetry) async {
+  Future<dynamic> _callAutoRegTrackingIsolateApi(int type0, int userId0, int ls0, int time0, String udid0, int nRetry) async {
     bool success = false;
-    AutoRegAnswer answer = AutoRegAnswer.fromMap({"userId": "-2", "userName": "-2", "credit": 0});
+    AutoRegTrackingAnswer answer = AutoRegTrackingAnswer.fromMap({"userId": "-2", "userName": "-2", "credit": 0});
     List<dynamic> errors = [];
     Map<String, dynamic> info = {};
     int apiId = 0;
@@ -60,34 +60,33 @@ class DioAutoRegIsolate {
 
     final Completer cMsg = Completer();
     var receivePort = ReceivePort(); //creating new port to listen data
-    const String sIsolateKey = "isolateRAR";
+    const String sIsolateKey = "isolateART";
     killNetworkProcessesByIsolateKey(sIsolateKey);
-    Isolate isolateRAR = await Isolate.spawn(_requestAutoRegEntryPoint, [
+    Isolate isolateART = await Isolate.spawn(_autoRegTrackingEntryPoint, [
       receivePort.sendPort,
       CertificatesStorage.getCertRailway,
-      modelCode0,
-      os0,
-      build0,
-      udid0,
-      threads0,
-      result0
+      type0,
+      userId0,
+      ls0,
+      time0,
+      udid0
     ]); //spawing/creating new thread as isolates.
-    String sIsolateId = "$sIsolateKey-$nRetry-${isolateRAR.hashCode}";
-    mrpiNetIsolates.putIfAbsent(sIsolateId, () => ReceivePortIsolate(receivePort: receivePort, isolate: isolateRAR));
-    debugPrint("apinetisolates, apiautoregisolatecontroller.dart, _callRequestAutoRegIsolateApi() mrpiNetIsolates.length: ${mrpiNetIsolates.length}");
+    String sIsolateId = "$sIsolateKey-$nRetry-${isolateART.hashCode}";
+    mrpiNetIsolates.putIfAbsent(sIsolateId, () => ReceivePortIsolate(receivePort: receivePort, isolate: isolateART));
+    debugPrint("apinetisolates, apiautoregtrackingisolatecontroller.dart, _callAutoRegTrackingIsolateApi() mrpiNetIsolates.length: ${mrpiNetIsolates.length}");
     receivePort.listen((msg) async {
-      RequestAutoRegDioResponse rardr = RequestAutoRegDioResponse.fromMap(json.decode(msg));
-      success = rardr.success; // success can be overwritten
-      errorCode = rardr.errorCode; // errorCode can be overwritten
+      AutoRegTrackingDioResponse artdr = AutoRegTrackingDioResponse.fromMap(json.decode(msg));
+      success = artdr.success; // success can be overwritten
+      errorCode = artdr.errorCode; // errorCode can be overwritten
       try {
-        answer = AutoRegAnswer.fromMap(rardr.answer);
-        info = rardr.info;
+        answer = AutoRegTrackingAnswer.fromMap(artdr.answer);
+        info = artdr.info;
       } catch (e) {
         debugPrint(
-            "apinetisolates, apiautoregisolatecontroller.dart, _callRequestAutoRegIsolateApi() Exception! e: $e");
+            "apinetisolates, apiautoregtrackingisolatecontroller.dart, _callAutoRegTrackingIsolateApi() Exception! e: $e");
       }
-      errors = rardr.errors;
-      apiId = rardr.apiId;
+      errors = artdr.errors;
+      apiId = artdr.apiId;
       List<dynamic> ldMsg = [
         success,
         answer,
@@ -98,21 +97,21 @@ class DioAutoRegIsolate {
       ];
       cMsg.complete(ldMsg);
       receivePort.close();
-      isolateRAR.kill(priority: Isolate.immediate);
+      isolateART.kill(priority: Isolate.immediate);
       mrpiNetIsolates.remove(sIsolateId);
-      debugPrint('apinetisolates, apiautoregisolatecontroller.dart, _callRequestAutoRegIsolateApi() msg: $msg');
+      debugPrint('apinetisolates, apiautoregtrackingisolatecontroller.dart, _callAutoRegTrackingIsolateApi() msg: $msg');
     });
     return cMsg.future;
   }
 
-  Future<dynamic> callRequestAutoRegRetryIsolateApi(String modelCode0, String os0, int build0, String udid0, int threads0, int result0) async {
-    const int nMaxRetry = nTimeoutRequestRetry4RequestAutoReg;
-    List<dynamic> ldValue = await _callRequestAutoRegIsolateApi(modelCode0, os0, build0, udid0, threads0, result0, 0);
+  Future<dynamic> callAutoRegTrackingRetryIsolateApi(int type0, int userId0, int ls0, int time0, String udid0) async {
+    const int nMaxRetry = nTimeoutRequestRetry4AutoRegTracking;
+    List<dynamic> ldValue = await _callAutoRegTrackingIsolateApi(type0, userId0, ls0, time0, udid0, 0);
     bool success = ldValue[0];
     int iN = 1;
     while (!success && nMaxRetry >= iN) {
       await Future.delayed(const Duration(milliseconds: iTimeoutRetryDelayMs));
-      ldValue = await _callRequestAutoRegIsolateApi(modelCode0, os0, build0, udid0, threads0, result0, iN);
+      ldValue = await _callAutoRegTrackingIsolateApi(type0, userId0, ls0, time0, udid0, iN);
       success = ldValue[0];
       iN++;
     }
@@ -120,47 +119,45 @@ class DioAutoRegIsolate {
   }
 }
 
-// DBR Index App RequestAutoRegDioPost Classes and Methods
+// DBR Index App AutoRegTrackingDioPost Classes and Methods
 
-class RequestAutoRegDioPost {
+class AutoRegTrackingDioPost {
   final String apiKey;
-  final String modelCode;
-  final String os;
-  final int build;
+  final int type;
+  final int userId;
+  final int ls;
+  final int time; // millisec
   final String udid;
-  final int threads;
-  final int result; // millisec
 
-  RequestAutoRegDioPost({required this.apiKey, required this.modelCode, required this.os, required this.build, required this.udid, required this.threads, required this.result});
+  AutoRegTrackingDioPost({required this.apiKey, required this.type, required this.userId, required this.ls, required this.time, required this.udid});
 
-  factory RequestAutoRegDioPost.fromMap(Map<String, dynamic> map) {
-    return RequestAutoRegDioPost(
-        apiKey: map['apiKey'], modelCode: map['modelCode'], os: map['os'], build: map['build'], udid: map['udid'], threads: map['threads'], result: map['result']);
+  factory AutoRegTrackingDioPost.fromMap(Map<String, dynamic> map) {
+    return AutoRegTrackingDioPost(
+        apiKey: map['apiKey'], type: map['type'], userId: map['userId'], ls: map['ls'], time: map['time'], udid: map['udid']);
   }
 
   Map<String,dynamic> toMap() {
     Map<String,dynamic> map = <String, dynamic>{};
     map["apiKey"] = apiKey;
-    map["modelCode"] = modelCode;
-    map["os"] = os;
-    map["build"] = build;
+    map["type"] = type;
+    map["userId"] = userId;
+    map["ls"] = ls;
+    map["time"] = time;
     map["udid"] = udid;
-    map["threads"] = threads;
-    map["result"] = result;
     return map;
   }
 }
 
-class RequestAutoRegDioResponse {
+class AutoRegTrackingDioResponse {
   final bool success;
   final Map<String, dynamic> answer;
   final List<dynamic> errors;
   final Map<String, dynamic> info;
   final int apiId;
   final int errorCode;
-  static const int _iApiId = 1001;
+  static const int _iApiId = 1003;
 
-  RequestAutoRegDioResponse(
+  AutoRegTrackingDioResponse(
       {required this.success,
       required this.answer,
       required this.errors,
@@ -168,8 +165,8 @@ class RequestAutoRegDioResponse {
       required this.apiId,
       required this.errorCode});
 
-  factory RequestAutoRegDioResponse.fromMap(Map<String, dynamic> map) {
-    return RequestAutoRegDioResponse(
+  factory AutoRegTrackingDioResponse.fromMap(Map<String, dynamic> map) {
+    return AutoRegTrackingDioResponse(
         success: map['success'] ?? false,
         answer: map['answer'] ?? {},
         errors: map['errors'] ?? <String>[],
@@ -189,7 +186,7 @@ class RequestAutoRegDioResponse {
     return map;
   }
 
-  static Future<RequestAutoRegDioResponse> createRequestAutoRegDioPost(Uri uri, List<int> liCert,
+  static Future<AutoRegTrackingDioResponse> createAutoRegTrackingDioPost(Uri uri, List<int> liCert,
       {required Map mBody}) async {
     DioResponse response;
     String input, decryptedResponse;
@@ -203,45 +200,45 @@ class RequestAutoRegDioResponse {
       response = await dio.postUri(uri, data: jsonEncode(mBody));
       final int statusCode = response.statusCode ?? -1;
       if (statusCode == 200) {
-        debugPrint("RequestAutoRegDioResponse request data: ${jsonEncode(mBody)}");
-        debugPrint("RequestAutoRegDioResponse response.data: ${response.data}");
-        debugPrint("RequestAutoRegDioResponse response.data.runtimeType: ${response.data.runtimeType}");
+        debugPrint("AutoRegTrackingDioResponse request data: ${jsonEncode(mBody)}");
+        debugPrint("AutoRegTrackingDioResponse response.data: ${response.data}");
+        debugPrint("AutoRegTrackingDioResponse response.data.runtimeType: ${response.data.runtimeType}");
         if (response.data is Map) {
           input = jsonEncode(response.data);
           decryptedResponse = input; // no base64 encryption in response
-          debugPrint("RequestAutoRegDioResponse decryptedResponse: $decryptedResponse");
+          debugPrint("AutoRegTrackingDioResponse decryptedResponse: $decryptedResponse");
           mapDecodedResponse = json.decode(decryptedResponse);
-          return RequestAutoRegDioResponse.fromMap(mapDecodedResponse);
+          return AutoRegTrackingDioResponse.fromMap(mapDecodedResponse);
         } else if (response.data is String) {
           input = response.data.replaceAll('\r', '').replaceAll('\n', '');
           decryptedResponse = utf8.decode(base64.decode(input));
-          debugPrint("RequestAutoRegDioResponse decryptedResponse: $decryptedResponse");
+          debugPrint("AutoRegTrackingDioResponse decryptedResponse: $decryptedResponse");
           mapDecodedResponse = json.decode(decryptedResponse);
-          return RequestAutoRegDioResponse.fromMap(mapDecodedResponse);
+          return AutoRegTrackingDioResponse.fromMap(mapDecodedResponse);
         } else {
-          debugPrint('RequestAutoRegDioResponse NotMapOrStringResponse.');
+          debugPrint('AutoRegTrackingDioResponse NotMapOrStringResponse.');
           mapDecodedResponse = json.decode(json.encode({
             "errors": ["NotMapOrStringResponse"],
             "apiId": _iApiId,
             "errorCode": -5
           }));
-          debugPrint('RequestAutoRegDioResponse mapDecodedResponse: $mapDecodedResponse');
-          return RequestAutoRegDioResponse.fromMap(mapDecodedResponse);
+          debugPrint('AutoRegTrackingDioResponse mapDecodedResponse: $mapDecodedResponse');
+          return AutoRegTrackingDioResponse.fromMap(mapDecodedResponse);
         }
       } else {
-        debugPrint("RequestAutoRegDioResponse response.statusCode is not 200: $statusCode");
+        debugPrint("AutoRegTrackingDioResponse response.statusCode is not 200: $statusCode");
         throw Exception(response.statusMessage);
       }
     } on FormatException catch (e) {
-      debugPrint('RequestAutoRegDioResponse FormatException: $e');
+      debugPrint('AutoRegTrackingDioResponse FormatException: $e');
       mapDecodedResponse = json.decode(json.encode({
         "errors": ["FormatException"],
         "apiId": _iApiId,
         "errorCode": -7
       }));
-      return RequestAutoRegDioResponse.fromMap(mapDecodedResponse);
+      return AutoRegTrackingDioResponse.fromMap(mapDecodedResponse);
     } on DioException catch (e) {
-      debugPrint('RequestAutoRegDioResponse DioException: $e');
+      debugPrint('AutoRegTrackingDioResponse DioException: $e');
       if (e.type == DioExceptionType.connectionTimeout) {
         mapDecodedResponse = json.decode(json.encode({
           "errors": ["DioException: ${e.type}"],
@@ -261,23 +258,23 @@ class RequestAutoRegDioResponse {
           "errorCode": -3
         }));
       }
-      return RequestAutoRegDioResponse.fromMap(mapDecodedResponse);
+      return AutoRegTrackingDioResponse.fromMap(mapDecodedResponse);
     } on SocketException catch (_) {
-      debugPrint('RequestAutoRegDioResponse SocketException.');
+      debugPrint('AutoRegTrackingDioResponse SocketException.');
       mapDecodedResponse = json.decode(json.encode({
         "errors": ["SocketException"],
         "apiId": _iApiId,
         "errorCode": -6
       }));
-      return RequestAutoRegDioResponse.fromMap(mapDecodedResponse);
+      return AutoRegTrackingDioResponse.fromMap(mapDecodedResponse);
     } catch (e) {
-      debugPrint('RequestAutoRegDioResponse Exception: $e');
+      debugPrint('AutoRegTrackingDioResponse Exception: $e');
       mapDecodedResponse = json.decode(json.encode({
         "errors": ["Exception: $e"],
         "apiId": _iApiId,
         "errorCode": -4
       }));
-      return RequestAutoRegDioResponse.fromMap(mapDecodedResponse);
+      return AutoRegTrackingDioResponse.fromMap(mapDecodedResponse);
     } finally {
       dio.close(force: true);
     }

@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' as _foundation;
 import 'package:flutter/services.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ironsource_mediation/ironsource_mediation.dart';
 import '../parameters/globals.dart';
@@ -16,20 +15,22 @@ import 'contributionpage.dart';
 const String appUserId = '511399783462182';
 
 class InfoPage extends StatefulWidget {
-  const InfoPage({Key? key}) : super(key: key);
+
+  final DataPackageInfo dpi;
+
+  const InfoPage({Key? key, required this.dpi}) : super(key: key);
+
   @override
   _InfoPageState createState() => _InfoPageState();
 }
 
 class _InfoPageState extends State<InfoPage> with ImpressionDataListener, IronSourceInitializationListener, LevelPlayInitListener {
-  DataPackageInfo dpi =
-      DataPackageInfo(appName: "", packageName: "", version: "", buildNumber: "", buildMode: "");
   String appName = "";
   String packageName = "";
   String version = "";
   String buildNumber = "";
   String buildMode = "";
-  final String platform = 'Flutter 3.27.1';
+  final String platform = 'Flutter 3.27.2';
   final String platformPrerelease = '-';
   final String platformChannel = 'stable';
   final String author = 'Jack Davis';
@@ -49,32 +50,12 @@ class _InfoPageState extends State<InfoPage> with ImpressionDataListener, IronSo
     super.initState();
   }
 
-  Future<void> loadPackageInfo() async {
-    dpi = await loadLocalPackageInfo();
-    setState(() {
-      appName = dpi.appName;
-      packageName = dpi.packageName;
-      version = dpi.version;
-      buildNumber = dpi.buildNumber;
-      buildMode = dpi.buildMode;
-    });
-  }
-
-  Future<DataPackageInfo> loadLocalPackageInfo() async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    Map<String, dynamic> msdPI = <String, dynamic>{};
-    msdPI['appName'] = packageInfo.appName;
-    msdPI['packageName'] = packageInfo.packageName;
-    msdPI['version'] = packageInfo.version;
-    msdPI['buildNumber'] = packageInfo.buildNumber;
-    msdPI['buildMode'] = (_foundation.kReleaseMode)
-        ? "Release"
-        : (_foundation.kProfileMode)
-            ? "Profile"
-            : (_foundation.kDebugMode)
-                ? "Debug"
-                : "Unknown";
-    return DataPackageInfo.fromList(msdPI);
+  void loadPackageInfo() {
+    appName = widget.dpi.appName;
+    packageName = widget.dpi.packageName;
+    version = widget.dpi.version;
+    buildNumber = widget.dpi.buildNumber;
+    buildMode = widget.dpi.buildMode;
   }
 
   void switchDev() {

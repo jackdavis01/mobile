@@ -4,6 +4,5 @@ class GNet {
 
   static Uri uriInsertResults = Uri.https("nonet", "");
 
-  static const String apiKeyHeaderRailway = "";
   static const String apiKeyRailway = "";
 }
