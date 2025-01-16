@@ -16,3 +16,4 @@ typedef DioExceptionType = diohttp.DioExceptionType;
 
 const int nTimeoutRequestRetry4RequestAutoReg = 0;
 const int nTimeoutRequestRetry4InsertResults = 0;
+const int nTimeoutRequestRetry4AutoRegTracking = 0;
