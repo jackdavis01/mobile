@@ -49,7 +49,7 @@ Our app now includes advertisements provided by Google AdMob and ironSource. Ple
 
 By continuing to use this app, you agree to the integration of Google AdMob & ironSource ads and the collection of your Advertising ID for advertising purposes.
 
-Privacy Policy Update (Januar 10, 2025):
+Privacy Policy Update (January 10, 2025):
 
 Effective from January 10, 2025, for the iOS mobile application and January 17, 2025, for the Android version, our app will collect performance benchmark measurement data. This data includes the user's identifier, the unique device identifier, the app version number, and the number of threads used during the measurement. The collected data - without real names or identifiers - may later be displayed in various sortable table formats for analysis purposes. By continuing to use the application after these dates, you agree to this update in our data collection practices.
 
