@@ -29,6 +29,10 @@ class AutoRegMiddleware {
           AutoRegAnswer answer = ldValue[1];
           int userId = int.tryParse(answer.userId) ?? -4;
           autoRegLocal.setUserIdLocal(userId, udid, ls);
+          String userName = answer.userName;
+          autoRegLocal.setUserNameLocal(userName);
+          int userCrown = answer.credit;
+          autoRegLocal.setUserCrownLocal(userCrown);
         }
       }
     }
@@ -45,6 +49,8 @@ class AutoRegLocal {
   EAutoReged eAutoReged = EAutoReged.unknown;
 
   FSSLocalInt regedUserIdLocal = FSSLocalInt(fssGlobal, 'regedUserId', -3);
+  FSSLocalString regedUserNameLocal = FSSLocalString(fssGlobal, 'regedUserName', "Me");
+  FSSLocalInt regedUserCrownLocal = FSSLocalInt(fssGlobal, 'regedUserCrown', 0);
 
   final DioAutoRegTrackingIsolate darti = DioAutoRegTrackingIsolate();
 
@@ -52,7 +58,7 @@ class AutoRegLocal {
 
   int _iUserId = -10;
 
-  int get iUserId => _iUserId;
+  int getUserId() => _iUserId;
 
   Future<void> initEAutoRegedFromLocal() async {
     await _clearSecureStorageUserIdOnReinstall();
@@ -136,4 +142,13 @@ class AutoRegLocal {
     _iUserId = userId0;
     await _setEAutoReged(_iUserId);
   }
+
+  void setUserNameLocal(String sUserName) { regedUserNameLocal.set(sUserName); }
+
+  Future<String> getUserName() async => await regedUserNameLocal.get();
+
+  void setUserCrownLocal(int iCrown) { regedUserCrownLocal.set(iCrown); }
+
+  Future<int> getUserCrown() async => await regedUserCrownLocal.get();
+
 }

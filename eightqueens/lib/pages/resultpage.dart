@@ -7,13 +7,11 @@ import 'package:ironsource_mediation/ironsource_mediation.dart';
 import 'admobtest/admobtestpage.dart';
 import 'ironsourcetest/ironsourcetestpage.dart';
 import '../parameters/globals.dart';
-import '../parameters/ads.dart';
+import '../parameters/ads.dart' as ads;
 import '../middleware/deviceinfoplus.dart';
 import 'contributionpage.dart';
 import '../widgets/globalwidgets.dart';
 import '../widgets/rankrangelist.dart';
-
-const String appUserId = '511399783462182';
 
 class ResultPage extends StatefulWidget {
   final int speed;
@@ -209,7 +207,7 @@ class ResultPageState extends State<ResultPage> with ImpressionDataListener, Iro
     super.initState();
     if (!kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion)) {
       MobileAds.instance.updateRequestConfiguration(
-          RequestConfiguration(testDeviceIds: [testDeviceAndroid, testDeviceIOS, testDeviceAndroid2, testDeviceAndroid3]));
+          RequestConfiguration(testDeviceIds: [ads.testDeviceAndroid, ads.testDeviceIOS, ads.testDeviceAndroid2, ads.testDeviceAndroid3]));
     }
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!kIsWeb) await initIronSource();
@@ -361,7 +359,7 @@ class ResultPageState extends State<ResultPage> with ImpressionDataListener, Iro
       debugPrint('AdvertiserID: $id');
 
       // Do not use AdvertiserID for this.
-      await IronSource.setUserId(appUserId);
+      await IronSource.setUserId(ads.appUserId);
 
       // Authorization Request for IDFA use
       if (Platform.isIOS) {

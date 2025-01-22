@@ -5,11 +5,13 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:window_size/window_size.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'parameters/globals.dart';
+import 'middleware/listslocalstorage.dart';
 import 'middleware/deviceinfoplus.dart';
 import 'mainframe.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  spGlobal = await SpGlobal.init();
   if (!kIsWeb) {
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       setWindowTitle(GV.sTitle);

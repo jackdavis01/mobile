@@ -5,14 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ironsource_mediation/ironsource_mediation.dart';
 import '../parameters/globals.dart';
-import '../parameters/ads.dart';
+import '../parameters/ads.dart' as ads;
 import '../middleware/deviceinfoplus.dart';
 import '../widgets/globalwidgets.dart';
 import 'admobtest/admobtestpage.dart';
 import 'ironsourcetest/ironsourcetestpage.dart';
 import 'contributionpage.dart';
-
-const String appUserId = '511399783462182';
 
 class InfoPage extends StatefulWidget {
 
@@ -30,7 +28,7 @@ class _InfoPageState extends State<InfoPage> with ImpressionDataListener, IronSo
   String version = "";
   String buildNumber = "";
   String buildMode = "";
-  final String platform = 'Flutter 3.27.2';
+  final String platform = 'Flutter 3.27.3';
   final String platformPrerelease = '-';
   final String platformChannel = 'stable';
   final String author = 'Jack Davis';
@@ -42,7 +40,7 @@ class _InfoPageState extends State<InfoPage> with ImpressionDataListener, IronSo
     loadPackageInfo();
     if (!_foundation.kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion)) {
       MobileAds.instance.updateRequestConfiguration(
-          RequestConfiguration(testDeviceIds: [testDeviceAndroid, testDeviceIOS, testDeviceAndroid2, testDeviceAndroid3]));
+          RequestConfiguration(testDeviceIds: [ads.testDeviceAndroid, ads.testDeviceIOS, ads.testDeviceAndroid2, ads.testDeviceAndroid3]));
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!_foundation.kIsWeb) await initIronSource();
       });
@@ -603,7 +601,7 @@ class _InfoPageState extends State<InfoPage> with ImpressionDataListener, IronSo
       debugPrint('AdvertiserID: $id');
 
       // Do not use AdvertiserID for this.
-      await IronSource.setUserId(appUserId);
+      await IronSource.setUserId(ads.appUserId);
 
       // Authorization Request for IDFA use
       if (Platform.isIOS) {

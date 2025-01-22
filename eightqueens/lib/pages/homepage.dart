@@ -16,6 +16,8 @@ import '../middleware/rankings.dart';
 import '../middleware/certificate.dart';
 import '../middleware/autoregistration.dart';
 import '../middleware/insertresultsorautoreg.dart';
+import '../middleware/listslocalstorage.dart';
+import '../widgets/homenavdrawer.dart';
 import '../widgets/boxwidgets.dart';
 import 'configpage.dart';
 import 'infopage.dart';
@@ -91,6 +93,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   DataPackageInfo _dpi = DataPackageInfo(appName: "", packageName: "", version: "", buildNumber: "", buildMode: "");
 
+  ListsLocalStorage lls = ListsLocalStorage();
+
   @override
   initState() {
     super.initState();
@@ -122,6 +126,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> loadPackageInfo() async { _dpi = await loadLocalPackageInfo(); }
+
+  DataPackageInfo getDpi() => _dpi;
 
   Future<DataPackageInfo> loadLocalPackageInfo() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
@@ -781,6 +787,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ),
           ],
         ),
+        drawer: (_foundation.kIsWeb) ? null : HomeNavDrawer(wCrown: wQueenImage, autoRegLocal: arl, lls: lls, getDpi: getDpi),
         backgroundColor: Colors.white,
         body: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
 
@@ -822,6 +829,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (success) {
                 _dElapsedSended = _dElapsed;
                 _insertResultOrAutoRegStarted = false;
+                List<String> lsValueUR = lls.serializeURLoadDates( [["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
+                                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
+                                                                    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
+                                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
+                lls.fssUserResultsDates.set(lsValueUR);
+                List<String> lsValueMR = lls.serializeMRLoadDates( [["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
+                                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
+                                                                    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
+                                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
+                lls.fssModelResultsDates.set(lsValueMR);
               }
             }
           }

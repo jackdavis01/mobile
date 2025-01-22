@@ -1,12 +1,10 @@
 import 'dart:io' show Platform;
-import 'package:eightqueens/parameters/ads.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ironsource_mediation/ironsource_mediation.dart';
+import '../parameters/ads.dart' as ads;
 import '../widgets/messagedialogs.dart';
-
-const String appUserId = '511399783462182';
 
 // You can also test with your own ad unit IDs by registering your device as a
 // test device. Check the logs for your device's ID value.
@@ -41,7 +39,7 @@ class _ContributionPageState extends State<ContributionPage> with ImpressionData
   void initState() {
     super.initState();
     MobileAds.instance.updateRequestConfiguration(
-        RequestConfiguration(testDeviceIds: [testDeviceAndroid, testDeviceIOS, testDeviceAndroid2, testDeviceAndroid3]));
+        RequestConfiguration(testDeviceIds: [ads.testDeviceAndroid, ads.testDeviceIOS, ads.testDeviceAndroid2, ads.testDeviceAndroid3]));
     _createInterstitialAd();
     _createRewardedAd();
     _createRewardedInterstitialAd();
@@ -359,7 +357,7 @@ class _ContributionPageState extends State<ContributionPage> with ImpressionData
       debugPrint('AdvertiserID: $id');
 
       // Do not use AdvertiserID for this.
-      await IronSource.setUserId(appUserId);
+      await IronSource.setUserId(ads.appUserId);
 
       // Authorization Request for IDFA use
       if (Platform.isIOS) {

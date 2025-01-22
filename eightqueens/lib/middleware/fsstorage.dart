@@ -10,6 +10,55 @@ FlutterSecureStorage fssGlobal =
     : const FlutterSecureStorage()
   : const FlutterSecureStorage();
 
+class FSSLocalString {
+  final FlutterSecureStorage _storage;
+  final String _sKey;
+  final String initString;
+
+  FSSLocalString(this._storage, this._sKey, this.initString);
+
+  Future<String> get() async {
+    return await _getSharedPreference() ?? initString;
+  }
+
+  Future<String?> _getSharedPreference() async {
+    return _storage.read(key: _sKey);
+  }
+
+  set(String sValue) async {
+    await _saveSharedPreference(sValue);
+  }
+
+  Future<void> _saveSharedPreference(String sInput) async {
+    await _storage.write(key: _sKey, value: sInput);
+  }
+}
+
+class FSSLocalInt {
+  final FlutterSecureStorage _storage;
+  final String _sKey;
+  final int _initInt;
+
+  FSSLocalInt(this._storage, this._sKey, this._initInt);
+
+  Future<int> get() async {
+    return await _getSharedPreference() ?? _initInt;
+  }
+
+  Future<int?> _getSharedPreference() async {
+    int iValue = jsonDecode(await _storage.read(key: _sKey) ?? jsonEncode(_initInt));
+    return iValue;
+  }
+
+  set(int iValue) async {
+    await _saveSharedPreference(iValue);
+  }
+
+  Future<void> _saveSharedPreference(int iInput) async {
+    await _storage.write(key: _sKey, value: jsonEncode(iInput));
+  }
+}
+
 class FSSLocalStringList {
   final FlutterSecureStorage storage;
   final String _sKey;
@@ -41,30 +90,5 @@ class FSSLocalStringList {
 
   Future<void> _saveSharedPreference(List<String> lsInput) async {
     await storage.write(key: _sKey, value: jsonEncode(lsInput));
-  }
-}
-
-class FSSLocalInt {
-  final FlutterSecureStorage _storage;
-  final String _sKey;
-  final int _initInt;
-
-  FSSLocalInt(this._storage, this._sKey, this._initInt);
-
-  Future<int> get() async {
-    return await _getSharedPreference() ?? _initInt;
-  }
-
-  Future<int?> _getSharedPreference() async {
-    int iValue = jsonDecode(await _storage.read(key: _sKey) ?? jsonEncode(_initInt));
-    return iValue;
-  }
-
-  set(int iValue) async {
-    await _saveSharedPreference(iValue);
-  }
-
-  Future<void> _saveSharedPreference(int iInput) async {
-    await _storage.write(key: _sKey, value: jsonEncode(iInput));
   }
 }

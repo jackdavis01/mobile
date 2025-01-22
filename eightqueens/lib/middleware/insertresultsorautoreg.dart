@@ -28,7 +28,7 @@ class InsertResultsOrAutoRegMiddleware {
         String sModelCode = await getDeviceInfoModel();
         String sUdid = await autoRegLocal.oUdid.get();
         if (EAutoReged.reged == autoRegLocal.eAutoReged) {
-          int userId0 = autoRegLocal.iUserId;
+          int userId0 = autoRegLocal.getUserId();
           List<dynamic> ldValue = await diri.callInsertResultsRetryIsolateApi(userId0, sModelCode, os, iBuild, sUdid, iThreads, iResult);
           success = ldValue[0];
           errorCode = ldValue[5];
