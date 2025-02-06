@@ -13,7 +13,7 @@ This project contains the source code for the 8 Queens App and all the resources
 ### The App runs on, and you can download from
 
 1. Android: Google Play
-2. iOS: iPhones, iPads, on latest M1 Macintosh desktops, and on M1 MacBook notebooks: App Store
+2. iOS: iPhones, iPads, on M1, M2, M3, M4 Macintosh desktops, and on M1, M2, M3, M4 MacBook notebooks.'
 3. Windows desktop: <https://is.gd/8Queens>
 4. MacOS desktop: App Store
 5. Linux desktop: Snap Store
@@ -29,7 +29,7 @@ The App finds the 92 right solutions from the 16 million variations where the ei
 
 Finding the 92 right solutions with an up-to-date, decent smart mobile phone lasts less than a half minute.
 If you would like to see the right solutions, please choose '1 sec' or '5 sec' wait at 'No Wait'.
-If you would like to check your smart phone's multithreaded CPU performance please, choose 2 or '4 Threads'.
+If you would like to check your smart phone's multithreaded CPU performance please, choose 2 or 4 or '8 Threads'.
 
 The App uses brute force method to find the right solutions. Since this App is a Performance Benchmark, it was not intended to use an algorithm faster than the brute force method. Any more efficient algorithm would run too fast on a flagship device.
 

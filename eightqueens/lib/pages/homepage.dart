@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool _bResultPageOpened = false;
   bool _insertResultOrAutoRegStarted = false;
   Duration _dElapsedSended = const Duration(days: 0);
-  bool _bThereWasWait = false;
+  bool _bThereWasWaitOrPause = false;
 
   final GlobalKey<ResultPageState> _resultPageKey = GlobalKey();
 
@@ -186,7 +186,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       _stepCounterPrevious = 0;
       _solutionCounter = 0;
     });
-    _bThereWasWait = (0 != _waitms);
+    _bThereWasWaitOrPause = (0 != _waitms);
     List<dynamic> ldSqdLd = await findSolution.startIsolateInBackground();
     _sendPort = ldSqdLd[0];
     _sqdEvents = ldSqdLd[1];
@@ -232,7 +232,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       _stepCounterPrevious = 0;
       _solutionCounter = 0;
     });
-    _bThereWasWait = (0 != _waitms);
+    _bThereWasWaitOrPause = (0 != _waitms);
     _lsendPort.clear();
     _lsqdEvents.clear();
     List<dynamic> ldSqdLd =
@@ -382,6 +382,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   void _pauseStepCounter() {
+    _bThereWasWaitOrPause = true;
     if (1 == _nThreadsStarted) {
       if (!_foundation.kIsWeb) {
         findSolution.pause();
@@ -623,10 +624,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       iWaitms = 0;
     } else if (_lsWaitItems[1] == _ddWaitValue) {
       iWaitms = 1000;
-      _bThereWasWait = true;
+      _bThereWasWaitOrPause = true;
     } else if (_lsWaitItems[2] == _ddWaitValue) {
       iWaitms = 5000;
-      _bThereWasWait = true;
+      _bThereWasWaitOrPause = true;
     }
     setState(() {
       _waitms = iWaitms;
@@ -823,7 +824,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
           Future<void> _callInsertResultsOrAutoRegAfterWait() async {
             await Future.delayed(const Duration(milliseconds: 1000));
-            if (!_bStart && 0 < _stepCounter && const Duration(milliseconds: 0) < _dElapsed && _dElapsedSended != _dElapsed && !_bThereWasWait) {
+            if (!_bStart && pow(8, 8) == _stepCounter && const Duration(milliseconds: 0) < _dElapsed && _dElapsedSended != _dElapsed && !_bThereWasWaitOrPause) {
               int iBuild = int.tryParse(_dpi.buildNumber) ?? -20;
               bool success = await iroarm.insertResultOrAutoReg(iBuild, _nThreadsStarted, _dElapsed);
               if (success) {

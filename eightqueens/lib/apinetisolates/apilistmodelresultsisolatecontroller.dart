@@ -162,7 +162,7 @@ class ListModelResultsDioResponse {
   final Map<String, dynamic> info;
   final int apiId;
   final int errorCode;
-  static const int _iApiId = 1001;
+  static const int _iApiId = 1005;
 
   ListModelResultsDioResponse(
       {required this.success,
