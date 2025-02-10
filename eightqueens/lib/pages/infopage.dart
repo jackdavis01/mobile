@@ -28,7 +28,7 @@ class _InfoPageState extends State<InfoPage> with ImpressionDataListener, IronSo
   String version = "";
   String buildNumber = "";
   String buildMode = "";
-  final String platform = 'Flutter 3.27.3';
+  final String platform = 'Flutter 3.27.4';
   final String platformPrerelease = '-';
   final String platformChannel = 'stable';
   final String author = 'Jack Davis';

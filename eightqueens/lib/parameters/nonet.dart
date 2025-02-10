@@ -10,9 +10,12 @@ class GNet {
 
   static Uri uriListModelResults = Uri.https("nonet.com", "");
 
+  static Uri uriProfileHandler = Uri.https("nonet.com", "");
+
   static const String apiKeyRailway = "";
   static const String apiKeyRailwayTracking = "";
   static const String apiKeyRailwayListUR = "";
   static const String apiKeyRailwayListMR = "";
+  static const String apiKeyRailwayProfile = "";
 
 }

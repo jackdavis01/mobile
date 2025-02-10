@@ -49,7 +49,8 @@ class AutoRegLocal {
   EAutoReged eAutoReged = EAutoReged.unknown;
 
   FSSLocalInt regedUserIdLocal = FSSLocalInt(fssGlobal, 'regedUserId', -3);
-  FSSLocalString regedUserNameLocal = FSSLocalString(fssGlobal, 'regedUserName', "Me");
+  static const String sMe = "Me";
+  FSSLocalString regedUserNameLocal = FSSLocalString(fssGlobal, 'regedUserName', sMe);
   FSSLocalInt regedUserCrownLocal = FSSLocalInt(fssGlobal, 'regedUserCrown', 0);
 
   final DioAutoRegTrackingIsolate darti = DioAutoRegTrackingIsolate();

@@ -217,7 +217,7 @@ class _UserResultsPageState extends State<UserResultsPage> with TickerProviderSt
         initialIndex: 0,
         child: Scaffold(
           appBar: AppBar(
-            title: const Padding(padding: EdgeInsets.only(top: 12.0), child:  Text("User Stat")),
+            title: const Padding(padding: EdgeInsets.only(top: 12.0), child: Text("User Stat")),
             centerTitle: true,
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(32),

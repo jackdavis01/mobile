@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../middleware/autoregistration.dart';
 import '../middleware/listslocalstorage.dart';
+import '../apinetisolates/apiprofilehandlerisolatecontroller.dart';
+import '../pages/settingspage.dart';
 import '../pages/userresultspage.dart';
 import '../pages/modelresultspage.dart';
 import '../pages/infopage.dart';
@@ -8,11 +10,12 @@ import '../pages/infopage.dart';
 class HomeNavDrawer extends StatefulWidget {
 
   final Widget wCrown;
-  final AutoRegLocal autoRegLocal;
+  final DioProfileHandlerIsolate dphi;
+  final AutoRegLocal arl;
   final ListsLocalStorage lls;
   final DataPackageInfo Function() getDpi;
 
-  const HomeNavDrawer({Key? key, required this.wCrown, required this.autoRegLocal, required this.lls, required this.getDpi}): super(key: key);
+  const HomeNavDrawer({Key? key, required this.wCrown, required this.dphi, required this.arl, required this.lls, required this.getDpi}): super(key: key);
 
   @override
   _HomeNavDrawerState createState() => _HomeNavDrawerState();
@@ -26,15 +29,19 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      String uName = await widget.autoRegLocal.getUserName();
-      String uCrown = (await widget.autoRegLocal.getUserCrown()).toString();
-      setState(() {
-        userName = uName;
-        sUserCrown = uCrown;
-      });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshHeader();
     });
     super.initState();
+  }
+
+  Future<void> _refreshHeader() async {
+    String uName = await widget.arl.getUserName();
+    String uCrown = (await widget.arl.getUserCrown()).toString();
+    setState(() {
+      userName = uName;
+      sUserCrown = uCrown;
+    });
   }
 
   @override
@@ -46,7 +53,14 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
         backgroundColor: Colors.white,
         child: Padding(padding: const EdgeInsets.only(bottom: 8.0), child: widget.wCrown),
       ),
-      otherAccountsPictures: const <Widget>[],
+      otherAccountsPictures: (EAutoReged.reged == widget.arl.eAutoReged) ? <Widget>[
+        CircleAvatar(
+          child: IconButton(onPressed:  () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SettingsPage(dphi: widget.dphi, arl: widget.arl, lls: widget.lls, getDpi: widget.getDpi, refreshParent: _refreshHeader)),
+            );
+          }, icon: const Icon(Icons.edit)))] : null,
     );
     final drawerItems = ListView(
       children: <Widget>[
@@ -60,7 +74,7 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
             title: const Text('User Stat', style: TextStyle(fontSize: 18.0)),
             minLeadingWidth: 20.0,
             onTap: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => UserResultsPage(autoRegLocal: widget.autoRegLocal, lls: widget.lls)),
+              builder: (context) => UserResultsPage(autoRegLocal: widget.arl, lls: widget.lls)),
             ),
           ),
         ),
@@ -68,7 +82,7 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
           ListTile(
             title: const Text('Model Stat', style: TextStyle(fontSize: 18.0)),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => ModelResultsPage(autoRegLocal: widget.autoRegLocal, lls: widget.lls)),
+              builder: (context) => ModelResultsPage(autoRegLocal: widget.arl, lls: widget.lls)),
             ),
         )),
         ListTile(

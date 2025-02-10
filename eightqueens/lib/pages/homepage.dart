@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 import '../dartjs/nojsconnection.dart' if (dart.library.html) '../dartjs/jsconnection.dart' as dartjs;
@@ -12,6 +13,7 @@ import 'package:collection/collection.dart';
 import '../isolates/findsolutions.dart';
 import '../isolates/multithreadedfindsolutions.dart';
 import '../apinetisolates/api_isolateglobals.dart';
+import '../apinetisolates/apiprofilehandlerisolatecontroller.dart';
 import '../middleware/rankings.dart';
 import '../middleware/certificate.dart';
 import '../middleware/autoregistration.dart';
@@ -19,7 +21,7 @@ import '../middleware/insertresultsorautoreg.dart';
 import '../middleware/listslocalstorage.dart';
 import '../widgets/homenavdrawer.dart';
 import '../widgets/boxwidgets.dart';
-import 'configpage.dart';
+import 'settingspage.dart';
 import 'infopage.dart';
 import 'resultpage.dart';
 
@@ -93,7 +95,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   DataPackageInfo _dpi = DataPackageInfo(appName: "", packageName: "", version: "", buildNumber: "", buildMode: "");
 
-  ListsLocalStorage lls = ListsLocalStorage();
+  final ListsLocalStorage _lls = ListsLocalStorage();
+
+  final DioProfileHandlerIsolate _dphi = DioProfileHandlerIsolate();
 
   @override
   initState() {
@@ -103,7 +107,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     loadPackageInfo();
     arm = AutoRegMiddleware(autoRegLocal: arl);
     iroarm = InsertResultsOrAutoRegMiddleware(autoRegLocal: arl, autoRegMiddleware: arm);
-    if (!_foundation.kIsWeb) arl.initEAutoRegedFromLocal();
+    if (!_foundation.kIsWeb) {
+      arl.initEAutoRegedFromLocal();
+      loadUserNameIfMissing();
+    }
     _lsMultiThreadItems.add('8 Threads');
     wQueenImage = SvgPicture.asset(assetQueenName, semanticsLabel: 'Queen :)');
   }
@@ -122,6 +129,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     } else {
       disableNetworkProcessesAndKillAllNetworkIsolates();
       debugPrint('AppLifecycleState: $state');
+    }
+  }
+
+  Future<void> loadUserNameIfMissing() async {
+    await Future.delayed(const Duration(seconds: 1));
+    EAutoReged eAutoReged = arl.eAutoReged;
+    String sUsername = await arl.getUserName();
+    if (EAutoReged.reged == eAutoReged && AutoRegLocal.sMe == sUsername) {
+      int userId = arl.getUserId();
+      String base64username = base64.encode(utf8.encode(""));
+      List<dynamic> ldValue = await _dphi.callProfileHandlerRetryIsolateApi(1, userId, base64username);
+      bool success = ldValue[0];
+      Profile profile = ldValue[1];
+      if (success) {
+        String userName = profile.userName;
+        int credit = profile.credit;
+        arl.setUserNameLocal(userName);
+        arl.setUserCrownLocal(credit);
+        setState(() {});
+      }
     }
   }
 
@@ -764,31 +791,33 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         appBar: AppBar(
           title: Text(widget.title),
           actions: [
-            (_foundation.kIsWeb)
+            (!_foundation.kIsWeb && (Platform.isAndroid || Platform.isIOS))
                 ? IconButton(
                     icon: const Icon(Icons.settings),
-                    tooltip: 'Config Page',
+                    tooltip: 'Settings Page',
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const ConfigPage()),
+                        MaterialPageRoute(builder: (context) => SettingsPage(dphi: _dphi, arl: arl, lls: _lls, getDpi: getDpi, refreshParent: () async {})),
                       );
                     },
                   )
                 : const SizedBox.shrink(),
-            IconButton(
-              icon: const Icon(Icons.info),
-              tooltip: 'Info Page',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => InfoPage(dpi: _dpi)),
-                );
-              },
-            ),
+            (_foundation.kIsWeb)
+                ? IconButton(
+                    icon: const Icon(Icons.info),
+                    tooltip: 'Info Page',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => InfoPage(dpi: getDpi())),
+                      );
+                    },
+                  )
+                : const SizedBox.shrink(),
           ],
         ),
-        drawer: (_foundation.kIsWeb) ? null : HomeNavDrawer(wCrown: wQueenImage, autoRegLocal: arl, lls: lls, getDpi: getDpi),
+        drawer: (_foundation.kIsWeb) ? null : HomeNavDrawer(wCrown: wQueenImage, dphi: _dphi, arl: arl, lls: _lls, getDpi: getDpi),
         backgroundColor: Colors.white,
         body: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
 
@@ -830,16 +859,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (success) {
                 _dElapsedSended = _dElapsed;
                 _insertResultOrAutoRegStarted = false;
-                List<String> lsValueUR = lls.serializeURLoadDates( [["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
+                List<String> lsValueUR = _lls.serializeURLoadDates( [["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
                                                                      "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
                                                                     ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
                                                                      "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
-                lls.fssUserResultsDates.set(lsValueUR);
-                List<String> lsValueMR = lls.serializeMRLoadDates( [["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
+                _lls.fssUserResultsDates.set(lsValueUR);
+                List<String> lsValueMR = _lls.serializeMRLoadDates( [["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
                                                                      "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
                                                                     ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
                                                                      "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
-                lls.fssModelResultsDates.set(lsValueMR);
+                _lls.fssModelResultsDates.set(lsValueMR);
               }
             }
           }

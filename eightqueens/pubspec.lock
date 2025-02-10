@@ -416,14 +416,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
-  renderer_switcher:
-    dependency: "direct main"
-    description:
-      name: renderer_switcher
-      sha256: e261d6eaa05738c017b876ed98c6018bc9d77a8c1eb0ca5449a53ead41623613
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.0"
   shared_preferences:
     dependency: "direct main"
     description:
