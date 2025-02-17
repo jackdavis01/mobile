@@ -5,17 +5,17 @@ import '../middleware/autoregistration.dart';
 import '../middleware/listslocalstorage.dart';
 import '../widgets/modellistswidget.dart';
 
-class ModelResultsPage extends StatefulWidget {
+class ModelRunnersPage extends StatefulWidget {
   final AutoRegLocal autoRegLocal;
   final ListsLocalStorage lls;
-  const ModelResultsPage({Key? key, required this.autoRegLocal, required this.lls}) : super(key: key);
+  const ModelRunnersPage({Key? key, required this.autoRegLocal, required this.lls}) : super(key: key);
   @override
-  State<ModelResultsPage> createState() => _ModelResultsPageState();
+  State<ModelRunnersPage> createState() => _ModelRunnersPageState();
 }
 
-class _ModelResultsPageState extends State<ModelResultsPage> with TickerProviderStateMixin {
-  final int order = 2;
-  final int orderDirection = 1;
+class _ModelRunnersPageState extends State<ModelRunnersPage> with TickerProviderStateMixin {
+  final int order = 1;
+  final int orderDirection = 2;
   DioListModelResultsIsolate dlmri = DioListModelResultsIsolate();
 
   Future<dynamic> _callListModelRetryIsolateApi(int interval0, int thread0) {
@@ -25,11 +25,11 @@ class _ModelResultsPageState extends State<ModelResultsPage> with TickerProvider
 
   @override
   Widget build(BuildContext context) {
-    return ModelLists(pageTitle: "Model Stat",
-                      fssLslMLLoadDates: widget.lls.fssModelResultsDates,
+    return ModelLists(pageTitle: "Model Runners",
+                      fssLslMLLoadDates: widget.lls.fssModelRunnersDates,
                       serializeMLLoadDates: widget.lls.serializeMRLoadDates,
                       deserializeMLLoadDates: widget.lls.deserializeMRLoads,
-                      lslModel: widget.lls.lslModelResults,
+                      lslModel: widget.lls.lslModelRunners,
                       serializeLllmra: widget.lls.serializeLllmraList,
                       deserializeLllmra: widget.lls.deserializeLllmList,
                       callListModelRetryIsolateApi: _callListModelRetryIsolateApi);

@@ -135,9 +135,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future<void> loadUserNameIfMissing() async {
     await Future.delayed(const Duration(seconds: 1));
     EAutoReged eAutoReged = arl.eAutoReged;
+      //eAutoReged = EAutoReged.reged; // test code, should be commented out
     String sUsername = await arl.getUserName();
     if (EAutoReged.reged == eAutoReged && AutoRegLocal.sMe == sUsername) {
       int userId = arl.getUserId();
+        //userId = 0; // test code, should be commented out
+        //arl.setUserIdLocal(userId, "", 1); // test code, should be commented out
       String base64username = base64.encode(utf8.encode(""));
       List<dynamic> ldValue = await _dphi.callProfileHandlerRetryIsolateApi(1, userId, base64username);
       bool success = ldValue[0];
@@ -859,16 +862,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (success) {
                 _dElapsedSended = _dElapsed;
                 _insertResultOrAutoRegStarted = false;
-                List<String> lsValueUR = _lls.serializeURLoadDates( [["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                                    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
-                _lls.fssUserResultsDates.set(lsValueUR);
-                List<String> lsValueMR = _lls.serializeMRLoadDates( [["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                                    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
-                _lls.fssModelResultsDates.set(lsValueMR);
+                _lls.clearLocalListDates();
               }
             }
           }

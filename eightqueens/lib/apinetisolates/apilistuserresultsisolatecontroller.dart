@@ -54,7 +54,7 @@ class DioListUserResultsIsolate {
     }
     SendPort sendPort = ldInput[0];
     ListUserResultsDioPost lurdp =
-        ListUserResultsDioPost(apiKey: GNet.apiKeyRailwayListUR, userId: ldInput[2], interval: ldInput[3], threads: ldInput[4], limit: ldInput[5]);
+        ListUserResultsDioPost(apiKey: GNet.apiKeyRailwayListUR, userId: ldInput[2], interval: ldInput[3], threads: ldInput[4], order: ldInput[5], orderDirection: ldInput[6], limit: ldInput[7]);
     ListUserResultsDioResponse lurdr = await ListUserResultsDioResponse.createListUserResultsDioPost(
         GNet.uriListUserResults, ldInput[1],
         mBody: lurdp.toMap());
@@ -62,7 +62,7 @@ class DioListUserResultsIsolate {
     sendPort.send(jsonEncode(lurdr.toMap())); //sending data back to main thread's function
   }
 
-  Future<dynamic> _callListUserResultsIsolateApi(int userId0, int interval0, int threads0, int limit0, int nRetry) async {
+  Future<dynamic> _callListUserResultsIsolateApi(int userId0, int interval0, int threads0, int order0, int orderDirection0, int limit0, int nRetry) async {
     bool success = false;
     List<UserResultsAnswer> list = [];
     Map<String, List<UserResultsAnswer>> answer = { "list": list };
@@ -81,6 +81,8 @@ class DioListUserResultsIsolate {
       userId0,
       interval0,
       threads0,
+      order0,
+      orderDirection0,
       limit0
     ]); //spawing/creating new thread as isolates.
     String sIsolateId = "$sIsolateKey-$nRetry-${isolateLUR.hashCode}";
@@ -119,14 +121,14 @@ class DioListUserResultsIsolate {
     return cMsg.future;
   }
 
-  Future<dynamic> callListUserResultsRetryIsolateApi(int userId0, int interval0, int threads0, int limit0) async {
+  Future<dynamic> callListUserResultsRetryIsolateApi(int userId0, int interval0, int threads0, int order0, int orderDirection0, int limit0) async {
     const int nMaxRetry = nTimeoutRequestRetry4ListUserResults;
-    List<dynamic> ldValue = await _callListUserResultsIsolateApi(userId0, interval0, threads0, limit0, 0);
+    List<dynamic> ldValue = await _callListUserResultsIsolateApi(userId0, interval0, threads0, order0, orderDirection0, limit0, 0);
     bool success = ldValue[0];
     int iN = 1;
     while (!success && nMaxRetry >= iN) {
       await Future.delayed(const Duration(milliseconds: iTimeoutRetryDelayMs));
-      ldValue = await _callListUserResultsIsolateApi(userId0, interval0, threads0, limit0, iN);
+      ldValue = await _callListUserResultsIsolateApi(userId0, interval0, threads0, order0, orderDirection0, limit0, iN);
       success = ldValue[0];
       iN++;
     }
@@ -141,13 +143,15 @@ class ListUserResultsDioPost {
   final int userId;
   final int interval;
   final int threads;
+  final int order;
+  final int orderDirection;
   final int limit;
 
-  ListUserResultsDioPost({required this.apiKey, required this.userId, required this.interval, required this.threads, required this.limit});
+  ListUserResultsDioPost({required this.apiKey, required this.userId, required this.interval, required this.threads, required this.order, required this.orderDirection, required this.limit});
 
   factory ListUserResultsDioPost.fromMap(Map<String, dynamic> map) {
     return ListUserResultsDioPost(
-        apiKey: map['apiKey'], userId: map['userId'], interval: map['interval'], threads: map['threads'], limit: map['limit']);
+        apiKey: map['apiKey'], userId: map['userId'], interval: map['interval'], threads: map['threads'], order: map['order'], orderDirection: map['orderDirection'], limit: map['limit']);
   }
 
   Map<String,dynamic> toMap() {
@@ -156,6 +160,8 @@ class ListUserResultsDioPost {
     map["userId"] = userId;
     map["interval"] = interval;
     map["threads"] = threads;
+    map["order"] = order;
+    map["orderDirection"] = orderDirection;
     map["limit"] = limit;
     return map;
   }

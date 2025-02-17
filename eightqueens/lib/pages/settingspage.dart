@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../middleware/adhandler.dart';
 import '../middleware/autoregistration.dart';
 import '../middleware/listslocalstorage.dart';
 import '../widgets/globalwidgets.dart';
@@ -169,87 +170,90 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
         //backgroundColor: Colors.blue[50],
-        body: ListView(
-          children: <Widget>[
-            Align(
-              child: RoundedContainer(
-                width: double.infinity,
-                constraints: const BoxConstraints(minWidth: 296, maxWidth: 496),
-                margin: const EdgeInsets.all(12),
-                padding: const EdgeInsets.all(10),
-                child: Form(key: _formKey, child:
-                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-                    Container(
-                      width: double.infinity,
-                      constraints: const BoxConstraints(minWidth: 276, maxWidth: 476),
-                      child: const Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Text("User name:",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 32, bottom: 8),
-                      child: Text(_userName,
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(fontSize: 17),
-                        overflow: TextOverflow.ellipsis)),
-                    (EAutoReged.reged == widget.arl.eAutoReged)
-                    ? RoundedContainer(
+        body: Stack(alignment: AlignmentDirectional.bottomCenter, children: [
+          ListView(
+            children: <Widget>[
+              Align(
+                child: RoundedContainer(
+                  width: double.infinity,
+                  constraints: const BoxConstraints(minWidth: 296, maxWidth: 496),
+                  margin: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(10),
+                  child: Form(key: _formKey, child:
+                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
+                      Container(
                         width: double.infinity,
-                        backgroundcolor: Theme.of(context).hoverColor,
-                        constraints: const BoxConstraints(minWidth: 300, maxWidth: 500),
-                        margin: const EdgeInsets.all(6.0),
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: TextFormField(
-                                controller: _usernameController,
-                                validator: _textFormFieldValidator,
-                                maxLength: 22,
-                                keyboardType: TextInputType.name,
-                                decoration: InputDecoration(
-                                  border: const UnderlineInputBorder(),
-                                  filled: true,
-                                  fillColor: Theme.of(context).cardColor,
-                                  icon: const Icon(Icons.person),
-                                  labelText: 'Enter your new user name',
-                                  hintText: _hintText,
-                                  helperText: _usernameHelperText,
-                                  helperStyle: _helperStyle,
-                                  suffixIcon: _suffixIcon,
-                                ),
-                              )),
-                          ],
-                      ))
-                    : const SizedBox.shrink(),
-                    (EAutoReged.reged == widget.arl.eAutoReged)
-                    ? Align(child: Padding(padding: const EdgeInsets.only(top: 8), child:
-                          ElevatedButton(
-                            onPressed: ((_success ?? false) && _available) ? _submitPressed : null,
-                            child: const Text("Submit", style: TextStyle(fontSize: 18))
-                          ),
+                        constraints: const BoxConstraints(minWidth: 276, maxWidth: 476),
+                        child: const Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Text("User name:",
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 32, bottom: 8),
+                        child: Text(_userName,
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(fontSize: 17),
+                          overflow: TextOverflow.ellipsis)),
+                      (EAutoReged.reged == widget.arl.eAutoReged)
+                      ? RoundedContainer(
+                          width: double.infinity,
+                          backgroundcolor: Theme.of(context).hoverColor,
+                          constraints: const BoxConstraints(minWidth: 300, maxWidth: 500),
+                          margin: const EdgeInsets.all(6.0),
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: TextFormField(
+                                  controller: _usernameController,
+                                  validator: _textFormFieldValidator,
+                                  maxLength: 22,
+                                  keyboardType: TextInputType.name,
+                                  decoration: InputDecoration(
+                                    border: const UnderlineInputBorder(),
+                                    filled: true,
+                                    fillColor: Theme.of(context).cardColor,
+                                    icon: const Icon(Icons.person),
+                                    labelText: 'Enter your new user name',
+                                    hintText: _hintText,
+                                    helperText: _usernameHelperText,
+                                    helperStyle: _helperStyle,
+                                    suffixIcon: _suffixIcon,
+                                  ),
+                                )),
+                            ],
                         ))
-                    : RoundedContainer(
-                        width: double.infinity,
-                        backgroundcolor: Theme.of(context).hoverColor,
-                        constraints: const BoxConstraints(minWidth: 300, maxWidth: 500),
-                        margin: const EdgeInsets.all(6.0),
-                        padding: const EdgeInsets.all(14.0),
-                        child: const Text('Hello, if you don\'t like the username "Me" and want to change it, '
-                                          'please submit a result first by running the test on, for example, '
-                                          '2 threads. After that, you will be able to change your username. '
-                                          'Don\'t forget to turn on the internet.',
-                                          textAlign: TextAlign.justify,
-                                          style: TextStyle(fontSize: 17)),
-                      ),
-                  ]),
+                      : const SizedBox.shrink(),
+                      (EAutoReged.reged == widget.arl.eAutoReged)
+                      ? Align(child: Padding(padding: const EdgeInsets.only(top: 8), child:
+                            ElevatedButton(
+                              onPressed: ((_success ?? false) && _available) ? _submitPressed : null,
+                              child: const Text("Submit", style: TextStyle(fontSize: 18))
+                            ),
+                          ))
+                      : RoundedContainer(
+                          width: double.infinity,
+                          backgroundcolor: Theme.of(context).hoverColor,
+                          constraints: const BoxConstraints(minWidth: 300, maxWidth: 500),
+                          margin: const EdgeInsets.all(6.0),
+                          padding: const EdgeInsets.all(14.0),
+                          child: const Text('Hello, if you don\'t like the username "Me" and want to change it, '
+                                            'please submit a result first by running the test on, for example, '
+                                            '2 threads. After that, you will be able to change your username. '
+                                            'Don\'t forget to turn on the internet.',
+                                            textAlign: TextAlign.justify,
+                                            style: TextStyle(fontSize: 17)),
+                        ),
+                    ]),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+          const AdBanner(),
+        ]),
       ),
     );
   }

@@ -5,17 +5,17 @@ import '../middleware/autoregistration.dart';
 import '../middleware/listslocalstorage.dart';
 import '../widgets/modellistswidget.dart';
 
-class ModelResultsPage extends StatefulWidget {
+class ModelWorstResultsPage extends StatefulWidget {
   final AutoRegLocal autoRegLocal;
   final ListsLocalStorage lls;
-  const ModelResultsPage({Key? key, required this.autoRegLocal, required this.lls}) : super(key: key);
+  const ModelWorstResultsPage({Key? key, required this.autoRegLocal, required this.lls}) : super(key: key);
   @override
-  State<ModelResultsPage> createState() => _ModelResultsPageState();
+  State<ModelWorstResultsPage> createState() => _ModelWorstResultsPageState();
 }
 
-class _ModelResultsPageState extends State<ModelResultsPage> with TickerProviderStateMixin {
+class _ModelWorstResultsPageState extends State<ModelWorstResultsPage> with TickerProviderStateMixin {
   final int order = 2;
-  final int orderDirection = 1;
+  final int orderDirection = 2;
   DioListModelResultsIsolate dlmri = DioListModelResultsIsolate();
 
   Future<dynamic> _callListModelRetryIsolateApi(int interval0, int thread0) {
@@ -26,10 +26,10 @@ class _ModelResultsPageState extends State<ModelResultsPage> with TickerProvider
   @override
   Widget build(BuildContext context) {
     return ModelLists(pageTitle: "Model Stat",
-                      fssLslMLLoadDates: widget.lls.fssModelResultsDates,
+                      fssLslMLLoadDates: widget.lls.fssModelWorstResultsDates,
                       serializeMLLoadDates: widget.lls.serializeMRLoadDates,
                       deserializeMLLoadDates: widget.lls.deserializeMRLoads,
-                      lslModel: widget.lls.lslModelResults,
+                      lslModel: widget.lls.lslModelWorstResults,
                       serializeLllmra: widget.lls.serializeLllmraList,
                       deserializeLllmra: widget.lls.deserializeLllmList,
                       callListModelRetryIsolateApi: _callListModelRetryIsolateApi);
