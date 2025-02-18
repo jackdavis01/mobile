@@ -7,18 +7,18 @@ PODS:
   - flutter_udid (0.0.1):
     - Flutter
     - SAMKeychain
-  - Google-Mobile-Ads-SDK (11.10.0):
+  - Google-Mobile-Ads-SDK (11.13.0):
     - GoogleUserMessagingPlatform (>= 1.1)
-  - google_mobile_ads (5.2.0):
+  - google_mobile_ads (5.3.1):
     - Flutter
-    - Google-Mobile-Ads-SDK (~> 11.10.0)
+    - Google-Mobile-Ads-SDK (~> 11.13.0)
     - webview_flutter_wkwebview
   - GoogleUserMessagingPlatform (2.7.0)
-  - ironsource_mediation (3.0.1):
+  - ironsource_mediation (3.1.0):
     - Flutter
-    - IronSourceSDK (= 8.4.0.0)
+    - IronSourceSDK (= 8.6.0.0)
   - IronSourceAdQualitySDK (7.22.0)
-  - IronSourceSDK (8.4.0.0)
+  - IronSourceSDK (8.6.0.0)
   - IronSourceUnityAdsAdapter (4.3.45.0):
     - IronSourceSDK (~> 8.4)
     - UnityAds (= 4.12.5)
@@ -92,21 +92,21 @@ SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
   flutter_udid: b2417673f287ee62817a1de3d1643f47b9f508ab
-  Google-Mobile-Ads-SDK: 13e6e98edfd78ad8d8a791edb927658cc260a56f
-  google_mobile_ads: 2a538d8e42b1813809782792e48f8cf4374c2180
+  Google-Mobile-Ads-SDK: 14f57f2dc33532a24db288897e26494640810407
+  google_mobile_ads: fe0e2c1764ad95323dd0e3081d0bb2d58411f957
   GoogleUserMessagingPlatform: a8b56893477f67212fbc8411c139e61d463349f5
-  ironsource_mediation: 5984f014fab6d44fe3707ab058506bf0a1bd5be2
+  ironsource_mediation: f7e0476db35bbaf6e9a40c0e46932452268eca59
   IronSourceAdQualitySDK: d46d3db3e352793357c5c3aa8b630ea5b98dc15e
-  IronSourceSDK: 557a0edad39c2a48a225af07b491c672ca5acd36
+  IronSourceSDK: ae03a5aef5cc17a9868540aa409098e9614dfd48
   IronSourceUnityAdsAdapter: 825ab31e740d8ca24ab405cd99ff6258d6a62c6b
-  package_info_plus: 58f0028419748fad15bf008b270aaa8e54380b1c
+  package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   UnityAds: a4036ed911b4df2227d8137f4f777fcb86c4a2df
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
-  webview_flutter_wkwebview: 0982481e3d9c78fd5c6f62a002fcd24fc791f1e4
+  webview_flutter_wkwebview: a4af96a051138e28e29f60101d094683b9f82188
 
 PODFILE CHECKSUM: b55dd8d1f010bc9d0f5d6006f39f1c2aa0048e31
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

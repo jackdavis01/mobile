@@ -84,7 +84,7 @@ class _IronSourceTestPageState extends State<IronSourceTestPage> with Impression
         ? "2032a866d"
         : throw Exception("Unsupported Platform");
     try {
-      IronSource.setFlutterVersion('3.24.5');
+      IronSource.setFlutterVersion('3.29.0');
       IronSource.addImpressionDataListener(this);
       await enableDebug();
       await IronSource.shouldTrackNetworkState(true);
@@ -177,112 +177,95 @@ class LevelPlayRewardedVideoSection extends StatefulWidget {
       _LevelPlayRewardedVideoSectionState();
 }
 
-class _LevelPlayRewardedVideoSectionState extends State<LevelPlayRewardedVideoSection> with LevelPlayRewardedVideoListener {
-  bool _isRewardedVideoAvailable = false;
-  bool _isVideoAdVisible = false;
-  IronSourceRewardedVideoPlacement? _placement;
+class _LevelPlayRewardedVideoSectionState extends State<LevelPlayRewardedVideoSection> with LevelPlayRewardedAdListener {
+  final LevelPlayRewardedAd _rewardedAd = LevelPlayRewardedAd(adUnitId: Platform.isAndroid ? 'wi4iag4j3ki34clu' : 'gpwcxtrm9gscd82n');
 
   @override
   void initState() {
     super.initState();
-    IronSource.setLevelPlayRewardedVideoListener(this);
+    _rewardedAd.setListener(this);
   }
 
-  Future<void> _setRewardedVideoCustomParams() async {
-    final time = DateTime.now().millisecondsSinceEpoch.toString();
-    await IronSource.setRewardedVideoServerParams({'dateTimeMillSec': time});
-    Utils.showTextDialog(context, "RewardedVideo Custom Param Set", time);
+  void _loadAd() async {
+    _rewardedAd.loadAd();
   }
 
-  Future<void> _showRewardedVideo() async {
-    if (_isRewardedVideoAvailable && await IronSource.isRewardedVideoAvailable()) {
-      IronSource.showRewardedVideo();
+  Future<void> _showAd() async {
+    if (await _rewardedAd.isAdReady()) {
+      _rewardedAd.showAd(placementName: 'Default');
     }
+  }
+
+  void showTextDialog(BuildContext context, String title, String content) {
+    showDialog(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: Text(title),
+            content: Text(content),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                  },
+                  child: const Text('OK'))
+            ],
+          );
+        });
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      const Text("Rewarded Video", style: Utils.headingStyle),
-      HorizontalButtons([ButtonInfo("Show Rewarded Video", _showRewardedVideo),]),
-      HorizontalButtons([ButtonInfo("SetRewardedVideoServerParams", _setRewardedVideoCustomParams),]),
-      HorizontalButtons([ButtonInfo("ClearRewardedVideoServerParams", () => IronSource.clearRewardedVideoServerParams())
+      const Text("Rewarded Ad", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      HorizontalButtons([
+        ButtonInfo("Load Ad", _loadAd),
+        ButtonInfo("Show Ad", _showAd),
       ]),
     ]);
   }
 
   @override
-  void onAdAvailable(IronSourceAdInfo adInfo) {
-    debugPrint("RewardedVideo - onAdAvailable: $adInfo");
-    if (mounted) {
-      setState(() {
-        _isRewardedVideoAvailable = true;
-      });
-    }
+  void onAdRewarded(LevelPlayReward reward, LevelPlayAdInfo adInfo) {
+    debugPrint("Rewarded Ad - onAdRewarded: $adInfo");
+    showTextDialog(context, 'Rewarded', reward.toString());
   }
 
   @override
-  void onAdUnavailable() {
-    debugPrint("RewardedVideo - onAdUnavailable");
-    if (mounted) {
-      setState(() {
-        _isRewardedVideoAvailable = false;
-      });
-    }
+  void onAdClicked(LevelPlayAdInfo adInfo) {
+    debugPrint("Rewarded Ad - onAdClicked: $adInfo");
   }
 
   @override
-  void onAdOpened(IronSourceAdInfo adInfo) {
-    debugPrint("RewardedVideo - onAdOpened: $adInfo");
-    if (mounted) {
-      setState(() {
-        _isVideoAdVisible = true;
-      });
-    }
+  void onAdClosed(LevelPlayAdInfo adInfo) {
+    debugPrint("Rewarded Ad - onAdClosed: $adInfo");
   }
 
   @override
-  void onAdClosed(IronSourceAdInfo adInfo) {
-    debugPrint("RewardedVideo - onAdClosed: $adInfo");
-    setState(() {
-      _isVideoAdVisible = false;
-    });
-    if (mounted && _placement != null && !_isVideoAdVisible) {
-      Utils.showTextDialog(context, 'Video Reward', _placement?.toString() ?? '');
-      setState(() {
-        _placement = null;
-      });
-    }
+  void onAdDisplayFailed(LevelPlayAdError error, LevelPlayAdInfo adInfo) {
+    debugPrint("Rewarded Ad - onAdDisplayFailed: adInfo - $adInfo, error - $error");
   }
 
   @override
-  void onAdRewarded(IronSourceRewardedVideoPlacement placement, IronSourceAdInfo adInfo) {
-    debugPrint("RewardedVideo - onAdRewarded: $placement, $adInfo");
-    setState(() {
-      _placement = placement;
-    });
-    if (mounted && _placement != null && !_isVideoAdVisible) {
-      Utils.showTextDialog(context, 'Video Reward', _placement?.toString() ?? '');
-      setState(() {
-        _placement = null;
-      });
-    }
+  void onAdDisplayed(LevelPlayAdInfo adInfo) {
+    debugPrint("Rewarded Ad - onAdDisplayed: $adInfo");
   }
 
   @override
-  void onAdShowFailed(IronSourceError error, IronSourceAdInfo adInfo) {
-    debugPrint("RewardedVideo - onAdShowFailed: $error, $adInfo");
-    if (mounted) {
-      setState(() {
-        _isVideoAdVisible = false;
-      });
-    }
+  void onAdInfoChanged(LevelPlayAdInfo adInfo) {
+    debugPrint("Rewarded Ad - onAdInfoChanged: $adInfo");
   }
 
   @override
-  void onAdClicked(IronSourceRewardedVideoPlacement placement, IronSourceAdInfo adInfo) {
-    debugPrint("RewardedVideo - onAdClicked: $placement, $adInfo");
+  void onAdLoadFailed(LevelPlayAdError error) {
+    debugPrint("Rewarded Ad - onAdLoadFailed: $error");
   }
+
+  @override
+  void onAdLoaded(LevelPlayAdInfo adInfo) {
+    debugPrint("Rewarded Ad - onAdLoaded: $adInfo");
+  }
+
 }
 
 /// LevelPlay Interstitial Ad Section ------------------------------------------///

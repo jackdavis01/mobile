@@ -55,9 +55,15 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
+            minifyEnabled true
+        }
+        profile {
+            minifyEnabled true
+        }
+        debug {
+            minifyEnabled true
         }
     }
-
 }
 
 flutter {
@@ -69,6 +75,5 @@ dependencies {
     implementation 'com.google.android.gms:play-services-appset:16.0.2'
     implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
     implementation 'com.google.android.gms:play-services-basement:18.3.0'
-    implementation 'com.ironsource.sdk:mediationsdk:8.5.0'
-    implementation 'com.ironsource:adqualitysdk:7.22.2'
+    implementation 'com.ironsource:adqualitysdk:7.23.0'
 }

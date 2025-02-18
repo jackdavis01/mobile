@@ -25,7 +25,7 @@ class _InfoPageState extends State<InfoPage> {
   String version = "";
   String buildNumber = "";
   String buildMode = "";
-  final String platform = 'Flutter 3.27.4';
+  final String platform = 'Flutter 3.29.0';
   final String platformPrerelease = '-';
   final String platformChannel = 'stable';
   final String author = 'Jack Davis';
