@@ -17,3 +17,4 @@ jobs:
         with:
           workingDir: eightqueens
           baseHref: /mobile/
+          webRenderer: canvaskit
