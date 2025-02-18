@@ -13,8 +13,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-      - uses: bluefireteam/flutter-gh-pages@v7
+      - uses: bluefireteam/flutter-gh-pages@v9
         with:
           workingDir: eightqueens
           baseHref: /mobile/
-          webRenderer: canvaskit
