@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../middleware/adhandler.dart';
+import '../widgets/adhandler.dart';
 import '../middleware/autoregistration.dart';
 import '../middleware/listslocalstorage.dart';
+import '../parameters/themedata.dart';
 import '../widgets/globalwidgets.dart';
+import '../widgets/featurediscovery.dart';
 import '../apinetisolates/apiprofilehandlerisolatecontroller.dart';
 import 'infopage.dart';
 
@@ -13,9 +15,10 @@ class SettingsPage extends StatefulWidget {
   final AutoRegLocal arl;
   final ListsLocalStorage lls;
   final DataPackageInfo Function() getDpi;
+  final HomeFeatureDiscovery hfd;
   final Future<void> Function() refreshParent;
 
-  const SettingsPage({Key? key, required this.dphi, required this.arl, required this.lls, required this.getDpi, required this.refreshParent}) : super(key: key);
+  const SettingsPage({Key? key, required this.dphi, required this.arl, required this.lls, required this.getDpi, required this.hfd, required this.refreshParent}) : super(key: key);
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -144,18 +147,18 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  final ThemeData blueTheme = ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-  );
-
   @override
   Widget build(BuildContext context) {
+
+    widget.hfd.checkDiscoveryCompleted();
+
     return Theme(
       data: blueTheme,
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Settings"),
           centerTitle: true,
+          backgroundColor: blueTheme.colorScheme.inversePrimary,
           actions: [
             IconButton(
               icon: const Icon(Icons.info),
@@ -248,6 +251,28 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                     ]),
                   ),
+                ),
+              ),
+              // Add the new RoundedContainer here
+              RoundedContainer(
+                width: double.infinity,
+                backgroundcolor: Colors.white,
+                constraints: const BoxConstraints(minWidth: 300, maxWidth: 500),
+                margin: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.all(10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Feature discovery:', style: TextStyle(fontSize: 17)),
+                    Switch(
+                      value: !widget.hfd.bHasPreviouslyCompleted,
+                      onChanged: (bool value) {
+                        setState(() {
+                          widget.hfd.setHasPreviousCompleted(!value);
+                        });
+                      },
+                    ),
+                  ],
                 ),
               ),
             ],

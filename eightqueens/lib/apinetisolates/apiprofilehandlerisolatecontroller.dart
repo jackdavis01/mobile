@@ -56,15 +56,17 @@ class NewProfile {
   final String newUsername;
   final bool available;
   final bool updated;
+  final int credit;
 
   NewProfile(
-      {required this.newUsername, required this.available, required this.updated});
+      {required this.newUsername, required this.available, required this.updated, required this.credit});
 
   factory NewProfile.fromMap(Map<String, dynamic> map) {
     return NewProfile(
         newUsername: map['newUsername'] ?? "-1",
         available: map['available'] ?? false,
-        updated: map['updated'] ?? false);
+        updated: map['updated'] ?? false,
+        credit: map['credit'] ?? -1);
   }
 
   Map<String, dynamic> toMap() {
@@ -72,6 +74,7 @@ class NewProfile {
     map["newUsername"] = newUsername;
     map["available"] = available;
     map["updated"] = updated;
+    map["credit"] = credit;
     return map;
   }
 }

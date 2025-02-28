@@ -18,9 +18,10 @@ class UserResultsAnswer {
   final int bestResult;
   final int averageResult;
   final int worstResult;
+  final int credit;
 
   UserResultsAnswer(
-    {required this.me, required this.userName, required this.modelName, required this.runCount, required this.bestResult, required this.averageResult, required this.worstResult});
+    {required this.me, required this.userName, required this.modelName, required this.runCount, required this.bestResult, required this.averageResult, required this.worstResult, required this.credit});
 
   factory UserResultsAnswer.fromMap(Map<String, dynamic> map) {
     return UserResultsAnswer(
@@ -30,7 +31,8 @@ class UserResultsAnswer {
       runCount: map['run_count'] ?? 0,
       bestResult: map['best_result'] ?? 10000,
       averageResult: map['average_result'] ?? 10000,
-      worstResult: map['worst_result'] ?? 10000);
+      worstResult: map['worst_result'] ?? 10000,
+      credit: map['credit']);
   }
 
   Map<String, dynamic> toMap() {
@@ -42,6 +44,7 @@ class UserResultsAnswer {
     map["best_result"] = bestResult;
     map["average_result"] = averageResult;
     map["worst_result"] = worstResult;
+    map["credit"] = credit;
     return map;
   }
 }

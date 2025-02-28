@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' as _foundation;
 import '../parameters/globals.dart';
 import '../middleware/deviceinfoplus.dart';
-import '../middleware/adhandler.dart';
+import '../widgets/adhandler.dart';
 import '../widgets/globalwidgets.dart';
 import 'admobtest/admobtestpage.dart';
 import 'ironsourcetest/ironsourcetestpage.dart';

@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ironsource_mediation/ironsource_mediation.dart';
 import '../parameters/ads.dart' as ads;
-import 'deviceinfoplus.dart';
+import '../middleware/deviceinfoplus.dart';
 
 class AdBanner extends StatefulWidget {
   const AdBanner({Key? key}) : super(key: key);

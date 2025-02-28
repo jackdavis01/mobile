@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import '../apinetisolates/apilistuserresultsisolatecontroller.dart';
 import '../middleware/fsstorage.dart';
 import '../middleware/localstorage.dart';
-import '../middleware/adhandler.dart';
+import 'adhandler.dart';
 import '../middleware/customfloatingactionbuttonlocation.dart';
+import '../parameters/themedata.dart';
 
 class UserLists extends StatefulWidget {
 
@@ -214,10 +215,6 @@ class _UserListsState extends State<UserLists>  with TickerProviderStateMixin {
     }
   }
 
-  final ThemeData blueTheme = ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-  );
-
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -227,6 +224,7 @@ class _UserListsState extends State<UserLists>  with TickerProviderStateMixin {
         initialIndex: 0,
         child: Scaffold(
           appBar: AppBar(
+            backgroundColor: blueTheme.colorScheme.inversePrimary,
             title: Padding(
               padding: const EdgeInsets.only(top: 12.0), child: Text(widget.pageTitle)),
             centerTitle: true,
@@ -427,10 +425,15 @@ const List<DataColumn> kTableColumns = <DataColumn>[
     numeric: true,
     tooltip: "Worst results in second",
   ),
+  DataColumn(
+    label: Text('Crowns', style: TextStyle(fontSize: 17.6)),
+    numeric: true,
+    tooltip: "The collected crowns",
+  ),
 ];
 
 class _UserListsRow {
-  _UserListsRow(this.me, this.userName, this.modelName, this.runs, this.best, this.average, this.worst);
+  _UserListsRow(this.me, this.userName, this.modelName, this.runs, this.best, this.average, this.worst, this.crowns);
   final bool me;
   final String userName;
   final String modelName;
@@ -438,6 +441,7 @@ class _UserListsRow {
   final double best;
   final double average;
   final double worst;
+  final int crowns;
 }
 
 class UserListsDataTable {
@@ -455,6 +459,7 @@ class UserListsDataTable {
       lura0[row0].bestResult / 1000,
       lura0[row0].averageResult / 1000,
       lura0[row0].worstResult / 1000,
+      lura0[row0].credit,
     );
     return ulr;
   }
@@ -475,6 +480,7 @@ class UserListsDataTable {
           DataCell(Text(mur.best.toStringAsFixed(3), style: TextStyle(fontSize: 17, fontWeight: fw))),
           DataCell(Text(mur.average.toStringAsFixed(3), style: TextStyle(fontSize: 17, fontWeight: fw))),
           DataCell(Text(mur.worst.toStringAsFixed(3), style: TextStyle(fontSize: 17, fontWeight: fw))),
+          DataCell(Padding(padding: const EdgeInsets.only(right: 12), child: Text('${mur.crowns}', style: TextStyle(fontSize: 17, fontWeight: fw)))),
         ]));
     }
     return ldr;

@@ -5,7 +5,7 @@ import 'admobtest/admobtestpage.dart';
 import 'ironsourcetest/ironsourcetestpage.dart';
 import '../parameters/globals.dart';
 import '../middleware/deviceinfoplus.dart';
-import '../middleware/adhandler.dart';
+import '../widgets/adhandler.dart';
 import 'contributionpage.dart';
 import '../widgets/globalwidgets.dart';
 import '../widgets/rankrangelist.dart';

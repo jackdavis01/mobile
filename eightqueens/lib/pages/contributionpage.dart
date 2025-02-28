@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ironsource_mediation/ironsource_mediation.dart';
 import '../parameters/ads.dart' as ads;
+import '../parameters/themedata.dart';
 import '../widgets/messagedialogs.dart';
 
 // You can also test with your own ad unit IDs by registering your device as a
@@ -44,6 +45,7 @@ class _ContributionPageState extends State<ContributionPage> with ImpressionData
     _createRewardedAd();
     _createRewardedInterstitialAd();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _showAdQuestion(context);
       await initIronSource();
     });
   }
@@ -51,7 +53,7 @@ class _ContributionPageState extends State<ContributionPage> with ImpressionData
   void _createInterstitialAd() {
     InterstitialAd.load(
         adUnitId: Platform.isAndroid
-            ? 'ca-app-pub-4934899671581001/5660939728' // 'ca-app-pub- 3940256099942544/1033173712'
+            ? 'ca-app-pub-4934899671581001/5660939728'
             : 'ca-app-pub-4934899671581001/7435397266',
         request: request,
         adLoadCallback: InterstitialAdLoadCallback(
@@ -149,7 +151,7 @@ class _ContributionPageState extends State<ContributionPage> with ImpressionData
   void _createRewardedInterstitialAd() {
     RewardedInterstitialAd.load(
         adUnitId: Platform.isAndroid
-            ? 'ca-app-pub-4934899671581001/4826240326' // 'ca-app-pub- 3940256099942544/5354046379'
+            ? 'ca-app-pub-4934899671581001/4826240326'
             : 'ca-app-pub-4934899671581001/8636928176',
         request: request,
         rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
@@ -222,25 +224,29 @@ class _ContributionPageState extends State<ContributionPage> with ImpressionData
   }
 
   Future<void> _showAdQuestion(BuildContext context) async {
-    await info2ButtonDialog(
-      context,
-      false,
-      MainAxisAlignment.spaceBetween,
-      "Contribution",
-      "If you like this 8 Queens Performance Benchmark App and would like to contribute to its development, please watch an ad.",
-      "Later",
-      "Contribute",
-      () {},
-      () { _showRewardedOrInterstitialAd(); },
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-    );
+    if (context.mounted) {
+      if (ModalRoute.of(context)?.isCurrent == true) {
+        await info2ButtonDialog(
+          context,
+          false,
+          MainAxisAlignment.spaceBetween,
+          "Contribution",
+          "If you like this 8 Queens Performance Benchmark App and would like to contribute to its development, please watch an ad.",
+          "Later",
+          "Contribute",
+          () {},
+          () { _showRewardedOrInterstitialAd(); },
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(Duration.zero, () => _showAdQuestion(context));
-    return Scaffold(
+    return Theme(data: blueTheme, child: Scaffold(
       appBar: AppBar(
+        backgroundColor: blueTheme.colorScheme.inversePrimary,
         title: const Text('Contribution'),
         centerTitle: true,
       ),
@@ -254,7 +260,6 @@ class _ContributionPageState extends State<ContributionPage> with ImpressionData
               const Text('Benchmark', style: TextStyle(fontSize: 24)),
               const SizedBox(height: 24),
               const Text('Contribution', style: TextStyle(fontSize: 24)),
-              const Text('page.', style: TextStyle(fontSize: 24)),
               const SizedBox(height: 20),
               ElevatedButton(
                   child: const Padding(
@@ -269,7 +274,7 @@ class _ContributionPageState extends State<ContributionPage> with ImpressionData
           ]))
         ),
       ),
-    );
+    ));
   }
 
   /// ImpressionData listener --------------------------------------------------///

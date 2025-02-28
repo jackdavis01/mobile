@@ -1,5 +1,20 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+class SpGlobal {
+  static late final SharedPreferences pref;
+  static bool _init = false;
+  static Future init() async {
+    if (_init) return;
+    pref = await SharedPreferences.getInstance();
+    _init = true;
+    return pref;
+  }
+}
+
+late SharedPreferences spGlobal;
+
+LocalString lsBHasPreviousCompleted = LocalString(spGlobal, 'featurediscoveryhaspreviouscompleted', 'false');
+
 class LocalStringList {
   final SharedPreferences storage;
   final String _sKey;
@@ -31,5 +46,29 @@ class LocalStringList {
 
   Future<void> _saveSharedPreference(List<String> lsInput) async {
     await storage.setStringList(_sKey, lsInput);
+  }
+}
+
+class LocalString {
+  final SharedPreferences storage;
+  final String _sKey;
+  final String initString;
+
+  LocalString(this.storage, this._sKey, this.initString);
+
+  Future<String> get() async {
+    return await _getSharedPreference() ?? initString;
+  }
+
+  Future<String?> _getSharedPreference() async {
+    return storage.getString(_sKey);
+  }
+
+  set(String sValue) async {
+    await _saveSharedPreference(sValue);
+  }
+
+  Future<void> _saveSharedPreference(String sInput) async {
+    await storage.setString(_sKey, sInput);
   }
 }

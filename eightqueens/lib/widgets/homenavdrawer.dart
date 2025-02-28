@@ -1,3 +1,4 @@
+import 'package:eightqueens/widgets/featurediscovery.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../middleware/autoregistration.dart';
@@ -10,6 +11,8 @@ import '../pages/userrunnerspage.dart';
 import '../pages/modelrunnerspage.dart';
 import '../pages/userworstresultspage.dart';
 import '../pages/modelworstresultspage.dart';
+import '../pages/usercrownspage.dart';
+import '../pages/crowncollection.dart';
 import '../pages/infopage.dart';
 
 class HomeNavDrawer extends StatefulWidget {
@@ -19,8 +22,10 @@ class HomeNavDrawer extends StatefulWidget {
   final AutoRegLocal arl;
   final ListsLocalStorage lls;
   final DataPackageInfo Function() getDpi;
+  final HomeFeatureDiscovery hfd;
+  final Future<void> Function() refreshParent;
 
-  const HomeNavDrawer({Key? key, required this.wCrown, required this.dphi, required this.arl, required this.lls, required this.getDpi}): super(key: key);
+  const HomeNavDrawer({Key? key, required this.wCrown, required this.dphi, required this.arl, required this.lls, required this.getDpi, required this.hfd, required this.refreshParent}): super(key: key);
 
   @override
   _HomeNavDrawerState createState() => _HomeNavDrawerState();
@@ -43,6 +48,7 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
   Future<void> _refreshHeader() async {
     String uName = await widget.arl.getUserName();
     String uCrown = (await widget.arl.getUserCrown()).toString();
+    widget.refreshParent();
     setState(() {
       userName = uName;
       sUserCrown = uCrown;
@@ -60,12 +66,13 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
       ),
       otherAccountsPictures: (EAutoReged.reged == widget.arl.eAutoReged) ? <Widget>[
         CircleAvatar(
-          child: IconButton(onPressed:  () {
+          child: IconButton(onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => SettingsPage(dphi: widget.dphi, arl: widget.arl, lls: widget.lls, getDpi: widget.getDpi, refreshParent: _refreshHeader)),
+              MaterialPageRoute(builder: (context) => SettingsPage(dphi: widget.dphi, arl: widget.arl, lls: widget.lls, getDpi: widget.getDpi, hfd: widget.hfd, refreshParent: _refreshHeader)),
             );
-          }, icon: const Icon(Icons.edit)))] : null,
+          },
+          icon: const Icon(Icons.edit)))] : null,
     );
     final drawerItems = ListView(
       children: <Widget>[
@@ -152,6 +159,33 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
             ),
         )),
         ListTile(
+          leading: const Icon(Icons.person),
+          minLeadingWidth: 0,
+          horizontalTitleGap: 20.0,
+          title: const Text('User Crowns', style: TextStyle(fontSize: 18.0)),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => UserCrownsPage(autoRegLocal: widget.arl, lls: widget.lls)),
+          ),
+        ),
+        ListTile(
+          leading: Padding(padding: const EdgeInsets.only(bottom: 5), child: SizedBox.fromSize(child: widget.wCrown, size: const Size(28, 28))),
+          minLeadingWidth: 0,
+          title: const Text('Collect', style: TextStyle(fontSize: 18.0)),
+          onTap: (EAutoReged.reged == widget.arl.eAutoReged)
+            ? () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => CrownCollectionPage(wCrown: widget.wCrown, dphi: widget.dphi, arl: widget.arl, refreshParent: _refreshHeader)),
+              )
+            : () { showRunTestFirstTextDialog(context); },
+        ),
+        ListTile(
+          leading: const Icon(Icons.settings),
+          minLeadingWidth: 0,
+          title: const Text('Settings', style: TextStyle(fontSize: 18.0)),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => SettingsPage(dphi: widget.dphi, arl: widget.arl, lls: widget.lls, getDpi: widget.getDpi, hfd: widget.hfd, refreshParent: _refreshHeader)),
+          ),
+        ),
+        ListTile(
           leading: const Icon(Icons.info),
           minLeadingWidth: 0,
           title: const Text('Info', style: TextStyle(fontSize: 18.0)),
@@ -161,8 +195,12 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
         ),
       ],
     );
-    return Drawer(
-        child: drawerItems,
-    );
+    return SafeArea(child: Drawer(child: Scrollbar(
+      thumbVisibility: true,
+      trackVisibility: true,
+      thickness: 10,
+      radius: const Radius.circular(6),
+      child: drawerItems,
+    )));
   }
 }

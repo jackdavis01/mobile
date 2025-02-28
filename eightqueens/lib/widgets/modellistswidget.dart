@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import '../apinetisolates/apilistmodelresultsisolatecontroller.dart';
 import '../middleware/fsstorage.dart';
 import '../middleware/localstorage.dart';
-import '../middleware/adhandler.dart';
+import 'adhandler.dart';
 import '../middleware/customfloatingactionbuttonlocation.dart';
+import '../parameters/themedata.dart';
 
 class ModelLists extends StatefulWidget {
 
@@ -214,10 +215,6 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
     }
   }
 
-  final ThemeData blueTheme = ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-  );
-
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -227,6 +224,7 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
         initialIndex: 0,
         child: Scaffold(
           appBar: AppBar(
+            backgroundColor: blueTheme.colorScheme.inversePrimary,
             title: Padding(
               padding: const EdgeInsets.only(top: 12.0), child: Text(widget.pageTitle)),
             centerTitle: true,

@@ -1,23 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../apinetisolates/apilistmodelresultsisolatecontroller.dart';
-import '../middleware/fsstorage.dart';
 import 'localstorage.dart';
+import '../middleware/fsstorage.dart';
 import '../apinetisolates/apilistuserresultsisolatecontroller.dart';
-
-class SpGlobal {
-  static late final SharedPreferences pref;
-  static bool _init = false;
-  static Future init() async {
-    if (_init) return;
-    pref = await SharedPreferences.getInstance();
-    _init = true;
-    return pref;
-  }
-}
-
-late SharedPreferences spGlobal;
+import '../apinetisolates/apilistmodelresultsisolatecontroller.dart';
 
 class ListsLocalStorage {
 
@@ -33,6 +19,8 @@ class ListsLocalStorage {
   LocalStringList lslUserWorstResults = LocalStringList(spGlobal, 'userworstresults', []);
   FSSLocalStringList fssModelWorstResultsDates = FSSLocalStringList(fssGlobal, 'modelworstresultsdates', []);
   LocalStringList lslModelWorstResults = LocalStringList(spGlobal, 'modelworstresults', []);
+  FSSLocalStringList fssUserCrownsDates = FSSLocalStringList(fssGlobal, 'usercrownsdates', []);
+  LocalStringList lslUserCrowns = LocalStringList(spGlobal, 'modelcrowns', []);
 
   void clearLocalListDates() {
     List<String> lsValueUR = serializeURLoadDates([["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
@@ -77,6 +65,13 @@ class ListsLocalStorage {
                                                     ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
                                                      "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
     fssModelWorstResultsDates.set(lsValueMWR);
+    List<String> lsValueUC = serializeMRLoadDates([["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
+                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
+                                                   ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
+                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
+                                                   ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
+                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
+    fssUserCrownsDates.set(lsValueUC);
   }
 
   // UserResults and UserRunners Local conversions

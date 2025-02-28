@@ -1,5 +1,6 @@
 import 'dart:ui';
 //import 'package:eightqueens/widgets/iframeview.dart';
+import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/foundation.dart' as flutter_foundation;
 import 'package:flutter/material.dart';
 import '../parameters/globals.dart';
@@ -20,16 +21,16 @@ class _MainFrameState extends State<MainFrame> {
       debugPrint = (String? message, {int? wrapWidth}) {};
     }
     return MaterialApp(
-        //debugShowCheckedModeBanner: false,
-        scrollBehavior: DragPointerDeviceScrollBehavior(),
-        title: '8 Queens',
-        theme: ThemeData(
-          useMaterial3: false,
-          primarySwatch: Colors.blue,
-        ),
-        home: (flutter_foundation.kIsWeb)
-            ? const WebPageWidget()
-            : const HomePage(title: GV.sTitle, headerSize: 0));
+      //debugShowCheckedModeBanner: false,
+      scrollBehavior: DragPointerDeviceScrollBehavior(),
+      title: '8 Queens',
+      theme: ThemeData(
+        useMaterial3: false,
+        primarySwatch: Colors.blue,
+      ),
+      home: (flutter_foundation.kIsWeb)
+        ? const WebPageWidget()
+        : FeatureDiscovery(child: const HomePage(title: GV.sTitle, headerSize: 0)));
   }
 }
 

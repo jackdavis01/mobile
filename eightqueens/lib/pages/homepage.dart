@@ -2,12 +2,15 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
+import 'package:feature_discovery/feature_discovery.dart';
+
 import '../dartjs/nojsconnection.dart' if (dart.library.html) '../dartjs/jsconnection.dart' as dartjs;
 import "package:async/async.dart";
 import 'package:eightqueens/widgets/webwidgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' as _foundation show kIsWeb, kReleaseMode, kProfileMode, kDebugMode;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:collection/collection.dart';
 import '../isolates/findsolutions.dart';
@@ -21,7 +24,8 @@ import '../middleware/insertresultsorautoreg.dart';
 import '../middleware/listslocalstorage.dart';
 import '../widgets/homenavdrawer.dart';
 import '../widgets/boxwidgets.dart';
-import 'settingspage.dart';
+import '../widgets/featurediscovery.dart';
+import 'crowncollection.dart';
 import 'infopage.dart';
 import 'resultpage.dart';
 
@@ -99,6 +103,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   final DioProfileHandlerIsolate _dphi = DioProfileHandlerIsolate();
 
+  late HomeFeatureDiscovery hfd;
+  static const _kFeatureId1Start = 'feature1_start';
+  static const _kFeatureId2ThreadDD = 'feature2_thread_dd';
+  static const _kFeatureId3NavMenu = 'feature3_nav_menu';
+  static const _kFeatureId4CrownCollect = 'feature4_crown_collect';
+
   @override
   initState() {
     super.initState();
@@ -107,8 +117,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     loadPackageInfo();
     arm = AutoRegMiddleware(autoRegLocal: arl);
     iroarm = InsertResultsOrAutoRegMiddleware(autoRegLocal: arl, autoRegMiddleware: arm);
-    if (!_foundation.kIsWeb) {
+    if (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
       arl.initEAutoRegedFromLocal();
+      hfd = HomeFeatureDiscovery(context: context, lskFeatureIds: [_kFeatureId1Start, _kFeatureId2ThreadDD, _kFeatureId3NavMenu, _kFeatureId4CrownCollect], getMounted: () => mounted);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _refreshCrown();
+      });
+      // !Show feature discovery right after the page is ready.
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) => hfd.showDiscovery());
       loadUserNameIfMissing();
     }
     _lsMultiThreadItems.add('8 Threads');
@@ -125,6 +141,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (AppLifecycleState.resumed == state) {
       enableNetworkProcesses();
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) => hfd.showDiscovery());
       debugPrint('AppLifecycleState: $state');
     } else {
       disableNetworkProcessesAndKillAllNetworkIsolates();
@@ -135,12 +152,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future<void> loadUserNameIfMissing() async {
     await Future.delayed(const Duration(seconds: 1));
     EAutoReged eAutoReged = arl.eAutoReged;
-      //eAutoReged = EAutoReged.reged; // test code, should be commented out
+      // eAutoReged = EAutoReged.reged; // test code, should be commented out
     String sUsername = await arl.getUserName();
     if (EAutoReged.reged == eAutoReged && AutoRegLocal.sMe == sUsername) {
       int userId = arl.getUserId();
-        //userId = 0; // test code, should be commented out
-        //arl.setUserIdLocal(userId, "", 1); // test code, should be commented out
+        // userId = 0; // test code, should be commented out
+        // arl.setUserIdLocal(userId, "", 1); // test code, should be commented out
       String base64username = base64.encode(utf8.encode(""));
       List<dynamic> ldValue = await _dphi.callProfileHandlerRetryIsolateApi(1, userId, base64username);
       bool success = ldValue[0];
@@ -174,6 +191,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 ? "Debug"
                 : "Unknown";
     return DataPackageInfo.fromList(msdPI);
+  }
+
+  String sUserCrown = "";
+
+  Future<void> _refreshCrown() async {
+    String uCrown = (await arl.getUserCrown()).toString();
+    setState(() {
+      sUserCrown = uCrown;
+    });
   }
 
   Future<void> _startStepCounter() async {
@@ -749,32 +775,32 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       );
     }).toList();
     return DropdownButton(
-        items: lddItems,
-        value: _ddMultiThreadValue,
-        focusColor: Colors.transparent,
-        itemHeight: (1.5 < dFontSizeScale0)
-            ? 24 * (dFontSizeScale0 - 1.5) + kMinInteractiveDimension
-            : kMinInteractiveDimension,
-        onChanged: onChangedDDMultiThread);
+      items: lddItems,
+      value: _ddMultiThreadValue,
+      focusColor: Colors.transparent,
+      itemHeight: (1.5 < dFontSizeScale0)
+        ? 24 * (dFontSizeScale0 - 1.5) + kMinInteractiveDimension
+        : kMinInteractiveDimension,
+      onChanged: onChangedDDMultiThread);
   }
 
   Widget wTooltipThreads(double dFontSizeScale0) {
     return Tooltip(
         message:
-            "You can test the MultiThreaded speed of your device by choosing '2 Threads', '4 Threads' or '8 Threads'.",
+          "You can test the MultiThreaded speed of your device by choosing '2 Threads', '4 Threads' or '8 Threads'.",
         preferBelow: false,
         triggerMode: TooltipTriggerMode.tap,
         padding: const EdgeInsets.all(12),
         margin: const EdgeInsets.only(left: 60, right: 60),
         decoration:
-            BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
+          BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
         textStyle: const TextStyle(color: Colors.white, fontSize: 20),
         showDuration: const Duration(seconds: 10),
         child: Padding(
-            padding: EdgeInsets.only(right: 8 * dFontSizeScale0, top: 4 * dFontSizeScale0),
-            child: Transform.scale(
-                scale: dFontSizeScale0 * 1.36,
-                child: const Icon(Icons.info_outline, color: Colors.blue))));
+          padding: EdgeInsets.only(right: 8 * dFontSizeScale0, top: 4 * dFontSizeScale0),
+          child: Transform.scale(
+            scale: dFontSizeScale0 * 1.36,
+            child: const Icon(Icons.info_outline, color: Colors.blue))));
   }
 
   @override
@@ -790,22 +816,107 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       _iFPS = _liFrameCount.sum * (6 - _liFrameCount.length);
       _iFrameCount = 0;
     }
+
+    Widget wStartButtonBoxPortrait =  ElevatedButton(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
+        child: (!_bStart)
+          ? (0 == _stepCounter)
+            ? const Text("Start", style: TextStyle(fontSize: 20))
+            : const Text("Reset", style: TextStyle(fontSize: 20))
+          : const Text("Stop", style: TextStyle(fontSize: 20))),
+      style: ButtonStyle(
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+      onPressed: (!_bStart)
+        ? (0 == _stepCounter)
+          ? _startStepCounter
+          : _resetStepCounter
+        : _stopStepCounter
+    );
+
+    Widget wStartButtonBoxLandscape =  ElevatedButton(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
+        child: (!_bStart)
+          ? (0 == _stepCounter)
+            ? const Text("Start", style: TextStyle(fontSize: 20))
+            : const Text("Reset", style: TextStyle(fontSize: 20))
+          : const Text("Stop", style: TextStyle(fontSize: 20))),
+      style: ButtonStyle(
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+      onPressed: (!_bStart)
+        ? (0 == _stepCounter)
+          ? _startStepCounter
+          : _resetStepCounter
+        : _stopStepCounter
+    );
+
+    Widget wThreadBoxPortrait = Padding(
+      padding: EdgeInsets.only(left: 32 * _dFontSizeScalePortrait),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        wTooltipThreads(_dFontSizeScalePortrait),
+        Row(children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: ddMultiThread(_dFontSizeScalePortrait))
+        ]),
+        SizedBox(height: 6 * _dFontSizeScalePortrait),
+        Row(children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Text('FPS:',
+              style: TextStyle(fontSize: 20 * _dFontSizeScalePortrait))),
+          Text(_iFPS.toString(),
+            style:
+              TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers))
+        ]),
+        SizedBox(height: 26 * _dFontSizeScalePortrait)
+      ]));
+
+    Widget wThreadBoxLandscape(double dFontSizeScaleLandscape) { return ddMultiThread(dFontSizeScaleLandscape); }
+
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
+          centerTitle: true,
+          leading: (_foundation.kIsWeb) ? null : Builder(
+            builder: (BuildContext context) {
+              return Center(child: IconButton(
+                iconSize: 28,
+                icon: const NavMenuDescribedFeatureOverlay(
+                  featureId: _kFeatureId3NavMenu,
+                  child: Icon(Icons.menu_rounded)),
+                onPressed: () { Scaffold.of(context).openDrawer(); },
+                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              ));
+            },
+          ),
           actions: [
             (!_foundation.kIsWeb && (Platform.isAndroid || Platform.isIOS))
-                ? IconButton(
-                    icon: const Icon(Icons.settings),
-                    tooltip: 'Settings Page',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SettingsPage(dphi: _dphi, arl: arl, lls: _lls, getDpi: getDpi, refreshParent: () async {})),
-                      );
-                    },
-                  )
-                : const SizedBox.shrink(),
+                ? CrownCollectDescribedFeatureOverlay(
+                    featureId: _kFeatureId4CrownCollect,
+                    wCrown: wQueenImage,
+                    child: IntrinsicWidth(
+                      child: IntrinsicHeight(
+                        child: TextButton.icon(
+                          icon: Padding(padding: const EdgeInsets.only(bottom: 4), child: SizedBox.fromSize(child: wQueenImage, size: const Size(28, 28))),
+                          label: Padding(padding: const EdgeInsets.only(right: 4), child: Text(sUserCrown, style: const TextStyle(fontSize: 18), maxLines: 1)),
+                          onPressed: (EAutoReged.reged == arl.eAutoReged)
+                            ? () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => CrownCollectionPage(wCrown: wQueenImage, dphi: _dphi, arl: arl, refreshParent: _refreshCrown)),
+                                );
+                              }
+                            : () { showRunTestFirstTextDialog(context); },
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                          ),
+                    ))),
+                )
+              : const SizedBox.shrink(),
             (_foundation.kIsWeb)
                 ? IconButton(
                     icon: const Icon(Icons.info),
@@ -820,7 +931,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 : const SizedBox.shrink(),
           ],
         ),
-        drawer: (_foundation.kIsWeb) ? null : HomeNavDrawer(wCrown: wQueenImage, dphi: _dphi, arl: arl, lls: _lls, getDpi: getDpi),
+        drawer: (_foundation.kIsWeb) ? null : HomeNavDrawer(wCrown: wQueenImage, dphi: _dphi, arl: arl, lls: _lls, getDpi: getDpi, hfd: hfd, refreshParent: _refreshCrown),
         backgroundColor: Colors.white,
         body: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
 
@@ -829,14 +940,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => ResultPage(
-                        key: _resultPageKey,
-                        speed: _iSpeedRank,
-                        color: cNumbers,
-                        backgroundcolor: cResult0,
-                        threads: _nThreadsStarted,
-                        elapsed: _dElapsed,
-                        rankname: _sRankName)),
+                  builder: (context) => ResultPage(
+                    key: _resultPageKey,
+                    speed: _iSpeedRank,
+                    color: cNumbers,
+                    backgroundcolor: cResult0,
+                    threads: _nThreadsStarted,
+                    elapsed: _dElapsed,
+                    rankname: _sRankName)),
               );
             }
           }
@@ -862,6 +973,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (success) {
                 _dElapsedSended = _dElapsed;
                 _insertResultOrAutoRegStarted = false;
+                _refreshCrown();
                 _lls.clearLocalListDates();
               }
             }
@@ -976,29 +1088,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 const Spacer(),
               ])),
               Positioned(
-                  left: 0,
-                  bottom: 0,
-                  child: Padding(
-                      padding: EdgeInsets.only(left: 32 * _dFontSizeScalePortrait),
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        wTooltipThreads(_dFontSizeScalePortrait),
-                        Row(children: [
-                          Padding(
-                              padding: const EdgeInsets.only(right: 10),
-                              child: ddMultiThread(_dFontSizeScalePortrait))
-                        ]),
-                        SizedBox(height: 6 * _dFontSizeScalePortrait),
-                        Row(children: [
-                          Padding(
-                              padding: const EdgeInsets.only(right: 10),
-                              child: Text('FPS:',
-                                  style: TextStyle(fontSize: 20 * _dFontSizeScalePortrait))),
-                          Text(_iFPS.toString(),
-                              style:
-                                  TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers))
-                        ]),
-                        SizedBox(height: 26 * _dFontSizeScalePortrait)
-                      ])))
+                left: 0,
+                bottom: 0,
+                child: (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid))
+                  ? ThreadDropdownDescribedFeatureOverlay(
+                      featureId: _kFeatureId2ThreadDD,
+                      contentLocation: ContentLocation.above,
+                      child: wThreadBoxPortrait,
+                    )
+                  : wThreadBoxPortrait,
+              ),
             ]);
           } else {
             return Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
@@ -1046,8 +1145,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       Row(children: [
                         const Spacer(),
                         Padding(
-                            padding: const EdgeInsets.only(top: 4, right: 12),
-                            child: ddMultiThread(_dFontSizeScaleLandscape))
+                          padding: const EdgeInsets.only(top: 4, right: 12),
+                          child: (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid))
+                            ? ThreadDropdownDescribedFeatureOverlay(
+                                featureId: _kFeatureId2ThreadDD,
+                                contentLocation: ContentLocation.below,
+                                child: wThreadBoxLandscape(_dFontSizeScaleLandscape))
+                            : wThreadBoxLandscape(_dFontSizeScaleLandscape)),
                       ]),
                       (1.76 > (dScreenWidth / dScreenHeight))
                           ? Row(children: [
@@ -1086,22 +1190,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           : _pauseStepCounter
                       : null),
               const SizedBox(width: 16),
-              ElevatedButton(
-                  child: Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
-                      child: (!_bStart)
-                          ? (0 == _stepCounter)
-                              ? const Text("Start", style: TextStyle(fontSize: 20))
-                              : const Text("Reset", style: TextStyle(fontSize: 20))
-                          : const Text("Stop", style: TextStyle(fontSize: 20))),
-                  style: ButtonStyle(
-                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
-                  onPressed: (!_bStart)
-                      ? (0 == _stepCounter)
-                          ? _startStepCounter
-                          : _resetStepCounter
-                      : _stopStepCounter)
+              (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid))
+              ? StartButtonDescribedFeatureOverlay(
+                  featureId: _kFeatureId1Start,
+                  child: wStartButtonBoxPortrait,
+                )
+              : wStartButtonBoxPortrait,
             ]);
           } else {
             return Column(mainAxisAlignment: MainAxisAlignment.end, children: [
@@ -1120,22 +1214,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           : _pauseStepCounter
                       : null),
               const SizedBox(height: 16),
-              ElevatedButton(
-                  child: Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
-                      child: (!_bStart)
-                          ? (0 == _stepCounter)
-                              ? const Text("Start", style: TextStyle(fontSize: 20))
-                              : const Text("Reset", style: TextStyle(fontSize: 20))
-                          : const Text("Stop", style: TextStyle(fontSize: 20))),
-                  style: ButtonStyle(
-                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
-                  onPressed: (!_bStart)
-                      ? (0 == _stepCounter)
-                          ? _startStepCounter
-                          : _resetStepCounter
-                      : _stopStepCounter)
+              (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid))
+              ? StartButtonDescribedFeatureOverlay(
+                  featureId: _kFeatureId1Start,
+                  child: wStartButtonBoxLandscape,
+                )
+              : wStartButtonBoxLandscape,
             ]);
           }
         }));

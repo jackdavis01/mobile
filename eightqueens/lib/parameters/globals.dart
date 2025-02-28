@@ -14,4 +14,5 @@ class GV {
   static const List<String> lsWebRenderers = ['Auto', 'HTML', 'CanvasKit'];
 
   static bool bDev = !(flutter_foundation.kReleaseMode);
+  static bool bFirstCrownCollectionMessage = true;
 }
