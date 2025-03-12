@@ -133,16 +133,7 @@ class _SettingsPageState extends State<SettingsPage> {
           _hintText = "Saved 😊";
           _userName = newUsername;
         });
-        List<String> lsValueUR = widget.lls.serializeURLoadDates( [["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                                   ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
-        widget.lls.fssUserResultsDates.set(lsValueUR);
-        List<String> lsValueMR = widget.lls.serializeMRLoadDates( [["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                                   ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
-        widget.lls.fssModelResultsDates.set(lsValueMR);
+        widget.lls.clearLocalListDates();
       }
     }
   }
@@ -254,16 +245,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
               // Add the new RoundedContainer here
-              RoundedContainer(
+              Center(child: RoundedContainer(
                 width: double.infinity,
                 backgroundcolor: Colors.white,
-                constraints: const BoxConstraints(minWidth: 300, maxWidth: 500),
+                constraints: const BoxConstraints(minWidth: 296, maxWidth: 496),
                 margin: const EdgeInsets.all(12.0),
                 padding: const EdgeInsets.all(10.0),
-                child: Row(
+                child: Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Feature discovery:', style: TextStyle(fontSize: 17)),
+                    const Expanded(child: Text('Feature discovery:', style: TextStyle(fontSize: 17), maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis)),
                     Switch(
                       value: !widget.hfd.bHasPreviouslyCompleted,
                       onChanged: (bool value) {
@@ -273,8 +264,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       },
                     ),
                   ],
-                ),
-              ),
+                )),
+              )),
+              const SizedBox(height: 64), // ad banner place
             ],
           ),
           const AdBanner(),

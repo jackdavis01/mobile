@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
-import 'package:feature_discovery/feature_discovery.dart';
-
 import '../dartjs/nojsconnection.dart' if (dart.library.html) '../dartjs/jsconnection.dart' as dartjs;
 import "package:async/async.dart";
 import 'package:eightqueens/widgets/webwidgets.dart';
@@ -12,11 +10,13 @@ import 'package:flutter/foundation.dart' as _foundation show kIsWeb, kReleaseMod
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:feature_discovery/feature_discovery.dart';
 import 'package:collection/collection.dart';
 import '../isolates/findsolutions.dart';
 import '../isolates/multithreadedfindsolutions.dart';
 import '../apinetisolates/api_isolateglobals.dart';
 import '../apinetisolates/apiprofilehandlerisolatecontroller.dart';
+import '../middleware/deviceinfoplus.dart';
 import '../middleware/rankings.dart';
 import '../middleware/certificate.dart';
 import '../middleware/autoregistration.dart';
@@ -25,7 +25,7 @@ import '../middleware/listslocalstorage.dart';
 import '../widgets/homenavdrawer.dart';
 import '../widgets/boxwidgets.dart';
 import '../widgets/featurediscovery.dart';
-import 'crowncollection.dart';
+import 'crowncollectionpage.dart';
 import 'infopage.dart';
 import 'resultpage.dart';
 
@@ -39,7 +39,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteAware {
   final FindSolutions findSolution = FindSolutions();
   final MultiTreadedFindSolution multiThreadedFindSolution = MultiTreadedFindSolution();
   final int iDisplayDelayConstant = 180000;
@@ -123,7 +123,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _refreshCrown();
       });
-      // !Show feature discovery right after the page is ready.
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) => hfd.showDiscovery());
       loadUserNameIfMissing();
     }
@@ -141,7 +140,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (AppLifecycleState.resumed == state) {
       enableNetworkProcesses();
-      SchedulerBinding.instance.addPostFrameCallback((Duration duration) => hfd.showDiscovery());
       debugPrint('AppLifecycleState: $state');
     } else {
       disableNetworkProcessesAndKillAllNetworkIsolates();
@@ -735,7 +733,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget wDisplayNumbers(double dFontSizeScale0) {
     return Column(
       children: [
-        Text('Combinations checked:', style: TextStyle(fontSize: 20 * dFontSizeScale0)),
+        Text('Combinations checked:', style: TextStyle(fontSize: 20 * dFontSizeScale0), textAlign: TextAlign.center),
         Text(
           '$_stepCounter',
           style: TextStyle(fontSize: 32 * dFontSizeScale0, color: cNumbers),
@@ -903,14 +901,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         child: TextButton.icon(
                           icon: Padding(padding: const EdgeInsets.only(bottom: 4), child: SizedBox.fromSize(child: wQueenImage, size: const Size(28, 28))),
                           label: Padding(padding: const EdgeInsets.only(right: 4), child: Text(sUserCrown, style: const TextStyle(fontSize: 18), maxLines: 1)),
-                          onPressed: (EAutoReged.reged == arl.eAutoReged)
+                          onPressed: (EAutoReged.reged == arl.eAutoReged && !_foundation.kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion))
                             ? () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => CrownCollectionPage(wCrown: wQueenImage, dphi: _dphi, arl: arl, refreshParent: _refreshCrown)),
+                                  MaterialPageRoute(builder: (context) => CrownCollectionPage(wCrown: wQueenImage, dphi: _dphi, arl: arl, lls: _lls, iInterval: 0, refreshParent: _refreshCrown)),
                                 );
                               }
-                            : () { showRunTestFirstTextDialog(context); },
+                            : (!_foundation.kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion))
+                              ? () { showRunTestFirstTextDialog(context); }
+                              : null,
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.white,
                           ),
@@ -932,6 +932,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           ],
         ),
         drawer: (_foundation.kIsWeb) ? null : HomeNavDrawer(wCrown: wQueenImage, dphi: _dphi, arl: arl, lls: _lls, getDpi: getDpi, hfd: hfd, refreshParent: _refreshCrown),
+        onDrawerChanged: (isOpen) {
+          if (!isOpen) {
+            SchedulerBinding.instance.addPostFrameCallback((Duration duration) => hfd.showDiscovery());
+          }
+        },
         backgroundColor: Colors.white,
         body: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
 
@@ -947,14 +952,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     backgroundcolor: cResult0,
                     threads: _nThreadsStarted,
                     elapsed: _dElapsed,
-                    rankname: _sRankName)),
+                    rankname: _sRankName,
+                    wCrown: wQueenImage,
+                    dphi: _dphi,
+                    arl: arl,
+                    lls: _lls,
+                    refreshParent: _refreshCrown,
+                  )),
               );
             }
           }
 
           _startOpenResultPageAfterWait(Color cResult0) async {
-            const int iWaitMsSec = 3000;
-            for (int i = 0; i < iWaitMsSec; i += 100) {
+            const int iOpenResultPageWaitMsSec = 2500;
+            for (int i = 0; i < iOpenResultPageWaitMsSec; i += 100) {
               await Future.delayed(const Duration(milliseconds: 100));
               if (pow(8, 8) != _stepCounter || _bResultPageOpened) break;
             }
@@ -1026,7 +1037,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 child: Transform.scale(scale: 380 / dScreenSizeLandscape, child: wQueenImage));
             wTimeElapsedLandscape = Text(
                 _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
-                style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers));
+                style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers), maxLines: 1);
           }
           if (pow(8, 8) == _stepCounter) {
             if (!_foundation.kIsWeb && !_insertResultOrAutoRegStarted) {

@@ -25,7 +25,7 @@ class _InfoPageState extends State<InfoPage> {
   String version = "";
   String buildNumber = "";
   String buildMode = "";
-  final String platform = 'Flutter 3.29.0';
+  final String platform = 'Flutter 3.29.1';
   final String platformPrerelease = '-';
   final String platformChannel = 'stable';
   final String author = 'Jack Davis';
@@ -277,21 +277,17 @@ class _InfoPageState extends State<InfoPage> {
                                         ))
                                     : const SizedBox.shrink(),
                                 const SizedBox(height: 5),
-                                Row(children: <Widget>[
-                                  const Expanded(child: SizedBox.shrink()),
-                                  const Text(
-                                    'Version number: ',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Text(
-                                    version,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context).primaryColorDark,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const Expanded(child: SizedBox.shrink()),
-                                ]),
+                                const Text(
+                                  'Version number: ',
+                                  style: TextStyle(fontSize: 18),
+                                ),
+                                Text(
+                                  version,
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Theme.of(context).primaryColorDark,
+                                      fontWeight: FontWeight.bold),
+                                ),
                                 Row(children: <Widget>[
                                   const Expanded(child: SizedBox.shrink()),
                                   const Text(
@@ -322,21 +318,17 @@ class _InfoPageState extends State<InfoPage> {
                                   ),
                                   const Expanded(child: SizedBox.shrink()),
                                 ]),
-                                Row(children: <Widget>[
-                                  const Expanded(child: SizedBox.shrink()),
-                                  const Text(
-                                    'Platform: ',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Text(
-                                    platform,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context).primaryColorDark,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const Expanded(child: SizedBox.shrink()),
-                                ]),
+                                const Text(
+                                  'Platform: ',
+                                  style: TextStyle(fontSize: 18),
+                                ),
+                                Text(
+                                  platform,
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Theme.of(context).primaryColorDark,
+                                      fontWeight: FontWeight.bold),
+                                ),
                                 Row(children: <Widget>[
                                   const Expanded(child: SizedBox.shrink()),
                                   const Text(

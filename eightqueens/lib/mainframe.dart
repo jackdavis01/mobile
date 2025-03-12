@@ -1,7 +1,6 @@
 import 'dart:ui';
-//import 'package:eightqueens/widgets/iframeview.dart';
 import 'package:feature_discovery/feature_discovery.dart';
-import 'package:flutter/foundation.dart' as flutter_foundation;
+import 'package:flutter/foundation.dart' as flutter_foundation show kReleaseMode, kIsWeb;
 import 'package:flutter/material.dart';
 import '../parameters/globals.dart';
 import '../widgets/webwidgets.dart';

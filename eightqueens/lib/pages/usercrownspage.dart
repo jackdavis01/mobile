@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../apinetisolates/apilistuserresultsisolatecontroller.dart';
 import '../middleware/autoregistration.dart';
 import '../middleware/listslocalstorage.dart';
-import '../widgets/userlistswidget.dart';
+import '../widgets/usercrownlistswidget.dart';
 
 class UserCrownsPage extends StatefulWidget {
   final AutoRegLocal autoRegLocal;
@@ -19,14 +19,14 @@ class _UserCrownsPageState extends State<UserCrownsPage> with TickerProviderStat
   DioListUserResultsIsolate dluri = DioListUserResultsIsolate();
 
 
-  Future<dynamic> _callListUserRetryIsolateApi(int interval0, int thread0) {
-    return dluri.callListUserResultsRetryIsolateApi(widget.autoRegLocal.getUserId(), interval0, thread0,
+  Future<dynamic> _callListUserRetryIsolateApi() {
+    return dluri.callListUserResultsRetryIsolateApi(widget.autoRegLocal.getUserId(), 0, 0,
                                                     order, orderDirection, 100);
   }
 
   @override
   Widget build(BuildContext context) {
-    return UserLists(pageTitle: "User Crowns",
+    return UserCrownLists(pageTitle: "Crown Leaders",
                      fssLslULLoadDates: widget.lls.fssUserCrownsDates,
                      serializeULLoadDates: widget.lls.serializeURLoadDates,
                      deserializeULLoadDates: widget.lls.deserializeURLoads,

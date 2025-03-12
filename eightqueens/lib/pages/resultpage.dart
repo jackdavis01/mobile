@@ -1,14 +1,19 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
+import '../apinetisolates/apiprofilehandlerisolatecontroller.dart';
+import '../middleware/autoregistration.dart';
+import '../middleware/listslocalstorage.dart';
 import 'admobtest/admobtestpage.dart';
 import 'ironsourcetest/ironsourcetestpage.dart';
 import '../parameters/globals.dart';
 import '../middleware/deviceinfoplus.dart';
-import '../widgets/adhandler.dart';
 import 'contributionpage.dart';
+import 'crowncollectionpage.dart';
 import '../widgets/globalwidgets.dart';
 import '../widgets/rankrangelist.dart';
+import '../widgets/adhandler.dart';
 
 class ResultPage extends StatefulWidget {
   final int speed;
@@ -17,6 +22,12 @@ class ResultPage extends StatefulWidget {
   final int threads;
   final Duration elapsed;
   final String rankname;
+  final Widget wCrown;
+  final DioProfileHandlerIsolate dphi;
+  final AutoRegLocal arl;
+  final ListsLocalStorage lls;
+  final Future<void> Function() refreshParent;
+
   const ResultPage(
       {Key? key,
       required this.speed,
@@ -24,7 +35,12 @@ class ResultPage extends StatefulWidget {
       required this.backgroundcolor,
       required this.threads,
       required this.elapsed,
-      required this.rankname})
+      required this.rankname,
+      required this.wCrown,
+      required this.dphi,
+      required this.arl,
+      required this.lls,
+      required this.refreshParent})
       : super(key: key);
   @override
   ResultPageState createState() => ResultPageState();
@@ -39,15 +55,53 @@ class ResultPageState extends State<ResultPage> {
   void _openIronSourceTestPage() =>  Navigator.push(context, MaterialPageRoute(builder: (context) => const IronSourceTestPage()));
 
   ScrollController scrollController = ScrollController();
+  bool _userScrolled = false;
 
   @override
   void initState() {
     super.initState();
+    scrollController.addListener(_scrollListener);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 5000));
-      if (mounted) scrollController.animateTo(420, duration: const Duration(milliseconds: 1000), curve: Curves.easeInOut);
+      _autoScrollAfterWait();
+      _collectCrownsAfterWait();
     });
   }
+
+  @override
+  void dispose() {
+    scrollController.removeListener(_scrollListener);
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (scrollController.position.userScrollDirection != ScrollDirection.idle) {
+      setState(() {
+        _userScrolled = true;
+      });
+    }
+  }
+
+  Future<void> _autoScrollAfterWait() async {
+    await Future.delayed(const Duration(milliseconds: 5000));
+    if (mounted && !_userScrolled) scrollController.animateTo(420, duration: const Duration(milliseconds: 1000), curve: Curves.easeInOut);
+  }
+
+  Future<void> _collectCrownsAfterWait() async {
+    if (!kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion)) {
+      await Future.delayed(const Duration(milliseconds: 10000));
+      if (mounted && GV.bFirstIntervalCrownCollectionMessage) {
+        int iCrown = await widget.arl.getUserCrown();
+        int iInterval = (2 > iCrown) ? 1 : (3 > iCrown) ? 2 : 0;
+        if (0 < iInterval) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CrownCollectionPage(wCrown: widget.wCrown, dphi: widget.dphi, arl: widget.arl, lls: widget.lls, iInterval: iInterval, refreshParent: widget.refreshParent)),
+          );
+        }
+      }
+    }
+  } 
 
   @override
   Widget build(BuildContext context) {

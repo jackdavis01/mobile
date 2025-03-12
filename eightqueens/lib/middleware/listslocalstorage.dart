@@ -20,7 +20,7 @@ class ListsLocalStorage {
   FSSLocalStringList fssModelWorstResultsDates = FSSLocalStringList(fssGlobal, 'modelworstresultsdates', []);
   LocalStringList lslModelWorstResults = LocalStringList(spGlobal, 'modelworstresults', []);
   FSSLocalStringList fssUserCrownsDates = FSSLocalStringList(fssGlobal, 'usercrownsdates', []);
-  LocalStringList lslUserCrowns = LocalStringList(spGlobal, 'modelcrowns', []);
+  LocalStringList lslUserCrowns = LocalStringList(spGlobal, 'usercrowns', []);
 
   void clearLocalListDates() {
     List<String> lsValueUR = serializeURLoadDates([["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
@@ -65,12 +65,7 @@ class ListsLocalStorage {
                                                     ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
                                                      "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
     fssModelWorstResultsDates.set(lsValueMWR);
-    List<String> lsValueUC = serializeMRLoadDates([["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                   ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                   ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
+    List<String> lsValueUC = serializeMRLoadDates([["1980-01-01T00:00:00.000Z"]]);
     fssUserCrownsDates.set(lsValueUC);
   }
 

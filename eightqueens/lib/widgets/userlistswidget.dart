@@ -48,23 +48,23 @@ class _UserListsState extends State<UserLists>  with TickerProviderStateMixin {
     [[], [], [], []],
     [[], [], [], []]
   ];
-  List<List<UserListsDataTable>> lluldt = [
+  List<List<_UserListsDataTable>> lluldt = [
     [
-      UserListsDataTable(lUserAnswer: [], threads: 1),
-      UserListsDataTable(lUserAnswer: [], threads: 2),
-      UserListsDataTable(lUserAnswer: [], threads: 4),
-      UserListsDataTable(lUserAnswer: [], threads: 8),
+      _UserListsDataTable(lUserAnswer: [], threads: 1),
+      _UserListsDataTable(lUserAnswer: [], threads: 2),
+      _UserListsDataTable(lUserAnswer: [], threads: 4),
+      _UserListsDataTable(lUserAnswer: [], threads: 8),
     ],
     [
-      UserListsDataTable(lUserAnswer: [], threads: 1),
-      UserListsDataTable(lUserAnswer: [], threads: 2),
-      UserListsDataTable(lUserAnswer: [], threads: 4),
-      UserListsDataTable(lUserAnswer: [], threads: 8),
+      _UserListsDataTable(lUserAnswer: [], threads: 1),
+      _UserListsDataTable(lUserAnswer: [], threads: 2),
+      _UserListsDataTable(lUserAnswer: [], threads: 4),
+      _UserListsDataTable(lUserAnswer: [], threads: 8),
     ],    [
-      UserListsDataTable(lUserAnswer: [], threads: 1),
-      UserListsDataTable(lUserAnswer: [], threads: 2),
-      UserListsDataTable(lUserAnswer: [], threads: 4),
-      UserListsDataTable(lUserAnswer: [], threads: 8),
+      _UserListsDataTable(lUserAnswer: [], threads: 1),
+      _UserListsDataTable(lUserAnswer: [], threads: 2),
+      _UserListsDataTable(lUserAnswer: [], threads: 4),
+      _UserListsDataTable(lUserAnswer: [], threads: 8),
     ],
   ];
 
@@ -178,7 +178,7 @@ class _UserListsState extends State<UserLists>  with TickerProviderStateMixin {
   }
 
   Widget scrollableDataTable(int iIntervalTab, int iThreadTab) {
-    UserListsDataTable uldt = UserListsDataTable(
+    _UserListsDataTable uldt = _UserListsDataTable(
         lUserAnswer: lllura[iIntervalTab][iThreadTab],
         threads: _threadTabToThreads(iThreadTab));
     lluldt[iIntervalTab][iThreadTab] = uldt;
@@ -189,7 +189,7 @@ class _UserListsState extends State<UserLists>  with TickerProviderStateMixin {
         scrollDirection: Axis.horizontal,
         child: DataTable(
           columnSpacing: 12.0,
-          columns: kTableColumns,
+          columns: _kTableColumns,
           rows: lluldt[iIntervalTab][iThreadTab].getRows(),
         ),
       ),
@@ -393,7 +393,7 @@ class _UserListsState extends State<UserLists>  with TickerProviderStateMixin {
 
 }
 
-const List<DataColumn> kTableColumns = <DataColumn>[
+const List<DataColumn> _kTableColumns = <DataColumn>[
   DataColumn(
     label: Padding(padding: EdgeInsets.only(right: 6), child: Text('No.', style: TextStyle(fontSize: 17.6))),
     numeric: true,
@@ -444,11 +444,11 @@ class _UserListsRow {
   final int crowns;
 }
 
-class UserListsDataTable {
+class _UserListsDataTable {
   final List<UserResultsAnswer> lUserAnswer;
   final int threads;
 
-  UserListsDataTable({required this.lUserAnswer, required this.threads});
+  _UserListsDataTable({required this.lUserAnswer, required this.threads});
 
   _UserListsRow _convertUserListsElementToDataTableRow(List<UserResultsAnswer> lura0, int row0) {
     _UserListsRow ulr = _UserListsRow(
@@ -468,19 +468,19 @@ class UserListsDataTable {
     final int nRows = lUserAnswer.length;
     final List<DataRow> ldr = [];
     for (int row = 0; row < nRows; row++) {
-      _UserListsRow mur = _convertUserListsElementToDataTableRow(lUserAnswer, row);
-      FontWeight fw = (mur.me) ? FontWeight.bold : FontWeight.normal;
-      String sMe = (mur.me) ? " (me)" : "";
+      _UserListsRow ulr = _convertUserListsElementToDataTableRow(lUserAnswer, row);
+      FontWeight fw = (ulr.me) ? FontWeight.bold : FontWeight.normal;
+      String sMe = (ulr.me) ? " (me)" : "";
       ldr.add(
         DataRow(cells: [
           DataCell(Padding(padding: const EdgeInsets.only(right: 8), child: Text('${row + 1}', style: TextStyle(fontSize: 17, fontWeight: fw)))),
-          DataCell(Padding(padding: const EdgeInsets.only(right: 8), child: Text(mur.userName + sMe, style: TextStyle(fontSize: 17, fontWeight: fw)))),
-          DataCell(Padding(padding: const EdgeInsets.only(right: 8), child: Text(mur.modelName, style: TextStyle(fontSize: 17, fontWeight: fw)))),
-          DataCell(Padding(padding: const EdgeInsets.only(right: 12), child: Text('${mur.runs}', style: TextStyle(fontSize: 17, fontWeight: fw)))),
-          DataCell(Text(mur.best.toStringAsFixed(3), style: TextStyle(fontSize: 17, fontWeight: fw))),
-          DataCell(Text(mur.average.toStringAsFixed(3), style: TextStyle(fontSize: 17, fontWeight: fw))),
-          DataCell(Text(mur.worst.toStringAsFixed(3), style: TextStyle(fontSize: 17, fontWeight: fw))),
-          DataCell(Padding(padding: const EdgeInsets.only(right: 12), child: Text('${mur.crowns}', style: TextStyle(fontSize: 17, fontWeight: fw)))),
+          DataCell(Padding(padding: const EdgeInsets.only(right: 8), child: Text(ulr.userName + sMe, style: TextStyle(fontSize: 17, fontWeight: fw)))),
+          DataCell(Padding(padding: const EdgeInsets.only(right: 8), child: Text(ulr.modelName, style: TextStyle(fontSize: 17, fontWeight: fw)))),
+          DataCell(Padding(padding: const EdgeInsets.only(right: 12), child: Text('${ulr.runs}', style: TextStyle(fontSize: 17, fontWeight: fw)))),
+          DataCell(Text(ulr.best.toStringAsFixed(3), style: TextStyle(fontSize: 17, fontWeight: fw))),
+          DataCell(Text(ulr.average.toStringAsFixed(3), style: TextStyle(fontSize: 17, fontWeight: fw))),
+          DataCell(Text(ulr.worst.toStringAsFixed(3), style: TextStyle(fontSize: 17, fontWeight: fw))),
+          DataCell(Padding(padding: const EdgeInsets.only(right: 12), child: Text('${ulr.crowns}', style: TextStyle(fontSize: 17, fontWeight: fw)))),
         ]));
     }
     return ldr;

@@ -10,6 +10,7 @@ import '../parameters/themedata.dart';
 import '../apinetisolates/apiprofilehandlerisolatecontroller.dart';
 import '../middleware/autoregistration.dart';
 import '../middleware/deviceinfoplus.dart';
+import '../middleware/listslocalstorage.dart';
 import '../widgets/messagedialogs.dart';
 
 class CrownCollectionPage extends StatefulWidget {
@@ -17,9 +18,11 @@ class CrownCollectionPage extends StatefulWidget {
   final Widget wCrown;
   final DioProfileHandlerIsolate dphi;
   final AutoRegLocal arl;
+  final ListsLocalStorage lls;
+  final int iInterval;
   final Future<void> Function() refreshParent;
 
-  const CrownCollectionPage({Key? key, required this.wCrown, required this.dphi, required this.arl, required this.refreshParent}): super(key: key);
+  const CrownCollectionPage({Key? key, required this.wCrown, required this.dphi, required this.arl, required this.lls, required this.iInterval, required this.refreshParent}): super(key: key);
 
   @override
   _CrownCollectionPageState createState() => _CrownCollectionPageState();
@@ -34,6 +37,7 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
 
   final LevelPlayRewardedAdViewController _lpravController = LevelPlayRewardedAdViewController();
 
+  int iUserCrown = 0;
   String sUserCrown = "";
 
   @override
@@ -45,7 +49,14 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
       _createRewardedAd();
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         _refreshCrown();
-        if (GV.bFirstCrownCollectionMessage) { GV.bFirstCrownCollectionMessage = false; _showAdQuestion(context); }
+        if (GV.bFirstCrownCollectionMessage) {
+          if (1 > widget.iInterval) {
+            GV.bFirstCrownCollectionMessage = false;
+            _showAdQuestion(context);
+          } else {
+            _showIntevalListsAdQuestion(context, widget.iInterval);
+          }
+        }
         await initIronSource();
       });
     }
@@ -73,10 +84,30 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
           false,
           MainAxisAlignment.spaceBetween,
           "Crown Collection",
-          "If you would like to collect crowns, please watch an ad. You will get 1 crown for 1 Ad and you contribute to this 8 Queens Performance Benchmark App's development.",
+          "If you would like to collect crowns, please watch an ad. You will get 1 crown for 1 Ad and you will get surprises later for them.",
           "Later",
           "Collect crown",
           () {},
+          () { _showRewardedAdMobOrIronSourceAd(); },
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+        );
+      }
+    }
+  }
+
+  Future<void> _showIntevalListsAdQuestion(BuildContext context, int iInterval) async {
+    if (context.mounted) {
+      if (ModalRoute.of(context)?.isCurrent == true) {
+        String sInterval = (1 == iInterval) ? "Monthy" : (2 == iInterval) ? "Quarterly" : "Yearly";
+        await info2ButtonDialog(
+          context,
+          false,
+          MainAxisAlignment.spaceBetween,
+          (1 == iInterval) ? "Monthy List" : (2 == iInterval) ? "Quarterly List" : "Crown Collection",
+          "Would you like to be included in the " + sInterval + " Top List? Then watch an Ad.",
+          "Later",
+          "Inclusion",
+          () { GV.bFirstIntervalCrownCollectionMessage = false; },
           () { _showRewardedAdMobOrIronSourceAd(); },
           insetPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
         );
@@ -156,6 +187,7 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
       try { iCrown = ldValue[2].credit; } catch (e) { debugPrint('_sendAdjustCrown(), $e'); }
       await saveUserCrownLocal(iCrown);
       _refreshCrown();
+      widget.lls.clearLocalListDates();
       debugPrint('_sendAdjustCrown(), ldValue: $ldValue');
       debugPrint('_sendAdjustCrown(), ldValue[1], ldValue[2]: ${ldValue[1].toMap()}, ${ldValue[2].toMap()}');
     }
@@ -170,7 +202,8 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
   }
 
   Future<void> _refreshCrown() async {
-    String sCrown = '${(await widget.arl.getUserCrown())}';
+    iUserCrown = await widget.arl.getUserCrown();
+    String sCrown = '$iUserCrown';
     setState(() {
       sUserCrown = sCrown;
     });
@@ -296,7 +329,7 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
           children: [
             Padding(padding: const EdgeInsets.only(bottom: 5), child: SizedBox(width: 28, height: 28, child: widget.wCrown)),
             const SizedBox(width: 8),
-            const Text('Crown: ', style: TextStyle(fontSize: 22)),
+            Text((2 > iUserCrown) ? 'Crown: ' : 'Crowns: ', style: const TextStyle(fontSize: 22)),
             Text(sUserCrown, style: const TextStyle(fontSize: 24)),
           ],
         ),

@@ -48,23 +48,23 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
     [[], [], [], []],
     [[], [], [], []]
   ];
-  List<List<ModelListsDataTable>> llmldt = [
+  List<List<_ModelListsDataTable>> llmldt = [
     [
-      ModelListsDataTable(lModelAnswer: [], threads: 1),
-      ModelListsDataTable(lModelAnswer: [], threads: 2),
-      ModelListsDataTable(lModelAnswer: [], threads: 4),
-      ModelListsDataTable(lModelAnswer: [], threads: 8),
+      _ModelListsDataTable(lModelAnswer: [], threads: 1),
+      _ModelListsDataTable(lModelAnswer: [], threads: 2),
+      _ModelListsDataTable(lModelAnswer: [], threads: 4),
+      _ModelListsDataTable(lModelAnswer: [], threads: 8),
     ],
     [
-      ModelListsDataTable(lModelAnswer: [], threads: 1),
-      ModelListsDataTable(lModelAnswer: [], threads: 2),
-      ModelListsDataTable(lModelAnswer: [], threads: 4),
-      ModelListsDataTable(lModelAnswer: [], threads: 8),
+      _ModelListsDataTable(lModelAnswer: [], threads: 1),
+      _ModelListsDataTable(lModelAnswer: [], threads: 2),
+      _ModelListsDataTable(lModelAnswer: [], threads: 4),
+      _ModelListsDataTable(lModelAnswer: [], threads: 8),
     ],    [
-      ModelListsDataTable(lModelAnswer: [], threads: 1),
-      ModelListsDataTable(lModelAnswer: [], threads: 2),
-      ModelListsDataTable(lModelAnswer: [], threads: 4),
-      ModelListsDataTable(lModelAnswer: [], threads: 8),
+      _ModelListsDataTable(lModelAnswer: [], threads: 1),
+      _ModelListsDataTable(lModelAnswer: [], threads: 2),
+      _ModelListsDataTable(lModelAnswer: [], threads: 4),
+      _ModelListsDataTable(lModelAnswer: [], threads: 8),
     ],
   ];
 
@@ -178,7 +178,7 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
   }
 
   Widget scrollableDataTable(int iIntervalTab, int iThreadTab) {
-    ModelListsDataTable uldt = ModelListsDataTable(
+    _ModelListsDataTable uldt = _ModelListsDataTable(
         lModelAnswer: lllmra[iIntervalTab][iThreadTab],
         threads: _threadTabToThreads(iThreadTab));
     llmldt[iIntervalTab][iThreadTab] = uldt;
@@ -189,7 +189,7 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
         scrollDirection: Axis.horizontal,
         child: DataTable(
           columnSpacing: 12.0,
-          columns: kTableColumns,
+          columns: _kTableColumns,
           rows: llmldt[iIntervalTab][iThreadTab].getRows(),
         ),
       ),
@@ -393,7 +393,7 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
 
 }
 
-const List<DataColumn> kTableColumns = <DataColumn>[
+const List<DataColumn> _kTableColumns = <DataColumn>[
   DataColumn(
     label: Padding(padding: EdgeInsets.only(right: 6), child: Text('No.', style: TextStyle(fontSize: 17.6))),
     numeric: true,
@@ -433,36 +433,36 @@ class _ModelListsRow {
   final double worst;
 }
 
-class ModelListsDataTable {
+class _ModelListsDataTable {
   final List<ModelResultsAnswer> lModelAnswer;
   final int threads;
 
-  ModelListsDataTable({required this.lModelAnswer, required this.threads});
+  _ModelListsDataTable({required this.lModelAnswer, required this.threads});
 
-  _ModelListsRow _convertModelListsElementToDataTableRow(List<ModelResultsAnswer> lura0, int row0) {
-    _ModelListsRow ulr = _ModelListsRow(
-      lura0[row0].modelName,
-      lura0[row0].runCount,
-      lura0[row0].bestResult / 1000,
-      lura0[row0].averageResult / 1000,
-      lura0[row0].worstResult / 1000,
+  _ModelListsRow _convertModelListsElementToDataTableRow(List<ModelResultsAnswer> lmra0, int row0) {
+    _ModelListsRow mlr = _ModelListsRow(
+      lmra0[row0].modelName,
+      lmra0[row0].runCount,
+      lmra0[row0].bestResult / 1000,
+      lmra0[row0].averageResult / 1000,
+      lmra0[row0].worstResult / 1000,
     );
-    return ulr;
+    return mlr;
   }
 
   List<DataRow> getRows() {
     final int nRows = lModelAnswer.length;
     final List<DataRow> ldr = [];
     for (int row = 0; row < nRows; row++) {
-      _ModelListsRow mur = _convertModelListsElementToDataTableRow(lModelAnswer, row);
+      _ModelListsRow mlr = _convertModelListsElementToDataTableRow(lModelAnswer, row);
       ldr.add(
         DataRow(cells: [
           DataCell(Padding(padding: const EdgeInsets.only(right: 8), child: Text('${row + 1}', style: const TextStyle(fontSize: 17)))),
-          DataCell(Padding(padding: const EdgeInsets.only(right: 8), child: Text(mur.modelName, style: const TextStyle(fontSize: 17)))),
-          DataCell(Padding(padding: const EdgeInsets.only(right: 12), child: Text('${mur.runs}', style: const TextStyle(fontSize: 17)))),
-          DataCell(Text(mur.best.toStringAsFixed(3), style: const TextStyle(fontSize: 17))),
-          DataCell(Text(mur.average.toStringAsFixed(3), style: const TextStyle(fontSize: 17))),
-          DataCell(Text(mur.worst.toStringAsFixed(3), style: const TextStyle(fontSize: 17))),
+          DataCell(Padding(padding: const EdgeInsets.only(right: 8), child: Text(mlr.modelName, style: const TextStyle(fontSize: 17)))),
+          DataCell(Padding(padding: const EdgeInsets.only(right: 12), child: Text('${mlr.runs}', style: const TextStyle(fontSize: 17)))),
+          DataCell(Text(mlr.best.toStringAsFixed(3), style: const TextStyle(fontSize: 17))),
+          DataCell(Text(mlr.average.toStringAsFixed(3), style: const TextStyle(fontSize: 17))),
+          DataCell(Text(mlr.worst.toStringAsFixed(3), style: const TextStyle(fontSize: 17))),
         ]));
     }
     return ldr;

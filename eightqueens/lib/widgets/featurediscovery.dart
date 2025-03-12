@@ -69,8 +69,8 @@ class _StartButtonDescribedFeatureOverlayState extends State<StartButtonDescribe
   Widget build(BuildContext context) {
     return DescribedFeatureOverlay(
       featureId: widget.featureId,
-      tapTarget: ElevatedButton(child: const Padding(padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
-        child: Text('Start', style: TextStyle(fontSize: 20))),
+      tapTarget: ElevatedButton(child: const Padding(padding: EdgeInsets.fromLTRB(4, 16, 4, 16),
+        child: SizedBox(width: 72, height: 32, child: FittedBox(fit: BoxFit.scaleDown, child: Text('Start', style: TextStyle(fontSize: 20))))),
         onPressed: null,
         style: ButtonStyle(
           shape: WidgetStateProperty.all<RoundedRectangleBorder>(
@@ -88,7 +88,7 @@ class _StartButtonDescribedFeatureOverlayState extends State<StartButtonDescribe
       contentLocation: ContentLocation.above,
       title: const Text('Start button', style: TextStyle(fontSize: 18)),
       description:
-          const Text('Tap the Start button to start the speed test.', style: TextStyle(fontSize: 17)),
+          const Text('Tap the Start button to run the speed test.', style: TextStyle(fontSize: 17)),
       backgroundColor: Theme.of(context).primaryColor,
       child: widget.child
     );
@@ -124,7 +124,7 @@ class _ThreadDropdownDescribedFeatureOverlayState extends State<ThreadDropdownDe
             },
           ),
         ),
-        child: const Padding(padding: EdgeInsets.fromLTRB(0, 8, 0, 8), child: Text('Thread', style: TextStyle(fontSize: 17))),
+        child: const Padding(padding: EdgeInsets.fromLTRB(4, 16, 4, 16), child: SizedBox(width: 72, height: 32, child: FittedBox(fit: BoxFit.scaleDown, child: Text('Thread', style: TextStyle(fontSize: 17))))),
       ),
       contentLocation: widget.contentLocation,
       title: const Text('Thread selection', style: TextStyle(fontSize: 18)),
@@ -153,8 +153,8 @@ class _NavMenuDescribedFeatureOverlayState extends State<NavMenuDescribedFeature
       featureId: widget.featureId,
       tapTarget: const Icon(Icons.menu_rounded, size: 28),
       contentLocation: ContentLocation.below,
-      title: const Text('Lists of the fastest and slowest mobiles.', style: TextStyle(fontSize: 18)),
-      description: const Text('Tap the Hamburger icon to choose from many different Lists: Top performers, worst performers phones, You can also see who tested the most phones and who collected the most crowns.', style: TextStyle(fontSize: 17)),
+      title: const Text('Lists of results', style: TextStyle(fontSize: 18)),
+      description: const Text('Top performer, worst performer devices, users who tested the most, and who collected the most crowns.', style: TextStyle(fontSize: 17)),
       backgroundColor: Theme.of(context).primaryColor,
       child: Align(alignment: Alignment.topLeft, child: widget.child),
     );
@@ -183,8 +183,8 @@ class _CrownCollectDescribedFeatureOverlayState extends State<CrownCollectDescri
           child: Padding(padding: const EdgeInsets.only(bottom: 4), child: SizedBox.fromSize(child: widget.wCrown, size: const Size(28, 28))),
       )),
       contentLocation: ContentLocation.below,
-      title: const Text('Collect crowns.', style: TextStyle(fontSize: 18)),
-      description: const Text('Tap the crown and collect crowns, you will get surprises later for the crowns.', style: TextStyle(fontSize: 17)),
+      title: const Padding(padding: EdgeInsets.only(left: 16), child: Text('Collect crowns', style: TextStyle(fontSize: 18))),
+      description: const Padding(padding: EdgeInsets.only(left: 16), child: Text('Tap the crown and collect crowns, you will get surprises later for them.', style: TextStyle(fontSize: 17))),
       backgroundColor: Theme.of(context).primaryColor,
       child: Align(alignment: Alignment.topLeft, child: widget.child),
     );

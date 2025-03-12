@@ -255,11 +255,10 @@ class _ContributionPageState extends State<ContributionPage> with ImpressionData
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('8 Queens', style: TextStyle(fontSize: 24)),
-              const Text('Performance', style: TextStyle(fontSize: 24)),
-              const Text('Benchmark', style: TextStyle(fontSize: 24)),
-              const SizedBox(height: 24),
-              const Text('Contribution', style: TextStyle(fontSize: 24)),
+              const Text('8 Queens', style: TextStyle(fontSize: 22)),
+              const Text('Performance', style: TextStyle(fontSize: 22)),
+              const Text('Benchmark', style: TextStyle(fontSize: 22)),
+              //const Text('Contribution', style: TextStyle(fontSize: 24)),
               const SizedBox(height: 20),
               ElevatedButton(
                   child: const Padding(

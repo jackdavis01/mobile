@@ -15,4 +15,5 @@ class GV {
 
   static bool bDev = !(flutter_foundation.kReleaseMode);
   static bool bFirstCrownCollectionMessage = true;
+  static bool bFirstIntervalCrownCollectionMessage = true;
 }
