@@ -11,9 +11,11 @@ const bool bReleaseMode = _bReleaseMode; // || true;
 
 class GV {
   static const String sTitle = '8 Queens Performance Benchmark';
-  static const List<String> lsWebRenderers = ['Auto', 'HTML', 'CanvasKit'];
 
   static bool bDev = !(flutter_foundation.kReleaseMode);
   static bool bFirstCrownCollectionMessage = true;
   static bool bFirstIntervalCrownCollectionMessage = true;
+
+  static int iShowPlacementQuestionDelaySec = 10;
+  static int iInAppReviewDelayDays = 5;
 }

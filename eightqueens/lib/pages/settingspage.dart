@@ -256,10 +256,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   children: [
                     const Expanded(child: Text('Feature discovery:', style: TextStyle(fontSize: 17), maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis)),
                     Switch(
-                      value: !widget.hfd.bHasPreviouslyCompleted,
+                      value: !widget.hfd.bHasAlreadyBeenCompleted,
                       onChanged: (bool value) {
                         setState(() {
-                          widget.hfd.setHasPreviousCompleted(!value);
+                          widget.hfd.setHasAlreadyBeenCompleted(!value);
                         });
                       },
                     ),

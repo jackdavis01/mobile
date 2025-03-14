@@ -10,13 +10,13 @@ class HomeFeatureDiscovery {
   HomeFeatureDiscovery({required this.context, required this.lskFeatureIds, required this.getMounted});
 
   bool bFirstShowDiscovery = true;  
-  bool bHasPreviouslyCompleted = false;
+  bool bHasAlreadyBeenCompleted = false;
 
-  Future<bool> getHasPreviousCompleted() async { return ('true' == (await lsBHasPreviousCompleted.get())) ? true : false; }
+  Future<bool> getHasPreviousCompleted() async { return ('true' == (await lsBFeatureDiscoveryHasAlreadyBeenCompleted.get())) ? true : false; }
 
   Future<void> showDiscovery() async {
     if (!bFirstShowDiscovery) { await checkDiscoveryCompleted(); } else { bFirstShowDiscovery = false; }
-    bHasPreviouslyCompleted = await getHasPreviousCompleted();
+    bHasAlreadyBeenCompleted = await getHasPreviousCompleted();
     if (!getMounted()) return;
     // ! Start feature discovery
     FeatureDiscovery.discoverFeatures(
@@ -41,13 +41,13 @@ class HomeFeatureDiscovery {
         final isShown = await FeatureDiscovery.hasPreviouslyCompleted(context, lskFeatureIds[i]);
         isCompleted = isCompleted && isShown;
       }
-      setHasPreviousCompleted(isCompleted);
+      setHasAlreadyBeenCompleted(isCompleted);
     }
   }
 
-  void setHasPreviousCompleted(bool value) {
-    bHasPreviouslyCompleted = value;
-    lsBHasPreviousCompleted.set((bHasPreviouslyCompleted) ? 'true' : 'false');
+  void setHasAlreadyBeenCompleted(bool value) {
+    bHasAlreadyBeenCompleted = value;
+    lsBFeatureDiscoveryHasAlreadyBeenCompleted.set((bHasAlreadyBeenCompleted) ? 'true' : 'false');
     if (!value) _clearDiscovery();  
   }
 

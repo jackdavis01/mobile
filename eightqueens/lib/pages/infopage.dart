@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' as _foundation;
 import '../parameters/globals.dart';
 import '../middleware/deviceinfoplus.dart';
+import '../middleware/localstorage.dart';
 import '../widgets/adhandler.dart';
 import '../widgets/globalwidgets.dart';
 import 'admobtest/admobtestpage.dart';
@@ -25,7 +26,7 @@ class _InfoPageState extends State<InfoPage> {
   String version = "";
   String buildNumber = "";
   String buildMode = "";
-  final String platform = 'Flutter 3.29.1';
+  final String platform = 'Flutter 3.27.4';
   final String platformPrerelease = '-';
   final String platformChannel = 'stable';
   final String author = 'Jack Davis';
@@ -48,6 +49,7 @@ class _InfoPageState extends State<InfoPage> {
     setState(() {
       GV.bDev = !GV.bDev;
     });
+    if (GV.bDev) setEnabledInAppReviewLocalDateToLongTimeAgo();
   }
 
   @override

@@ -382,6 +382,6 @@
 			<true/>
 		</dict>
 	<key>NSUserTrackingUsageDescription</key>
-    <string>8 Queens App uses Advertisement Id</string>
+    <string>8 Queens App uses the Advertising ID to provide personalized ads and improve ad relevance. Watching ads may grant in-app rewards. This helps keep the app free by supporting it with targeted advertisements. Your data will not be shared with third parties beyond ad providers.</string>
 </dict>
 </plist>

@@ -6,6 +6,8 @@ import '../middleware/localstorage.dart';
 import 'adhandler.dart';
 import '../middleware/customfloatingactionbuttonlocation.dart';
 import '../parameters/themedata.dart';
+import '../parameters/globals.dart';
+import '../middleware/inappreview.dart';
 
 class UserCrownLists extends StatefulWidget {
 
@@ -37,6 +39,9 @@ class _UserCrownListsState extends State<UserCrownLists>  with TickerProviderSta
 
   final int _iRefreshDelaySec = 300;
   bool _bRefreshDelayCompleted = true;
+  int _iPlacement = 0;
+  void fSetPlacement(int placement) { _iPlacement = placement; }
+  InAppReviewController iarc = InAppReviewController();
   List<List<String>> llsULLoadDates = [["1980-01-01T00:00:00.000Z"]];
   bool _bHasULLoadCompleted = false;
   List<List<List<UserResultsAnswer>>> lllura = [[[]]];
@@ -137,6 +142,15 @@ class _UserCrownListsState extends State<UserCrownLists>  with TickerProviderSta
         threads: 0);
     lluldt[0][0] = uldt;
 
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if ([1, 2, 3].contains(_iPlacement) && _bHasULLoadCompleted) {
+        await Future.delayed(Duration(seconds: GV.iShowPlacementQuestionDelaySec));
+        if (mounted && [1, 2, 3].contains(_iPlacement) && _bHasULLoadCompleted) {
+          await iarc.callPlacementAndRequestReview(context, _iPlacement);
+        }
+      }
+    });
+
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: SingleChildScrollView(
@@ -144,7 +158,7 @@ class _UserCrownListsState extends State<UserCrownLists>  with TickerProviderSta
         child: DataTable(
           columnSpacing: 12.0,
           columns: kTableColumns,
-          rows: lluldt[0][0].getRows(),
+          rows: lluldt[0][0].getRows(fSetPlacement),
         ),
       ),
     );
@@ -229,13 +243,14 @@ class _UserCrownListsDataTable {
     return uclr;
   }
 
-  List<DataRow> getRows() {
+  List<DataRow> getRows(Function(int) setPlacement) {
     final int nRows = lUserAnswer.length;
     final List<DataRow> ldr = [];
     for (int row = 0; row < nRows; row++) {
       _UserCrownListsRow uclr = _convertUserListsElementToDataTableRow(lUserAnswer, row);
       FontWeight fw = (uclr.me) ? FontWeight.bold : FontWeight.normal;
       String sMe = (uclr.me) ? " (me)" : "";
+      if (uclr.me) setPlacement(row + 1);
       ldr.add(
         DataRow(cells: [
           DataCell(Padding(padding: const EdgeInsets.only(right: 2), child: Text('${row + 1}', style: TextStyle(fontSize: 17, fontWeight: fw)))),

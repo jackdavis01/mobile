@@ -13,7 +13,13 @@ class SpGlobal {
 
 late SharedPreferences spGlobal;
 
-LocalString lsBHasPreviousCompleted = LocalString(spGlobal, 'featurediscoveryhaspreviouscompleted', 'false');
+LocalString lsBFeatureDiscoveryHasAlreadyBeenCompleted = LocalString(spGlobal, 'featurediscoveryhasalreadybeencompleted', 'false');
+
+DateTime _dtLongTimeAgo = DateTime.utc(1980);
+LocalString _lsSInAppReviewDate = LocalString(spGlobal, 'inappreviewdate', _dtLongTimeAgo.toUtc().toIso8601String());
+Future<DateTime> getInAppReviewLocalDate() async { return DateTime.tryParse(await _lsSInAppReviewDate.get()) ?? DateTime.now().toUtc(); }
+void setEnabledInAppReviewLocalDateToNow() { _lsSInAppReviewDate.set(DateTime.now().toUtc().toIso8601String()); }
+void setEnabledInAppReviewLocalDateToLongTimeAgo() { _lsSInAppReviewDate.set(_dtLongTimeAgo.toUtc().toIso8601String()); }
 
 class LocalStringList {
   final SharedPreferences storage;

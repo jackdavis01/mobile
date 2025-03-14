@@ -14,6 +14,8 @@ PODS:
     - Google-Mobile-Ads-SDK (~> 11.13.0)
     - webview_flutter_wkwebview
   - GoogleUserMessagingPlatform (2.7.0)
+  - in_app_review (2.0.0):
+    - Flutter
   - ironsource_mediation (3.1.0):
     - Flutter
     - IronSourceSDK (= 8.6.0.0)
@@ -44,6 +46,7 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - flutter_udid (from `.symlinks/plugins/flutter_udid/ios`)
   - google_mobile_ads (from `.symlinks/plugins/google_mobile_ads/ios`)
+  - in_app_review (from `.symlinks/plugins/in_app_review/ios`)
   - ironsource_mediation (from `.symlinks/plugins/ironsource_mediation/ios`)
   - IronSourceAdQualitySDK (= 7.22.0)
   - IronSourceUnityAdsAdapter (= 4.3.45.0)
@@ -74,6 +77,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_udid/ios"
   google_mobile_ads:
     :path: ".symlinks/plugins/google_mobile_ads/ios"
+  in_app_review:
+    :path: ".symlinks/plugins/in_app_review/ios"
   ironsource_mediation:
     :path: ".symlinks/plugins/ironsource_mediation/ios"
   package_info_plus:
@@ -95,6 +100,7 @@ SPEC CHECKSUMS:
   Google-Mobile-Ads-SDK: 14f57f2dc33532a24db288897e26494640810407
   google_mobile_ads: fe0e2c1764ad95323dd0e3081d0bb2d58411f957
   GoogleUserMessagingPlatform: a8b56893477f67212fbc8411c139e61d463349f5
+  in_app_review: a31b5257259646ea78e0e35fc914979b0031d011
   ironsource_mediation: f7e0476db35bbaf6e9a40c0e46932452268eca59
   IronSourceAdQualitySDK: d46d3db3e352793357c5c3aa8b630ea5b98dc15e
   IronSourceSDK: ae03a5aef5cc17a9868540aa409098e9614dfd48

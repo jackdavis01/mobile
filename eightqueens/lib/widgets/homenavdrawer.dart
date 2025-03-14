@@ -54,10 +54,12 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
     iUserCrown = await widget.arl.getUserCrown();
     String uCrown = iUserCrown.toString();
     widget.refreshParent();
-    setState(() {
-      userName = uName;
-      sUserCrown = uCrown;
-    });
+    if (mounted) {
+      setState(() {
+        userName = uName;
+        sUserCrown = uCrown;
+      });
+    }
   }
 
   @override

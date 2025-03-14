@@ -6,6 +6,8 @@ import '../middleware/localstorage.dart';
 import 'adhandler.dart';
 import '../middleware/customfloatingactionbuttonlocation.dart';
 import '../parameters/themedata.dart';
+import '../parameters/globals.dart';
+import '../middleware/inappreview.dart';
 
 class UserLists extends StatefulWidget {
 
@@ -39,6 +41,9 @@ class _UserListsState extends State<UserLists>  with TickerProviderStateMixin {
   late TabController _tabThreadsController;
   final int _iRefreshDelaySec = 300;
   bool _bRefreshDelayCompleted = true;
+  final List<List<int>> _aPlacement = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+  void fSetPlacement(int intervalTab, int threadTab, int placement) { _aPlacement[intervalTab][threadTab] = placement; }
+  InAppReviewController iarc = InAppReviewController();
   List<List<String>> llsULLoadDates = [["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
                                        ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
                                        ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]];
@@ -183,6 +188,15 @@ class _UserListsState extends State<UserLists>  with TickerProviderStateMixin {
         threads: _threadTabToThreads(iThreadTab));
     lluldt[iIntervalTab][iThreadTab] = uldt;
 
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if ([1, 2, 3].contains(_aPlacement[_tabIntervalsController.index][_tabThreadsController.index]) && _bHasULLoadCompleted) {
+        await Future.delayed(Duration(seconds: GV.iShowPlacementQuestionDelaySec));
+        if (mounted && [1, 2, 3].contains(_aPlacement[_tabIntervalsController.index][_tabThreadsController.index]) && _bHasULLoadCompleted) {
+          await iarc.callPlacementAndRequestReview(context, _aPlacement[_tabIntervalsController.index][_tabThreadsController.index]);
+        }
+      }
+    });
+
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: SingleChildScrollView(
@@ -190,7 +204,7 @@ class _UserListsState extends State<UserLists>  with TickerProviderStateMixin {
         child: DataTable(
           columnSpacing: 12.0,
           columns: _kTableColumns,
-          rows: lluldt[iIntervalTab][iThreadTab].getRows(),
+          rows: lluldt[iIntervalTab][iThreadTab].getRows(iIntervalTab, iThreadTab, fSetPlacement),
         ),
       ),
     );
@@ -464,13 +478,14 @@ class _UserListsDataTable {
     return ulr;
   }
 
-  List<DataRow> getRows() {
+  List<DataRow> getRows(int intervalTab, int threadTab, Function(int, int, int) setPlacement) {
     final int nRows = lUserAnswer.length;
     final List<DataRow> ldr = [];
     for (int row = 0; row < nRows; row++) {
       _UserListsRow ulr = _convertUserListsElementToDataTableRow(lUserAnswer, row);
       FontWeight fw = (ulr.me) ? FontWeight.bold : FontWeight.normal;
       String sMe = (ulr.me) ? " (me)" : "";
+      if (ulr.me) setPlacement(intervalTab, threadTab, row + 1);
       ldr.add(
         DataRow(cells: [
           DataCell(Padding(padding: const EdgeInsets.only(right: 8), child: Text('${row + 1}', style: TextStyle(fontSize: 17, fontWeight: fw)))),
