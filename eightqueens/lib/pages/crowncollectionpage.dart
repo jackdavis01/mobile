@@ -185,19 +185,11 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
       List<dynamic> ldValue = await widget.dphi.callProfileHandlerRetryIsolateApi(4, widget.arl.getUserId(), "");
       int iCrown = await widget.arl.getUserCrown();
       try { iCrown = ldValue[2].credit; } catch (e) { debugPrint('_sendAdjustCrown(), $e'); }
-      await saveUserCrownLocal(iCrown);
+      await widget.arl.saveUserCrownLocal(iCrown);
       _refreshCrown();
       widget.lls.clearLocalListDates();
       debugPrint('_sendAdjustCrown(), ldValue: $ldValue');
       debugPrint('_sendAdjustCrown(), ldValue[1], ldValue[2]: ${ldValue[1].toMap()}, ${ldValue[2].toMap()}');
-    }
-  }
-
-  Future<void> saveUserCrownLocal(int iCrown) async {
-    widget.arl.setUserCrownLocal(iCrown);
-    for (int i = 0; i < 50; i++) {
-      await Future.delayed(const Duration(milliseconds: 1));
-      if (iCrown == (await widget.arl.getUserCrown())) break;
     }
   }
 

@@ -32,7 +32,7 @@ class AutoRegMiddleware {
           String userName = answer.userName;
           autoRegLocal.setUserNameLocal(userName);
           int userCrown = answer.credit;
-          autoRegLocal.setUserCrownLocal(userCrown);
+          await autoRegLocal.saveUserCrownLocal(userCrown);
         }
       }
     }
@@ -43,6 +43,9 @@ class AutoRegMiddleware {
 enum EAutoReged { unknown, unreged, reged }
 
 class AutoRegLocal {
+  final Function() refreshCrown;
+
+  AutoRegLocal({required this.refreshCrown});
 
   final Udid oUdid = Udid();
 
@@ -66,7 +69,7 @@ class AutoRegLocal {
     int userId = await regedUserIdLocal.get();
     await _setEAutoReged(userId);
     _iUserId = userId;
-    debugPrint("middleware, autoregistration.dart, initEAutoRegedFromLocal() _iUserId: $_iUserId");
+    debugPrint("middleware, autoregistration.dart, initEAutoRegedFromLocal() _iUserId: $_iUserId, udid: ${await oUdid.get()}");
   }
 
   Future<void> _clearSecureStorageUserIdOnReinstall() async {
@@ -74,6 +77,12 @@ class AutoRegLocal {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if(!(prefs.getBool(key) ?? false )) {
+      String sPreviousUsername = await regedUserNameLocal.get();
+      debugPrint("middleware, autoregistration.dart, _clearSecureStorageUserIdOnReinstall() sPreviousUserName: $sPreviousUsername");
+      regedUserNameLocal.set(AutoRegLocal.sMe);
+      int iPreviousUserCrowns = await regedUserCrownLocal.get();
+      debugPrint("middleware, autoregistration.dart, _clearSecureStorageUserIdOnReinstall() iPreviousUserCrown: $iPreviousUserCrowns");
+      regedUserCrownLocal.set(0);
       int ls = 0;
       int time = 0;
       int userId = -6;
@@ -95,6 +104,7 @@ class AutoRegLocal {
           }
         }
       }
+      refreshCrown();
       if (inRangeUserId(iPreviousUserId)) {
         const int type = 2; // uninstalled userId sending
         String sUdid = await oUdid.get();
@@ -148,7 +158,13 @@ class AutoRegLocal {
 
   Future<String> getUserName() async => await regedUserNameLocal.get();
 
-  void setUserCrownLocal(int iCrown) { regedUserCrownLocal.set(iCrown); }
+  Future<void> saveUserCrownLocal(int iCrown) async {
+    regedUserCrownLocal.set(iCrown);
+    for (int i = 0; i < 50; i++) {
+      await Future.delayed(const Duration(milliseconds: 1));
+      if (iCrown == (await getUserCrown())) break;
+    }
+  }
 
   Future<int> getUserCrown() async => await regedUserCrownLocal.get();
 

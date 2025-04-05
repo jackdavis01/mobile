@@ -59,7 +59,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _onNameChanged() {
-    debugPrint("Current text: ${_usernameController.text}");
+    debugPrint("settingspage.dart, _usernameController.text: ${_usernameController.text}");
     if (_minUsernameLength <= _usernameController.text.length) {
       _isAvailableUsernameAfterWait().then((ldBools) {
         bool? success = ldBools[0];
@@ -138,6 +138,12 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> _unfocusAndNavigatorPop() async {
+    FocusScope.of(context).unfocus();
+    await Future.delayed(const Duration(milliseconds: 300));
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -145,10 +151,21 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Theme(
       data: blueTheme,
+      child: PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) {
+          return;
+        }
+      },
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Settings"),
           centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back), onPressed: () async {
+              _unfocusAndNavigatorPop();
+            }),
           backgroundColor: blueTheme.colorScheme.inversePrimary,
           actions: [
             IconButton(
@@ -157,7 +174,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => InfoPage(dpi: widget.getDpi())),
+                  MaterialPageRoute(builder: (context) => InfoPage(dpi: widget.getDpi(), dphi: widget.dphi, arl: widget.arl, lls: widget.lls, refreshParent: widget.refreshParent)),
                 );
               },
             ),
@@ -272,7 +289,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const AdBanner(),
         ]),
       ),
-    );
+    ));
   }
 
 }

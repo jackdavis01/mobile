@@ -1,11 +1,15 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' as _foundation;
 import '../parameters/globals.dart';
 import '../middleware/deviceinfoplus.dart';
 import '../middleware/localstorage.dart';
+import '../middleware/autoregistration.dart';
+import '../middleware/listslocalstorage.dart';
 import '../widgets/adhandler.dart';
 import '../widgets/globalwidgets.dart';
+import '../apinetisolates/apiprofilehandlerisolatecontroller.dart';
 import 'admobtest/admobtestpage.dart';
 import 'ironsourcetest/ironsourcetestpage.dart';
 import 'contributionpage.dart';
@@ -13,8 +17,12 @@ import 'contributionpage.dart';
 class InfoPage extends StatefulWidget {
 
   final DataPackageInfo dpi;
+  final DioProfileHandlerIsolate dphi;
+  final AutoRegLocal arl;
+  final ListsLocalStorage lls;
+  final Future<void> Function() refreshParent;
 
-  const InfoPage({Key? key, required this.dpi}) : super(key: key);
+  const InfoPage({Key? key, required this.dpi, required this.dphi, required this.arl, required this.lls, required this.refreshParent}) : super(key: key);
 
   @override
   _InfoPageState createState() => _InfoPageState();
@@ -31,10 +39,36 @@ class _InfoPageState extends State<InfoPage> {
   final String platformChannel = 'stable';
   final String author = 'Jack Davis';
 
+  final TextEditingController _codeController = TextEditingController();
+  final int _minCodeLength = 16;
+  final int _maxCodeLength = 20;
+  final GlobalKey<FormState> _codeFormKey = GlobalKey<FormState>();
+  final nDevMinTap = 3;
+  int nDev = 0;
+  int userId = 0;
+  bool? _codeSuccess;
+  bool _codeExisting = false;
+  final String _initCodeHelperText = "Min 16 chars.";
+  final int _textFormFieldMaxLength = 20;
+  String _codeHelperText = "";
+  TextStyle? _codeHelperStyle;
+  final String _initCodeHintText = 'code ';
+  String _codeHintText = "";
+  Widget? _codeSuffixIcon;
+
   @override
   initState() {
     loadPackageInfo();
+    _codeHelperText = _initCodeHelperText;
+    _codeHintText = _initCodeHintText;
+    _codeController.addListener(_onCodeChanged);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
   }
 
   void loadPackageInfo() {
@@ -45,11 +79,116 @@ class _InfoPageState extends State<InfoPage> {
     buildMode = widget.dpi.buildMode;
   }
 
+  void _onCodeChanged() => _onCodeChangedAsync();
+
+  Future<void> _onCodeChangedAsync() async {
+    debugPrint("infopage.dart, _codeController.text: ${_codeController.text}");
+    if (_minCodeLength <= _codeController.text.length) {
+      List<dynamic> ldResults = await _isExistingUserIdAfterWait();
+      bool? success = ldResults[0];
+      bool invalid = ldResults[1];
+      bool neterror = ldResults[2];
+      bool existing = ldResults[3];
+      debugPrint('ldResults: $ldResults');
+      setState(() {
+        _codeSuccess = success;
+        _codeExisting = existing;
+        _codeHelperText = (null == _codeSuccess) ? _initCodeHelperText : (invalid) ? 'Invalid code' : (_codeSuccess! && existing) ? 'Existing' : (neterror) ? 'Check the net' : 'Not existing';
+        _codeHelperStyle = TextStyle(color: (null == _codeSuccess) ? null : _codeExisting ? Colors.green : Colors.red);
+        _codeSuffixIcon = (null == _codeSuccess) ? null : _codeExisting
+          ? const Icon(Icons.check, color: Colors.green)
+          : const Icon(Icons.close, color: Colors.red);
+      });
+    } else {
+      setState(() {
+        _codeSuccess = null;
+        _codeHelperText = _initCodeHelperText;
+        _codeHelperStyle = null;
+        _codeHintText = _initCodeHintText;
+        _codeSuffixIcon = null;
+      });
+    }
+  }
+
+  Future<List<dynamic>> _isExistingUserIdAfterWait() async {
+    bool? success;
+    bool invalid = false;
+    bool neterror = false;
+    bool existing = false;
+    await Future.delayed(const Duration(seconds: 1));
+    if (_minCodeLength <= _codeController.text.length) {
+      int userId = convertCode(_codeController.text);
+      String base64username = base64.encode(utf8.encode(""));
+      List<dynamic> ldValue = await widget.dphi.callProfileHandlerRetryIsolateApi(1, userId, base64username);
+      success = ldValue[0];
+      invalid = ldValue[3].contains('notInRangeUserId');
+      neterror = ldValue[3].toString().contains('Exception');
+      existing = ({} != ldValue[1] && "-1" != ldValue[1].userName);
+    }
+    return [success, invalid, neterror, existing];
+  } 
+
+  String? _textFormFieldValidator(String? value) {
+    if (value?.isEmpty ?? false) {
+      return 'Name is empty';
+    } else if (_minCodeLength <= (value?.length ?? 0)) {
+      userId = convertCode(value);
+      debugPrint('userId: $userId');
+    }
+    String sValue = value ?? "";
+    if (_minCodeLength <= sValue.length && _maxCodeLength >= sValue.length) {
+      return null;
+    } else {
+      return _initCodeHelperText;
+    }
+  }
+
+  int convertCode(String? sCode) {
+    const int code = (87 * 87 + 145) * 1000000000000000;
+    int iId = (int.tryParse(sCode ?? "0") ?? 0) - code;
+    return iId;
+  }
+
+  void _submitPressed() { _saveNewUserIdLocal(); }
+
+  Future<void> _saveNewUserIdLocal() async {
+    if (_codeFormKey.currentState?.validate() ?? false) {
+      int userId = convertCode(_codeController.text);
+      String base64username = base64.encode(utf8.encode(""));
+      List<dynamic> ldValue = await widget.dphi.callProfileHandlerRetryIsolateApi(1, userId, base64username);
+      bool success = ldValue[0];
+      bool existing = {} != ldValue[1];
+      if (success && existing) {
+        Profile profile = ldValue[1];
+        String username = profile.userName;
+        int crowns = profile.credit;
+        await widget.arl.setUserIdLocal(userId, await widget.arl.oUdid.get(), 3);
+        widget.arl.setUserNameLocal(username);
+        await widget.arl.saveUserCrownLocal(crowns);
+        _codeController.clear();
+        await widget.refreshParent();
+        setState(() {
+          _codeHintText = "Saved 😊";
+        });
+        widget.lls.clearLocalListDates();
+      }
+    }
+  }
+
   void switchDev() {
     setState(() {
       GV.bDev = !GV.bDev;
     });
-    if (GV.bDev) setEnabledInAppReviewLocalDateToLongTimeAgo();
+    if (GV.bDev) {
+      nDev++;
+      setEnabledInAppReviewLocalDateToLongTimeAgo();
+    }
+  }
+
+  Future<void> _unfocusAndNavigatorPop() async {
+    FocusScope.of(context).unfocus();
+    await Future.delayed(const Duration(milliseconds: 300));
+    Navigator.pop(context);
   }
 
   @override
@@ -61,7 +200,14 @@ class _InfoPageState extends State<InfoPage> {
 
     void _openIronSourceTestPage() =>  Navigator.push(context, MaterialPageRoute(builder: (context) => const IronSourceTestPage()));
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) {
+          return;
+        }
+      },
+      child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
           titleSpacing: 0,
@@ -72,7 +218,10 @@ class _InfoPageState extends State<InfoPage> {
               Padding(
                 padding: const EdgeInsets.only(left: 8),
                 child: IconButton(
-                    icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
+                    icon: const Icon(Icons.arrow_back), onPressed: () async {
+                      _unfocusAndNavigatorPop();
+                    }
+                ),
               ),
               const Padding(padding: EdgeInsets.only(right: 18), child: Text("Info")),
               const SizedBox(width: 36)
@@ -411,13 +560,63 @@ class _InfoPageState extends State<InfoPage> {
                       onPressed: _openIronSourceTestPage,
                   ))
                   : const SizedBox.shrink(),
+                  (GV.bDev && (nDevMinTap <= nDev) && !_foundation.kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion))
+                  ? RoundedContainer(
+                      width: double.infinity,
+                      constraints: const BoxConstraints(minWidth: 300, maxWidth: 400),
+                      margin: const EdgeInsets.only(top: 26, bottom: 26),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                          padding: const EdgeInsets.only(top: 6, bottom: 6),
+                          child: Form(key: _codeFormKey, child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                RoundedContainer(
+                                  width: double.infinity,
+                                  backgroundcolor: Theme.of(context).hoverColor,
+                                  constraints: const BoxConstraints(minWidth: 300, maxWidth: 500),
+                                  margin: const EdgeInsets.all(6.0),
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: TextFormField(
+                                          controller: _codeController,
+                                          validator: _textFormFieldValidator,
+                                          maxLength: _textFormFieldMaxLength,
+                                          keyboardType: TextInputType.number,
+                                          decoration: InputDecoration(
+                                            border: const UnderlineInputBorder(),
+                                            filled: true,
+                                            fillColor: Theme.of(context).cardColor,
+                                            icon: const Icon(Icons.person),
+                                            labelText: 'Enter your code',
+                                            hintText: _codeHintText,
+                                            helperText: _codeHelperText,
+                                            helperStyle: _codeHelperStyle,
+                                            suffixIcon: _codeSuffixIcon,
+                                          ),
+                                        )),
+                                    ],
+                                )),
+                              Align(child: Padding(padding: const EdgeInsets.only(top: 8), child:
+                                    ElevatedButton(
+                                      onPressed: ((_codeSuccess ?? false) && _codeExisting) ? _submitPressed : null,
+                                      child: const Text("Submit", style: TextStyle(fontSize: 18))
+                                    ),
+                                  )),
+                            ]),
+                      )))
+                  : const SizedBox.shrink(),
                   const SizedBox(height: 20),
                   const SizedBox(height: 64), // ad banner place
                 ]),
               ]))
           ]),
           const AdBanner(),
-    ]));
+    ])));
   }
 
 }

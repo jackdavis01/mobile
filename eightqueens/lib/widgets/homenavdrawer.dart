@@ -62,6 +62,13 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
     }
   }
 
+  void _navigateToInfoPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => InfoPage(dpi: widget.getDpi(), dphi: widget.dphi, arl: widget.arl, lls: widget.lls, refreshParent: _refreshHeader)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget drawerHeader = Container(
@@ -96,12 +103,7 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
                 },
                 icon: const Icon(Icons.settings))),
             CircleAvatar(
-              child: IconButton(onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => InfoPage(dpi: widget.getDpi())),
-                );
-              },
+              child: IconButton(onPressed: () => _navigateToInfoPage(),
               icon: const Icon(Icons.info))),
           ],
         ),
@@ -230,9 +232,7 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
           leading: const Icon(Icons.info),
           minLeadingWidth: 0,
           title: const Text('Info', style: TextStyle(fontSize: 18.0)),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => InfoPage(dpi: widget.getDpi())),
-          ),
+          onTap: () => _navigateToInfoPage(),
         ),
       ],
     );

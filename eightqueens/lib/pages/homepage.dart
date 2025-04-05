@@ -93,7 +93,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
   Color _cSpeedRank = Colors.white;
   String _sRankName = "Unknown";
 
-  AutoRegLocal arl = AutoRegLocal();
+  late AutoRegLocal arl;
   late AutoRegMiddleware arm;
   late InsertResultsOrAutoRegMiddleware iroarm;
 
@@ -115,6 +115,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
     WidgetsBinding.instance.addObserver(this);
     CertificatesStorage.load();
     loadPackageInfo();
+    arl = AutoRegLocal(refreshCrown: _refreshCrown);
     arm = AutoRegMiddleware(autoRegLocal: arl);
     iroarm = InsertResultsOrAutoRegMiddleware(autoRegLocal: arl, autoRegMiddleware: arm);
     if (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
@@ -164,8 +165,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
         String userName = profile.userName;
         int credit = profile.credit;
         arl.setUserNameLocal(userName);
-        arl.setUserCrownLocal(credit);
-        setState(() {});
+        await arl.saveUserCrownLocal(credit);
+        _refreshCrown();
       }
     }
   }
@@ -921,10 +922,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
                 ? IconButton(
                     icon: const Icon(Icons.info),
                     tooltip: 'Info Page',
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => InfoPage(dpi: getDpi())),
+                        MaterialPageRoute(builder: (context) => InfoPage(dpi: getDpi(), dphi: _dphi, arl: arl, lls: _lls, refreshParent: _refreshCrown)),
                       );
                     },
                   )
