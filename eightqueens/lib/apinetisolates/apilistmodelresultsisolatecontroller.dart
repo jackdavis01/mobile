@@ -8,7 +8,6 @@ import '../parameters/globals.dart';
 import '../parameters/net.dart' if (dart.library.html) '../parameters/nonet.dart';
 import '../parameters/globaldio.dart' if (dart.library.html) '../parameters/noglobaldio.dart';
 import 'api_isolateglobals.dart';
-import '../middleware/certificate.dart';
 
 class ModelResultsAnswer {
   final String modelName;
@@ -48,9 +47,9 @@ class DioListModelResultsIsolate {
     }
     SendPort sendPort = ldInput[0];
     ListModelResultsDioPost lmrdp =
-        ListModelResultsDioPost(apiKey: GNet.apiKeyRailwayListMR, userId: ldInput[2], interval: ldInput[3], threads: ldInput[4], order: ldInput[5], orderDirection: ldInput[6], limit: ldInput[7]);
+        ListModelResultsDioPost(apiKey: GNet.apiKeyRailwayListMR, userId: ldInput[1], interval: ldInput[2], threads: ldInput[3], order: ldInput[4], orderDirection: ldInput[5], limit: ldInput[6]);
     ListModelResultsDioResponse lmrdr = await ListModelResultsDioResponse.createListModelResultsDioPost(
-        GNet.uriListModelResults, ldInput[1],
+        GNet.uriListModelResults,
         mBody: lmrdp.toMap());
     debugPrint('apinetisolates, apilistmodelresultsisolatecontroller.dart, _listModelResultsEntryPoint() lmrdr: ${lmrdr.toMap()}');
     sendPort.send(jsonEncode(lmrdr.toMap())); //sending data back to main thread's function
@@ -71,7 +70,6 @@ class DioListModelResultsIsolate {
     killNetworkProcessesByIsolateKey(sIsolateKey);
     Isolate isolateLMR = await Isolate.spawn(_listModelResultsEntryPoint, [
       receivePort.sendPort,
-      CertificatesStorage.getCertRailway,
       userId0,
       interval0,
       threads0,
@@ -130,7 +128,7 @@ class DioListModelResultsIsolate {
   }
 }
 
-// DBR Index App ListModelResultsDioPost Classes and Methods
+// 8 Queens App ListModelResultsDioPost Classes and Methods
 
 class ListModelResultsDioPost {
   final String apiKey;
@@ -199,16 +197,15 @@ class ListModelResultsDioResponse {
     return map;
   }
 
-  static Future<ListModelResultsDioResponse> createListModelResultsDioPost(Uri uri, List<int> liCert,
-      {required Map mBody}) async {
+  static Future<ListModelResultsDioResponse> createListModelResultsDioPost(Uri uri, {required Map mBody}) async {
     DioResponse response;
     String input, decryptedResponse;
     Map<String, dynamic> mapDecodedResponse;
+  
     final dio = DioHttp(dioOptions);
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () =>
-        HttpClient(context: CertificateSecurityContext.get(liCert))
-          ..maxConnectionsPerHost = 16
-          /*..badCertificateCallback = (X509Certificate cert, String host, int port) => true*/;
+        HttpClient()..maxConnectionsPerHost = 16;
+
     try {
       response = await dio.postUri(uri, data: jsonEncode(mBody));
       final int statusCode = response.statusCode ?? -1;

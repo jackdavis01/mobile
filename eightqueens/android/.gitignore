@@ -15,3 +15,4 @@ key.properties
 # android
 *.cxx
 app/.cxx/*
+build

@@ -8,7 +8,6 @@ import '../parameters/globals.dart';
 import '../parameters/net.dart' if (dart.library.html) '../parameters/nonet.dart';
 import '../parameters/globaldio.dart' if (dart.library.html) '../parameters/noglobaldio.dart';
 import 'api_isolateglobals.dart';
-import '../middleware/certificate.dart';
 
 class Answer {
   final String userId;
@@ -42,10 +41,10 @@ class DioInsertResultsIsolate {
     }
     SendPort sendPort = ldInput[0];
     InsertResultsDioPost irdp =
-        InsertResultsDioPost(apiKey: GNet.apiKeyRailway, userId: ldInput[2], modelCode: ldInput[3], os: ldInput[4],
-                             build: ldInput[5], udid: ldInput[6], threads: ldInput[7], result: ldInput[8]);
+        InsertResultsDioPost(apiKey: GNet.apiKeyRailway, userId: ldInput[1], modelCode: ldInput[2], os: ldInput[3],
+                             build: ldInput[4], udid: ldInput[5], threads: ldInput[6], result: ldInput[7]);
     InsertResultsDioResponse irdr = await InsertResultsDioResponse.createInsertResultsDioPost(
-        GNet.uriInsertResults, ldInput[1],
+        GNet.uriInsertResults,
         mBody: irdp.toMap());
     debugPrint('apinetisolates, apisendresultsisolatecontroller.dart, _insertResultsEntryPoint() irdr: ${irdr.toMap()}');
     sendPort.send(jsonEncode(irdr.toMap())); //sending data back to main thread's function
@@ -65,7 +64,6 @@ class DioInsertResultsIsolate {
     killNetworkProcessesByIsolateKey(sIsolateKey);
     Isolate isolateIR = await Isolate.spawn(_insertResultsEntryPoint, [
       receivePort.sendPort,
-      CertificatesStorage.getCertRailway,
       userId0,
       modelCode0,
       os0,
@@ -126,7 +124,7 @@ class DioInsertResultsIsolate {
   }
 }
 
-// DBR Index App InsertResultsDioPost Classes and Methods
+// 8 Queens App InsertResultsDioPost Classes and Methods
 
 class InsertResultsDioPost {
   final String apiKey;
@@ -199,16 +197,15 @@ class InsertResultsDioResponse {
     return map;
   }
 
-  static Future<InsertResultsDioResponse> createInsertResultsDioPost(Uri uri, List<int> liCert,
-      {required Map mBody}) async {
+  static Future<InsertResultsDioResponse> createInsertResultsDioPost(Uri uri, {required Map mBody}) async {
     DioResponse response;
     String input, decryptedResponse;
     Map<String, dynamic> mapDecodedResponse;
+
     final dio = DioHttp(dioOptions);
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () =>
-        HttpClient(context: CertificateSecurityContext.get(liCert))
-          ..maxConnectionsPerHost = 16
-          /*..badCertificateCallback = (X509Certificate cert, String host, int port) => true*/;
+        HttpClient()..maxConnectionsPerHost = 16;
+
     try {
       response = await dio.postUri(uri, data: jsonEncode(mBody));
       final int statusCode = response.statusCode ?? -1;

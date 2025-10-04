@@ -18,7 +18,6 @@ import '../apinetisolates/api_isolateglobals.dart';
 import '../apinetisolates/apiprofilehandlerisolatecontroller.dart';
 import '../middleware/deviceinfoplus.dart';
 import '../middleware/rankings.dart';
-import '../middleware/certificate.dart';
 import '../middleware/autoregistration.dart';
 import '../middleware/insertresultsorautoreg.dart';
 import '../middleware/listslocalstorage.dart';
@@ -113,7 +112,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
   initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    CertificatesStorage.load();
     loadPackageInfo();
     arl = AutoRegLocal(refreshCrown: _refreshCrown);
     arm = AutoRegMiddleware(autoRegLocal: arl);

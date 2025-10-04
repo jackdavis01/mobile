@@ -8,7 +8,6 @@ import '../parameters/globals.dart';
 import '../parameters/net.dart' if (dart.library.html) '../parameters/nonet.dart';
 import '../parameters/globaldio.dart' if (dart.library.html) '../parameters/noglobaldio.dart';
 import 'api_isolateglobals.dart';
-import '../middleware/certificate.dart';
 
 class ProfileHandlerAnswer {
   final Map<String, dynamic> profile;
@@ -87,9 +86,9 @@ class DioProfileHandlerIsolate {
     }
     SendPort sendPort = ldInput[0];
     ProfileHandlerDioPost phdp =
-        ProfileHandlerDioPost(apiKey: GNet.apiKeyRailwayProfile, type: ldInput[2], userId: ldInput[3], base64username: ldInput[4]);
+        ProfileHandlerDioPost(apiKey: GNet.apiKeyRailwayProfile, type: ldInput[1], userId: ldInput[2], base64username: ldInput[3]);
     ProfileHandlerDioResponse phdr = await ProfileHandlerDioResponse.createProfileHandlerDioPost(
-        GNet.uriProfileHandler, ldInput[1],
+        GNet.uriProfileHandler,
         mBody: phdp.toMap());
     debugPrint('apinetisolates, apiprofilehandlerisolatecontroller.dart, _profileHandlerEntryPoint() phdr: ${phdr.toMap()}');
     sendPort.send(jsonEncode(phdr.toMap())); //sending data back to main thread's function
@@ -111,7 +110,6 @@ class DioProfileHandlerIsolate {
     killNetworkProcessesByIsolateKey(sIsolateKey);
     Isolate isolatePH = await Isolate.spawn(_profileHandlerEntryPoint, [
       receivePort.sendPort,
-      CertificatesStorage.getCertRailway,
       type0,
       userId0,
       base64username0
@@ -167,7 +165,7 @@ class DioProfileHandlerIsolate {
   }
 }
 
-// DBR Index App ProfileHandlerDioPost Classes and Methods
+// 8 Queens App ProfileHandlerDioPost Classes and Methods
 
 class ProfileHandlerDioPost {
   final String apiKey;
@@ -230,16 +228,15 @@ class ProfileHandlerDioResponse {
     return map;
   }
 
-  static Future<ProfileHandlerDioResponse> createProfileHandlerDioPost(Uri uri, List<int> liCert,
-      {required Map mBody}) async {
+  static Future<ProfileHandlerDioResponse> createProfileHandlerDioPost(Uri uri, {required Map mBody}) async {
     DioResponse response;
     String input, decryptedResponse;
     Map<String, dynamic> mapDecodedResponse;
+
     final dio = DioHttp(dioOptions);
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () =>
-        HttpClient(context: CertificateSecurityContext.get(liCert))
-          ..maxConnectionsPerHost = 16
-          /*..badCertificateCallback = (X509Certificate cert, String host, int port) => true*/;
+        HttpClient()..maxConnectionsPerHost = 16;
+
     try {
       response = await dio.postUri(uri, data: jsonEncode(mBody));
       final int statusCode = response.statusCode ?? -1;
