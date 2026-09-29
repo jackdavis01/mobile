@@ -40,6 +40,14 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
   String userName = "";
   int iUserCrown = 0;
   String sUserCrown = "";
+  bool androidSelected = true;
+  bool iosSelected = true;
+
+  String get selectedOs {
+    if (androidSelected && iosSelected) return 'b';
+    if (androidSelected) return 'a';
+    return 'i';
+  }
 
   @override
   void initState() {
@@ -71,6 +79,9 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isIosPhoneUi = !kIsWeb && Platform.isIOS;
+    final String androidFilterLabel = isIosPhoneUi ? 'Other' : 'Android';
+
     Widget drawerHeader = Container(
       padding: const EdgeInsets.only(right: 16),
       color: Theme.of(context).primaryColor,
@@ -112,6 +123,98 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
       children: <Widget>[
         drawerHeader,
         const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  if (isIosPhoneUi) ...[
+                    Expanded(
+                      child: CheckboxListTile(
+                        visualDensity: const VisualDensity(horizontal: -4),
+                        contentPadding: const EdgeInsets.only(left: 0, right: 0, bottom: 4),
+                        dense: true,
+                        title: const Text('iOS', style: TextStyle(fontSize: 16.0)),
+                        value: iosSelected,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            final bool nextValue = value ?? false;
+                            iosSelected = nextValue;
+                            if (!iosSelected && !androidSelected) {
+                              androidSelected = true;
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: CheckboxListTile(
+                        visualDensity: const VisualDensity(horizontal: -4),
+                        contentPadding: const EdgeInsets.only(left: 0, right: 0, bottom: 4),
+                        dense: true,
+                        title: Text(androidFilterLabel, style: const TextStyle(fontSize: 16.0)),
+                        value: androidSelected,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            final bool nextValue = value ?? false;
+                            androidSelected = nextValue;
+                            if (!androidSelected && !iosSelected) {
+                              iosSelected = true;
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                  ] else ...[
+                    Expanded(
+                      child: CheckboxListTile(
+                        visualDensity: const VisualDensity(horizontal: -4),
+                        contentPadding: const EdgeInsets.only(left: 0, right: 0, bottom: 4),
+                        dense: true,
+                        title: Text(androidFilterLabel, style: const TextStyle(fontSize: 16.0)),
+                        value: androidSelected,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            final bool nextValue = value ?? false;
+                            androidSelected = nextValue;
+                            if (!androidSelected && !iosSelected) {
+                              iosSelected = true;
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: CheckboxListTile(
+                        visualDensity: const VisualDensity(horizontal: -4),
+                        contentPadding: const EdgeInsets.only(left: 0, right: 0, bottom: 4),
+                        dense: true,
+                        title: const Text('iOS', style: TextStyle(fontSize: 16.0)),
+                        value: iosSelected,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            final bool nextValue = value ?? false;
+                            iosSelected = nextValue;
+                            if (!iosSelected && !androidSelected) {
+                              androidSelected = true;
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1, thickness: 1),
         ExpansionTile(
           tilePadding: const EdgeInsets.only(left: 16, right: 32),
           leading: const Icon(Icons.star),
@@ -125,7 +228,7 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
                 horizontalTitleGap: 20.0,
                 title: const Text('User Stat', style: TextStyle(fontSize: 18.0)),
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => UserResultsPage(autoRegLocal: widget.arl, lls: widget.lls)),
+                  builder: (context) => UserResultsPage(autoRegLocal: widget.arl, lls: widget.lls, os: selectedOs)),
                 ),
               ),
             ),
@@ -136,7 +239,7 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
                 horizontalTitleGap: 20.0,
                 title: const Text('Model Stat', style: TextStyle(fontSize: 18.0)),
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ModelResultsPage(autoRegLocal: widget.arl, lls: widget.lls)),
+                  builder: (context) => ModelResultsPage(autoRegLocal: widget.arl, lls: widget.lls, os: selectedOs)),
                 ),
             ))
           ],
@@ -154,7 +257,7 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
                 horizontalTitleGap: 20.0,
                 title: const Text('User Runners', style: TextStyle(fontSize: 18.0)),
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => UserRunnersPage(autoRegLocal: widget.arl, lls: widget.lls)),
+                  builder: (context) => UserRunnersPage(autoRegLocal: widget.arl, lls: widget.lls, os: selectedOs)),
                 ),
               ),
             ),
@@ -165,7 +268,7 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
                 horizontalTitleGap: 20.0,
                 title: const Text('Model Runners', style: TextStyle(fontSize: 18.0)),
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ModelRunnersPage(autoRegLocal: widget.arl, lls: widget.lls)),
+                  builder: (context) => ModelRunnersPage(autoRegLocal: widget.arl, lls: widget.lls, os: selectedOs)),
                 ),
             )),
           ],
@@ -183,7 +286,7 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
                 horizontalTitleGap: 20.0,
                 title: const Text('User Stat', style: TextStyle(fontSize: 18.0)),
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => UserWorstResultsPage(autoRegLocal: widget.arl, lls: widget.lls)),
+                  builder: (context) => UserWorstResultsPage(autoRegLocal: widget.arl, lls: widget.lls, os: selectedOs)),
                 ),
               ),
             ),
@@ -194,7 +297,7 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
                 horizontalTitleGap: 20.0,
                 title: const Text('Model Stat', style: TextStyle(fontSize: 18.0)),
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ModelWorstResultsPage(autoRegLocal: widget.arl, lls: widget.lls)),
+                  builder: (context) => ModelWorstResultsPage(autoRegLocal: widget.arl, lls: widget.lls, os: selectedOs)),
                 ),
             )),
           ],

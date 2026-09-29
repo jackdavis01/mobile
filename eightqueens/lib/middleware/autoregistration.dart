@@ -17,7 +17,7 @@ class AutoRegMiddleware {
   Future<bool> callAutoReg(String sModelCode, String os, int build, String udid, int iThreads, int iResult, int ls) async {
 
     bool success = false;
-  
+
     debugPrint('middleware, autoregistration.dart, callAutoReg() iResult: $iResult');
 
     if (!kIsWeb) {

@@ -118,7 +118,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
     iroarm = InsertResultsOrAutoRegMiddleware(autoRegLocal: arl, autoRegMiddleware: arm);
     if (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
       arl.initEAutoRegedFromLocal();
-      hfd = HomeFeatureDiscovery(context: context, lskFeatureIds: [_kFeatureId1Start, _kFeatureId2ThreadDD, _kFeatureId3NavMenu, _kFeatureId4CrownCollect], getMounted: () => mounted);
+      hfd = HomeFeatureDiscovery(
+          context: context,
+          lskFeatureIds: [_kFeatureId1Start, _kFeatureId2ThreadDD, _kFeatureId3NavMenu, _kFeatureId4CrownCollect],
+          getMounted: () => mounted);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _refreshCrown();
       });
@@ -149,12 +152,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
   Future<void> loadUserNameIfMissing() async {
     await Future.delayed(const Duration(seconds: 1));
     EAutoReged eAutoReged = arl.eAutoReged;
-      // eAutoReged = EAutoReged.reged; // test code, should be commented out
+    // eAutoReged = EAutoReged.reged; // test code, should be commented out
     String sUsername = await arl.getUserName();
     if (EAutoReged.reged == eAutoReged && AutoRegLocal.sMe == sUsername) {
       int userId = arl.getUserId();
-        // userId = 0; // test code, should be commented out
-        // arl.setUserIdLocal(userId, "", 1); // test code, should be commented out
+      // userId = 0; // test code, should be commented out
+      // arl.setUserIdLocal(userId, "", 1); // test code, should be commented out
       String base64username = base64.encode(utf8.encode(""));
       List<dynamic> ldValue = await _dphi.callProfileHandlerRetryIsolateApi(1, userId, base64username);
       bool success = ldValue[0];
@@ -169,7 +172,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
     }
   }
 
-  Future<void> loadPackageInfo() async { _dpi = await loadLocalPackageInfo(); }
+  Future<void> loadPackageInfo() async {
+    _dpi = await loadLocalPackageInfo();
+  }
 
   DataPackageInfo getDpi() => _dpi;
 
@@ -288,8 +293,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
     _bThereWasWaitOrPause = (0 != _waitms);
     _lsendPort.clear();
     _lsqdEvents.clear();
-    List<dynamic> ldSqdLd =
-        await multiThreadedFindSolution.startMultiIsolatesInBackground(_nThreadsStarted);
+    List<dynamic> ldSqdLd = await multiThreadedFindSolution.startMultiIsolatesInBackground(_nThreadsStarted);
     for (int i = 0; i < _nThreadsStarted; i++) {
       _lsendPort.add(ldSqdLd[0][i]);
       _lsqdEvents.add(ldSqdLd[1][i]);
@@ -712,8 +716,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
             triggerMode: TooltipTriggerMode.tap,
             padding: const EdgeInsets.all(12),
             margin: const EdgeInsets.only(left: 60, right: 60),
-            decoration:
-                BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
+            decoration: BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
             textStyle: const TextStyle(color: Colors.white, fontSize: 20),
             showDuration: const Duration(seconds: 10),
             child: Padding(
@@ -723,8 +726,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
                     left: 12 * dFontSizeScale0,
                     top: 4 * dFontSizeScale0),
                 child: Transform.scale(
-                    scale: dFontSizeScale0 * 1.36,
-                    child: const Icon(Icons.info_outline, color: Colors.blue))))
+                    scale: dFontSizeScale0 * 1.36, child: const Icon(Icons.info_outline, color: Colors.blue))))
       ],
     );
   }
@@ -772,32 +774,30 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
       );
     }).toList();
     return DropdownButton(
-      items: lddItems,
-      value: _ddMultiThreadValue,
-      focusColor: Colors.transparent,
-      itemHeight: (1.5 < dFontSizeScale0)
-        ? 24 * (dFontSizeScale0 - 1.5) + kMinInteractiveDimension
-        : kMinInteractiveDimension,
-      onChanged: onChangedDDMultiThread);
+        items: lddItems,
+        value: _ddMultiThreadValue,
+        focusColor: Colors.transparent,
+        itemHeight: (1.5 < dFontSizeScale0)
+            ? 24 * (dFontSizeScale0 - 1.5) + kMinInteractiveDimension
+            : kMinInteractiveDimension,
+        onChanged: onChangedDDMultiThread);
   }
 
   Widget wTooltipThreads(double dFontSizeScale0) {
     return Tooltip(
         message:
-          "You can test the MultiThreaded speed of your device by choosing '2 Threads', '4 Threads' or '8 Threads'.",
+            "You can test the MultiThreaded speed of your device by choosing '2 Threads', '4 Threads' or '8 Threads'.",
         preferBelow: false,
         triggerMode: TooltipTriggerMode.tap,
         padding: const EdgeInsets.all(12),
         margin: const EdgeInsets.only(left: 60, right: 60),
-        decoration:
-          BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
+        decoration: BoxDecoration(color: const Color(0xE04090FF), borderRadius: BorderRadius.circular(6)),
         textStyle: const TextStyle(color: Colors.white, fontSize: 20),
         showDuration: const Duration(seconds: 10),
         child: Padding(
-          padding: EdgeInsets.only(right: 8 * dFontSizeScale0, top: 4 * dFontSizeScale0),
-          child: Transform.scale(
-            scale: dFontSizeScale0 * 1.36,
-            child: const Icon(Icons.info_outline, color: Colors.blue))));
+            padding: EdgeInsets.only(right: 8 * dFontSizeScale0, top: 4 * dFontSizeScale0),
+            child: Transform.scale(
+                scale: dFontSizeScale0 * 1.36, child: const Icon(Icons.info_outline, color: Colors.blue))));
   }
 
   @override
@@ -814,108 +814,122 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
       _iFrameCount = 0;
     }
 
-    Widget wStartButtonBoxPortrait =  ElevatedButton(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
-        child: (!_bStart)
-          ? (0 == _stepCounter)
-            ? const Text("Start", style: TextStyle(fontSize: 20))
-            : const Text("Reset", style: TextStyle(fontSize: 20))
-          : const Text("Stop", style: TextStyle(fontSize: 20))),
-      style: ButtonStyle(
-        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
-      onPressed: (!_bStart)
-        ? (0 == _stepCounter)
-          ? _startStepCounter
-          : _resetStepCounter
-        : _stopStepCounter
-    );
+    Widget wStartButtonBoxPortrait = ElevatedButton(
+        child: Padding(
+            padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
+            child: (!_bStart)
+                ? (0 == _stepCounter)
+                    ? const Text("Start", style: TextStyle(fontSize: 20))
+                    : const Text("Reset", style: TextStyle(fontSize: 20))
+                : const Text("Stop", style: TextStyle(fontSize: 20))),
+        style: ButtonStyle(
+            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+        onPressed: (!_bStart)
+            ? (0 == _stepCounter)
+                ? _startStepCounter
+                : _resetStepCounter
+            : _stopStepCounter);
 
-    Widget wStartButtonBoxLandscape =  ElevatedButton(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
-        child: (!_bStart)
-          ? (0 == _stepCounter)
-            ? const Text("Start", style: TextStyle(fontSize: 20))
-            : const Text("Reset", style: TextStyle(fontSize: 20))
-          : const Text("Stop", style: TextStyle(fontSize: 20))),
-      style: ButtonStyle(
-        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
-      onPressed: (!_bStart)
-        ? (0 == _stepCounter)
-          ? _startStepCounter
-          : _resetStepCounter
-        : _stopStepCounter
-    );
+    Widget wStartButtonBoxLandscape = ElevatedButton(
+        child: Padding(
+            padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
+            child: (!_bStart)
+                ? (0 == _stepCounter)
+                    ? const Text("Start", style: TextStyle(fontSize: 20))
+                    : const Text("Reset", style: TextStyle(fontSize: 20))
+                : const Text("Stop", style: TextStyle(fontSize: 20))),
+        style: ButtonStyle(
+            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+        onPressed: (!_bStart)
+            ? (0 == _stepCounter)
+                ? _startStepCounter
+                : _resetStepCounter
+            : _stopStepCounter);
 
     Widget wThreadBoxPortrait = Padding(
-      padding: EdgeInsets.only(left: 32 * _dFontSizeScalePortrait),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        wTooltipThreads(_dFontSizeScalePortrait),
-        Row(children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: ddMultiThread(_dFontSizeScalePortrait))
-        ]),
-        SizedBox(height: 6 * _dFontSizeScalePortrait),
-        Row(children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: Text('FPS:',
-              style: TextStyle(fontSize: 20 * _dFontSizeScalePortrait))),
-          Text(_iFPS.toString(),
-            style:
-              TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers))
-        ]),
-        SizedBox(height: 26 * _dFontSizeScalePortrait)
-      ]));
+        padding: EdgeInsets.only(left: 32 * _dFontSizeScalePortrait),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          wTooltipThreads(_dFontSizeScalePortrait),
+          Row(children: [
+            Padding(padding: const EdgeInsets.only(right: 10), child: ddMultiThread(_dFontSizeScalePortrait))
+          ]),
+          SizedBox(height: 6 * _dFontSizeScalePortrait),
+          Row(children: [
+            Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: Text('FPS:', style: TextStyle(fontSize: 20 * _dFontSizeScalePortrait))),
+            Text(_iFPS.toString(), style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers))
+          ]),
+          SizedBox(height: 26 * _dFontSizeScalePortrait)
+        ]));
 
-    Widget wThreadBoxLandscape(double dFontSizeScaleLandscape) { return ddMultiThread(dFontSizeScaleLandscape); }
+    Widget wThreadBoxLandscape(double dFontSizeScaleLandscape) {
+      return ddMultiThread(dFontSizeScaleLandscape);
+    }
 
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
           centerTitle: true,
-          leading: (_foundation.kIsWeb) ? null : Builder(
-            builder: (BuildContext context) {
-              return Center(child: IconButton(
-                iconSize: 28,
-                icon: const NavMenuDescribedFeatureOverlay(
-                  featureId: _kFeatureId3NavMenu,
-                  child: Icon(Icons.menu_rounded)),
-                onPressed: () { Scaffold.of(context).openDrawer(); },
-                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-              ));
-            },
-          ),
+          leading: (_foundation.kIsWeb)
+              ? null
+              : Builder(
+                  builder: (BuildContext context) {
+                    return Center(
+                        child: IconButton(
+                      iconSize: 28,
+                      icon: const NavMenuDescribedFeatureOverlay(
+                          featureId: _kFeatureId3NavMenu, child: Icon(Icons.menu_rounded)),
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                      tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+                    ));
+                  },
+                ),
           actions: [
             (!_foundation.kIsWeb && (Platform.isAndroid || Platform.isIOS))
                 ? CrownCollectDescribedFeatureOverlay(
                     featureId: _kFeatureId4CrownCollect,
                     wCrown: wQueenImage,
                     child: IntrinsicWidth(
-                      child: IntrinsicHeight(
-                        child: TextButton.icon(
-                          icon: Padding(padding: const EdgeInsets.only(bottom: 4), child: SizedBox.fromSize(child: wQueenImage, size: const Size(28, 28))),
-                          label: Padding(padding: const EdgeInsets.only(right: 4), child: Text(sUserCrown, style: const TextStyle(fontSize: 18), maxLines: 1)),
-                          onPressed: (EAutoReged.reged == arl.eAutoReged && !_foundation.kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion))
-                            ? () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => CrownCollectionPage(wCrown: wQueenImage, dphi: _dphi, arl: arl, lls: _lls, iInterval: 0, refreshParent: _refreshCrown)),
-                                );
-                              }
-                            : (!_foundation.kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion))
-                              ? () { showRunTestFirstTextDialog(context); }
+                        child: IntrinsicHeight(
+                            child: TextButton.icon(
+                      icon: Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: SizedBox.fromSize(child: wQueenImage, size: const Size(28, 28))),
+                      label: Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: Text(sUserCrown, style: const TextStyle(fontSize: 18), maxLines: 1)),
+                      onPressed: (EAutoReged.reged == arl.eAutoReged &&
+                              !_foundation.kIsWeb &&
+                              (Platform.isIOS || 10.0 <= dAndroidVersion))
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CrownCollectionPage(
+                                        wCrown: wQueenImage,
+                                        dphi: _dphi,
+                                        arl: arl,
+                                        lls: _lls,
+                                        iInterval: 0,
+                                        refreshParent: _refreshCrown)),
+                              );
+                            }
+                          : (!_foundation.kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion))
+                              ? () {
+                                  showRunTestFirstTextDialog(context);
+                                }
                               : null,
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
-                          ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                      ),
                     ))),
-                )
-              : const SizedBox.shrink(),
+                  )
+                : const SizedBox.shrink(),
             (_foundation.kIsWeb)
                 ? IconButton(
                     icon: const Icon(Icons.info),
@@ -923,315 +937,333 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
                     onPressed: () async {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => InfoPage(dpi: getDpi(), dphi: _dphi, arl: arl, lls: _lls, refreshParent: _refreshCrown)),
+                        MaterialPageRoute(
+                            builder: (context) => InfoPage(
+                                dpi: getDpi(), dphi: _dphi, arl: arl, lls: _lls, refreshParent: _refreshCrown)),
                       );
                     },
                   )
                 : const SizedBox.shrink(),
           ],
         ),
-        drawer: (_foundation.kIsWeb) ? null : HomeNavDrawer(wCrown: wQueenImage, dphi: _dphi, arl: arl, lls: _lls, getDpi: getDpi, hfd: hfd, refreshParent: _refreshCrown),
+        drawer: (_foundation.kIsWeb)
+            ? null
+            : HomeNavDrawer(
+                wCrown: wQueenImage,
+                dphi: _dphi,
+                arl: arl,
+                lls: _lls,
+                getDpi: getDpi,
+                hfd: hfd,
+                refreshParent: _refreshCrown),
         onDrawerChanged: (isOpen) {
           if (!isOpen) {
             SchedulerBinding.instance.addPostFrameCallback((Duration duration) => hfd.showDiscovery());
           }
         },
         backgroundColor: Colors.white,
-        body: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-
-          _openResultPage(Color cResult0) {
-            if (null == _resultPageKey.currentState) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ResultPage(
-                    key: _resultPageKey,
-                    speed: _iSpeedRank,
-                    color: cNumbers,
-                    backgroundcolor: cResult0,
-                    threads: _nThreadsStarted,
-                    elapsed: _dElapsed,
-                    rankname: _sRankName,
-                    wCrown: wQueenImage,
-                    dphi: _dphi,
-                    arl: arl,
-                    lls: _lls,
-                    refreshParent: _refreshCrown,
-                  )),
-              );
-            }
-          }
-
-          _startOpenResultPageAfterWait(Color cResult0) async {
-            const int iOpenResultPageWaitMsSec = 2500;
-            for (int i = 0; i < iOpenResultPageWaitMsSec; i += 100) {
-              await Future.delayed(const Duration(milliseconds: 100));
-              if (pow(8, 8) != _stepCounter || _bResultPageOpened) break;
-            }
-            if (pow(8, 8) == _stepCounter && !_bResultPageOpened) {
-              _bResultPageOpened = true;
-              _openResultPage(cResult0);
-            }
-            _b5secWaitStarted = false;
-          }
-
-          Future<void> _callInsertResultsOrAutoRegAfterWait() async {
-            await Future.delayed(const Duration(milliseconds: 1000));
-            if (!_bStart && pow(8, 8) == _stepCounter && const Duration(milliseconds: 0) < _dElapsed && _dElapsedSended != _dElapsed && !_bThereWasWaitOrPause) {
-              int iBuild = int.tryParse(_dpi.buildNumber) ?? -20;
-              bool success = await iroarm.insertResultOrAutoReg(iBuild, _nThreadsStarted, _dElapsed);
-              if (success) {
-                _dElapsedSended = _dElapsed;
-                _insertResultOrAutoRegStarted = false;
-                _refreshCrown();
-                _lls.clearLocalListDates();
+        body: SafeArea(
+            top: false,
+            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+              _openResultPage(Color cResult0) {
+                if (null == _resultPageKey.currentState) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ResultPage(
+                              key: _resultPageKey,
+                              speed: _iSpeedRank,
+                              color: cNumbers,
+                              backgroundcolor: cResult0,
+                              threads: _nThreadsStarted,
+                              elapsed: _dElapsed,
+                              rankname: _sRankName,
+                              wCrown: wQueenImage,
+                              dphi: _dphi,
+                              arl: arl,
+                              lls: _lls,
+                              refreshParent: _refreshCrown,
+                            )),
+                  );
+                }
               }
-            }
-          }
 
-          // ! debugPrint('constraints.maxWidth: ${constraints.maxWidth}');
-          // ! debugPrint('constraints.maxHeight: ${constraints.maxHeight}');
-          //double dScreenWidth = MediaQuery.of(context).size.width;
-          //double dScreenHeight = MediaQuery.of(context).size.height;
-          double dScreenWidth = constraints.maxWidth;
-          double dScreenHeight = constraints.maxHeight;
-          //debugPrint("ScreenWidth: ${dScreenWidth.toStringAsFixed(2)}");
-          //debugPrint("ScreenHeight: ${dScreenHeight.toStringAsFixed(2)}");
-          // Height (without SafeArea: without status and toolbar)
-          //EdgeInsets dHeightPadding = MediaQuery.of(context).padding; // .viewPadding;
-          dScreenHeight = max(
-              dScreenHeight // -
-              //widget.headerSize -
-              //dHeightPadding.top -
-              //kToolbarHeight -
-              //dHeightPadding.bottom
-              ,
-              0);
-          // ! debugPrint("ScreenWidth: ${dScreenWidth.toStringAsFixed(2)}");
-          // ! debugPrint("ScreenHeight-: ${dScreenHeight.toStringAsFixed(2)}");
-          double dScreenSizePortrait = 0;
-          double dScreenSizeLandscape = 0;
-          Widget wQueenScaledPortrait = const SizedBox.shrink();
-          Widget wTimeElapsedPortrait = const SizedBox.shrink();
-          Widget wQueenScaledLandscape = const SizedBox.shrink();
-          Widget wTimeElapsedLandscape = const SizedBox.shrink();
+              _startOpenResultPageAfterWait(Color cResult0) async {
+                const int iOpenResultPageWaitMsSec = 2500;
+                for (int i = 0; i < iOpenResultPageWaitMsSec; i += 100) {
+                  await Future.delayed(const Duration(milliseconds: 100));
+                  if (pow(8, 8) != _stepCounter || _bResultPageOpened) break;
+                }
+                if (pow(8, 8) == _stepCounter && !_bResultPageOpened) {
+                  _bResultPageOpened = true;
+                  _openResultPage(cResult0);
+                }
+                _b5secWaitStarted = false;
+              }
 
-          Orientation currentOrientation = Orientation.landscape;
-          if (dScreenWidth < dScreenHeight) currentOrientation = Orientation.portrait;
-          if (Orientation.portrait == currentOrientation) {
-            dScreenSizePortrait = max(min(dScreenWidth, (dScreenHeight - 100) / 1.58), 200);
-            _dFontSizeScalePortrait = dScreenSizePortrait / 420;
-            wQueenScaledPortrait = Padding(
-                padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
-                child: Transform.scale(scale: 380 / dScreenSizePortrait, child: wQueenImage));
-            wTimeElapsedPortrait = Text(
-              _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
-              style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
-            );
-          } else {
-            dScreenSizeLandscape = min(dScreenWidth / 2.2, dScreenHeight);
-            _dFontSizeScaleLandscape = dScreenSizeLandscape / 332;
-            wQueenScaledLandscape = Padding(
-                padding: EdgeInsets.only(bottom: dScreenSizeLandscape / 220),
-                child: Transform.scale(scale: 380 / dScreenSizeLandscape, child: wQueenImage));
-            wTimeElapsedLandscape = Text(
-                _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
-                style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers), maxLines: 1);
-          }
-          if (pow(8, 8) == _stepCounter) {
-            if (!_foundation.kIsWeb && !_insertResultOrAutoRegStarted) {
-              _insertResultOrAutoRegStarted = true;
-              _callInsertResultsOrAutoRegAfterWait();
-            }
-            _iSpeedRank = _rks.getSpeedRank(_nThreadsStarted, _dElapsed);
-            //debugPrint("homepage.dart, build, _iSpeedRank: $_iSpeedRank");
-            _cSpeedRank = _rks.lcRanks[_iSpeedRank];
-            //debugPrint("homepage.dart, build, _cSpeedRank: $_cSpeedRank");
-            _sRankName = _rks.lsRankNames[_iSpeedRank];
-            //debugPrint("homepage.dart, build, _sRankName: $_sRankName");
-            if (!_b5secWaitStarted) {
-              _b5secWaitStarted = true;
-              _startOpenResultPageAfterWait(_cSpeedRank);
-            }
-            if (Orientation.portrait == currentOrientation) {
-              wTimeElapsedPortrait = ElevatedButton(
-                  onPressed: () { _bResultPageOpened = true; _openResultPage(_cSpeedRank); },
-                  clipBehavior: Clip.none,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _cSpeedRank,
-                  ),
-                  child: Text(
-                    _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
-                    style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
-                  ));
-            } else {
-              wTimeElapsedLandscape = ElevatedButton(
-                  onPressed: () { _bResultPageOpened = true; _openResultPage(_cSpeedRank); },
-                  style: ElevatedButton.styleFrom(backgroundColor: _cSpeedRank),
-                  child: Text(
-                    _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
-                    style: TextStyle(fontSize: 30 * _dFontSizeScaleLandscape, color: cNumbers),
-                  ));
-            }
-          }
-          if (constraints.maxWidth < constraints.maxHeight) {
-            return Stack(children: [
-              Center(
-                  child: Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-                Container(
-                  width: dScreenSizePortrait,
-                  alignment: Alignment.topCenter,
-                  child: SizedBox(
-                      height: dScreenSizePortrait,
-                      child: ChessTable(
-                          wQueen: Padding(
-                              padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
-                              child: wQueenScaledPortrait),
-                          liPlace: _liPos,
-                          /*dLeft: 24,
-                              dTop: 16,*/
-                          dScreenSize: dScreenSizePortrait)),
-                ),
-                wDisplayNumbers(_dFontSizeScalePortrait),
-                wTimeElapsedPortrait,
-                wddWaitType(_dFontSizeScalePortrait),
-                const Spacer(),
-              ])),
-              Positioned(
-                left: 0,
-                bottom: 0,
-                child: (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid))
-                  ? ThreadDropdownDescribedFeatureOverlay(
-                      featureId: _kFeatureId2ThreadDD,
-                      contentLocation: ContentLocation.above,
-                      child: wThreadBoxPortrait,
-                    )
-                  : wThreadBoxPortrait,
-              ),
-            ]);
-          } else {
-            return Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-              SizedBox(
-                  height: dScreenSizeLandscape,
-                  width: dScreenSizeLandscape,
-                  child: ChessTable(
-                      wQueen: wQueenScaledLandscape,
-                      liPlace: _liPos,
-                      dScreenSize: dScreenSizeLandscape)),
-              Flexible(
-                  flex: 4,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      wDisplayNumbers(_dFontSizeScaleLandscape),
-                      wTimeElapsedLandscape,
-                      wddWaitType(_dFontSizeScaleLandscape)
-                    ],
-                  )),
-              Flexible(
-                  flex: 3,
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          const Spacer(),
-                          (1.76 < (dScreenWidth / dScreenHeight))
-                              ? Padding(
-                                  padding: const EdgeInsets.only(top: 24, right: 4),
-                                  child: wTooltipThreads(_dFontSizeScaleLandscape))
-                              : const SizedBox.shrink(),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 24, right: 10),
-                            child: Text('FPS:',
-                                style: TextStyle(fontSize: 20 * _dFontSizeScaleLandscape)),
-                          ),
-                          Padding(
-                              padding: const EdgeInsets.only(top: 24, right: 16),
-                              child: Text(_iFPS.toString(),
-                                  style: TextStyle(
-                                      fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers)))
-                        ],
+              Future<void> _callInsertResultsOrAutoRegAfterWait() async {
+                await Future.delayed(const Duration(milliseconds: 1000));
+                if (!_bStart &&
+                    pow(8, 8) == _stepCounter &&
+                    const Duration(milliseconds: 0) < _dElapsed &&
+                    _dElapsedSended != _dElapsed &&
+                    !_bThereWasWaitOrPause) {
+                  int iBuild = int.tryParse(_dpi.buildNumber) ?? -20;
+                  bool success = await iroarm.insertResultOrAutoReg(iBuild, _nThreadsStarted, _dElapsed);
+                  if (success) {
+                    _dElapsedSended = _dElapsed;
+                    _insertResultOrAutoRegStarted = false;
+                    _refreshCrown();
+                    _lls.clearLocalListDates();
+                  }
+                }
+              }
+
+              // ! debugPrint('constraints.maxWidth: ${constraints.maxWidth}');
+              // ! debugPrint('constraints.maxHeight: ${constraints.maxHeight}');
+              //double dScreenWidth = MediaQuery.of(context).size.width;
+              //double dScreenHeight = MediaQuery.of(context).size.height;
+              double dScreenWidth = constraints.maxWidth;
+              double dScreenHeight = constraints.maxHeight;
+              //debugPrint("ScreenWidth: ${dScreenWidth.toStringAsFixed(2)}");
+              //debugPrint("ScreenHeight: ${dScreenHeight.toStringAsFixed(2)}");
+              // Height (without SafeArea: without status and toolbar)
+              //EdgeInsets dHeightPadding = MediaQuery.of(context).padding; // .viewPadding;
+              dScreenHeight = max(
+                  dScreenHeight // -
+                  //widget.headerSize -
+                  //dHeightPadding.top -
+                  //kToolbarHeight -
+                  //dHeightPadding.bottom
+                  ,
+                  0);
+              // ! debugPrint("ScreenWidth: ${dScreenWidth.toStringAsFixed(2)}");
+              // ! debugPrint("ScreenHeight-: ${dScreenHeight.toStringAsFixed(2)}");
+              double dScreenSizePortrait = 0;
+              double dScreenSizeLandscape = 0;
+              Widget wQueenScaledPortrait = const SizedBox.shrink();
+              Widget wTimeElapsedPortrait = const SizedBox.shrink();
+              Widget wQueenScaledLandscape = const SizedBox.shrink();
+              Widget wTimeElapsedLandscape = const SizedBox.shrink();
+
+              Orientation currentOrientation = Orientation.landscape;
+              if (dScreenWidth < dScreenHeight) currentOrientation = Orientation.portrait;
+              if (Orientation.portrait == currentOrientation) {
+                dScreenSizePortrait = max(min(dScreenWidth, (dScreenHeight - 100) / 1.58), 200);
+                _dFontSizeScalePortrait = dScreenSizePortrait / 420;
+                wQueenScaledPortrait = Padding(
+                    padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
+                    child: Transform.scale(scale: 380 / dScreenSizePortrait, child: wQueenImage));
+                wTimeElapsedPortrait = Text(
+                  _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
+                  style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
+                );
+              } else {
+                dScreenSizeLandscape = min(dScreenWidth / 2.2, dScreenHeight);
+                _dFontSizeScaleLandscape = dScreenSizeLandscape / 332;
+                wQueenScaledLandscape = Padding(
+                    padding: EdgeInsets.only(bottom: dScreenSizeLandscape / 220),
+                    child: Transform.scale(scale: 380 / dScreenSizeLandscape, child: wQueenImage));
+                wTimeElapsedLandscape = Text(_dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
+                    style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers), maxLines: 1);
+              }
+              if (pow(8, 8) == _stepCounter) {
+                if (!_foundation.kIsWeb && !_insertResultOrAutoRegStarted) {
+                  _insertResultOrAutoRegStarted = true;
+                  _callInsertResultsOrAutoRegAfterWait();
+                }
+                _iSpeedRank = _rks.getSpeedRank(_nThreadsStarted, _dElapsed);
+                //debugPrint("homepage.dart, build, _iSpeedRank: $_iSpeedRank");
+                _cSpeedRank = _rks.lcRanks[_iSpeedRank];
+                //debugPrint("homepage.dart, build, _cSpeedRank: $_cSpeedRank");
+                _sRankName = _rks.lsRankNames[_iSpeedRank];
+                //debugPrint("homepage.dart, build, _sRankName: $_sRankName");
+                if (!_b5secWaitStarted) {
+                  _b5secWaitStarted = true;
+                  _startOpenResultPageAfterWait(_cSpeedRank);
+                }
+                if (Orientation.portrait == currentOrientation) {
+                  wTimeElapsedPortrait = ElevatedButton(
+                      onPressed: () {
+                        _bResultPageOpened = true;
+                        _openResultPage(_cSpeedRank);
+                      },
+                      clipBehavior: Clip.none,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _cSpeedRank,
                       ),
-                      Row(children: [
-                        const Spacer(),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4, right: 12),
-                          child: (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid))
-                            ? ThreadDropdownDescribedFeatureOverlay(
-                                featureId: _kFeatureId2ThreadDD,
-                                contentLocation: ContentLocation.below,
-                                child: wThreadBoxLandscape(_dFontSizeScaleLandscape))
-                            : wThreadBoxLandscape(_dFontSizeScaleLandscape)),
-                      ]),
-                      (1.76 > (dScreenWidth / dScreenHeight))
-                          ? Row(children: [
+                      child: Text(
+                        _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
+                        style: TextStyle(fontSize: 32 * _dFontSizeScalePortrait, color: cNumbers),
+                      ));
+                } else {
+                  wTimeElapsedLandscape = ElevatedButton(
+                      onPressed: () {
+                        _bResultPageOpened = true;
+                        _openResultPage(_cSpeedRank);
+                      },
+                      style: ElevatedButton.styleFrom(backgroundColor: _cSpeedRank),
+                      child: Text(
+                        _dElapsed.toString().substring(0, _dElapsed.toString().indexOf('.') + 4),
+                        style: TextStyle(fontSize: 30 * _dFontSizeScaleLandscape, color: cNumbers),
+                      ));
+                }
+              }
+              if (constraints.maxWidth < constraints.maxHeight) {
+                return Stack(children: [
+                  Center(
+                      child: Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+                    Container(
+                      width: dScreenSizePortrait,
+                      alignment: Alignment.topCenter,
+                      child: SizedBox(
+                          height: dScreenSizePortrait,
+                          child: ChessTable(
+                              wQueen: Padding(
+                                  padding: EdgeInsets.only(bottom: dScreenSizePortrait / 320),
+                                  child: wQueenScaledPortrait),
+                              liPlace: _liPos,
+                              /*dLeft: 24,
+                              dTop: 16,*/
+                              dScreenSize: dScreenSizePortrait)),
+                    ),
+                    wDisplayNumbers(_dFontSizeScalePortrait),
+                    wTimeElapsedPortrait,
+                    wddWaitType(_dFontSizeScalePortrait),
+                    const Spacer(),
+                  ])),
+                  Positioned(
+                    left: 0,
+                    bottom: 0,
+                    child: (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid))
+                        ? ThreadDropdownDescribedFeatureOverlay(
+                            featureId: _kFeatureId2ThreadDD,
+                            contentLocation: ContentLocation.above,
+                            child: wThreadBoxPortrait,
+                          )
+                        : wThreadBoxPortrait,
+                  ),
+                ]);
+              } else {
+                return Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+                  SizedBox(
+                      height: dScreenSizeLandscape,
+                      width: dScreenSizeLandscape,
+                      child: ChessTable(
+                          wQueen: wQueenScaledLandscape, liPlace: _liPos, dScreenSize: dScreenSizeLandscape)),
+                  Flexible(
+                      flex: 4,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          wDisplayNumbers(_dFontSizeScaleLandscape),
+                          wTimeElapsedLandscape,
+                          wddWaitType(_dFontSizeScaleLandscape)
+                        ],
+                      )),
+                  Flexible(
+                      flex: 3,
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
                               const Spacer(),
+                              (1.76 < (dScreenWidth / dScreenHeight))
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(top: 24, right: 4),
+                                      child: wTooltipThreads(_dFontSizeScaleLandscape))
+                                  : const SizedBox.shrink(),
                               Padding(
-                                  padding: const EdgeInsets.only(top: 6, right: 8),
-                                  child: wTooltipThreads(_dFontSizeScaleLandscape))
-                            ])
-                          : const SizedBox.shrink(),
-                    ],
-                  ))
-            ]);
-          }
-        }),
-        floatingActionButton:
-            LayoutBuilder(builder: (BuildContext context, BoxConstraints floatingConstraints) {
-          double realFloatingConstraintsMaxHeight =
-              max(floatingConstraints.maxHeight - GVW.dWebWidgetHeaderHeight, 0);
-          if (floatingConstraints.maxWidth < (realFloatingConstraintsMaxHeight)) {
-            // portrait
-            // debugPrint('floatingConstraints.maxWidth: ${floatingConstraints.maxWidth}');
-            // debugPrint('realFloatingConstraintsMaxHeight: $realFloatingConstraintsMaxHeight');
-            return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-              ElevatedButton(
-                  child: Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
-                      child: (!_bPaused)
-                          ? const Text("Pause", style: TextStyle(fontSize: 20))
-                          : const Text("Resume", style: TextStyle(fontSize: 20))),
-                  style: ButtonStyle(
-                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
-                  onPressed: (_bStart)
-                      ? (_bPaused)
-                          ? _resumeStepCounter
-                          : _pauseStepCounter
-                      : null),
-              const SizedBox(width: 16),
-              (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid))
-              ? StartButtonDescribedFeatureOverlay(
-                  featureId: _kFeatureId1Start,
-                  child: wStartButtonBoxPortrait,
-                )
-              : wStartButtonBoxPortrait,
-            ]);
-          } else {
-            return Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-              ElevatedButton(
-                  child: Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
-                      child: (!_bPaused)
-                          ? const Text("Pause", style: TextStyle(fontSize: 20))
-                          : const Text("Resume", style: TextStyle(fontSize: 20))),
-                  style: ButtonStyle(
-                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
-                  onPressed: (_bStart)
-                      ? (_bPaused)
-                          ? _resumeStepCounter
-                          : _pauseStepCounter
-                      : null),
-              const SizedBox(height: 16),
-              (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid))
-              ? StartButtonDescribedFeatureOverlay(
-                  featureId: _kFeatureId1Start,
-                  child: wStartButtonBoxLandscape,
-                )
-              : wStartButtonBoxLandscape,
-            ]);
-          }
-        }));
+                                padding: const EdgeInsets.only(top: 24, right: 10),
+                                child: Text('FPS:', style: TextStyle(fontSize: 20 * _dFontSizeScaleLandscape)),
+                              ),
+                              Padding(
+                                  padding: const EdgeInsets.only(top: 24, right: 16),
+                                  child: Text(_iFPS.toString(),
+                                      style: TextStyle(fontSize: 32 * _dFontSizeScaleLandscape, color: cNumbers)))
+                            ],
+                          ),
+                          Row(children: [
+                            const Spacer(),
+                            Padding(
+                                padding: const EdgeInsets.only(top: 4, right: 12),
+                                child: (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid))
+                                    ? ThreadDropdownDescribedFeatureOverlay(
+                                        featureId: _kFeatureId2ThreadDD,
+                                        contentLocation: ContentLocation.below,
+                                        child: wThreadBoxLandscape(_dFontSizeScaleLandscape))
+                                    : wThreadBoxLandscape(_dFontSizeScaleLandscape)),
+                          ]),
+                          (1.76 > (dScreenWidth / dScreenHeight))
+                              ? Row(children: [
+                                  const Spacer(),
+                                  Padding(
+                                      padding: const EdgeInsets.only(top: 6, right: 8),
+                                      child: wTooltipThreads(_dFontSizeScaleLandscape))
+                                ])
+                              : const SizedBox.shrink(),
+                        ],
+                      ))
+                ]);
+              }
+            })),
+        floatingActionButton: SafeArea(
+            top: false,
+            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints floatingConstraints) {
+              double realFloatingConstraintsMaxHeight =
+                  max(floatingConstraints.maxHeight - GVW.dWebWidgetHeaderHeight, 0);
+              if (floatingConstraints.maxWidth < (realFloatingConstraintsMaxHeight)) {
+                // portrait
+                // debugPrint('floatingConstraints.maxWidth: ${floatingConstraints.maxWidth}');
+                // debugPrint('realFloatingConstraintsMaxHeight: $realFloatingConstraintsMaxHeight');
+                return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  ElevatedButton(
+                      child: Padding(
+                          padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
+                          child: (!_bPaused)
+                              ? const Text("Pause", style: TextStyle(fontSize: 20))
+                              : const Text("Resume", style: TextStyle(fontSize: 20))),
+                      style: ButtonStyle(
+                          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+                      onPressed: (_bStart)
+                          ? (_bPaused)
+                              ? _resumeStepCounter
+                              : _pauseStepCounter
+                          : null),
+                  const SizedBox(width: 16),
+                  (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid))
+                      ? StartButtonDescribedFeatureOverlay(
+                          featureId: _kFeatureId1Start,
+                          child: wStartButtonBoxPortrait,
+                        )
+                      : wStartButtonBoxPortrait,
+                ]);
+              } else {
+                return Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  ElevatedButton(
+                      child: Padding(
+                          padding: const EdgeInsets.fromLTRB(4, 16, 4, 16),
+                          child: (!_bPaused)
+                              ? const Text("Pause", style: TextStyle(fontSize: 20))
+                              : const Text("Resume", style: TextStyle(fontSize: 20))),
+                      style: ButtonStyle(
+                          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)))),
+                      onPressed: (_bStart)
+                          ? (_bPaused)
+                              ? _resumeStepCounter
+                              : _pauseStepCounter
+                          : null),
+                  const SizedBox(height: 16),
+                  (!_foundation.kIsWeb && (Platform.isIOS || Platform.isAndroid))
+                      ? StartButtonDescribedFeatureOverlay(
+                          featureId: _kFeatureId1Start,
+                          child: wStartButtonBoxLandscape,
+                        )
+                      : wStartButtonBoxLandscape,
+                ]);
+              }
+            })));
   }
 }

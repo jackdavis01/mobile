@@ -8,7 +8,8 @@ import '../widgets/modellistswidget.dart';
 class ModelRunnersPage extends StatefulWidget {
   final AutoRegLocal autoRegLocal;
   final ListsLocalStorage lls;
-  const ModelRunnersPage({Key? key, required this.autoRegLocal, required this.lls}) : super(key: key);
+  final String os;
+  const ModelRunnersPage({Key? key, required this.autoRegLocal, required this.lls, required this.os}) : super(key: key);
   @override
   State<ModelRunnersPage> createState() => _ModelRunnersPageState();
 }
@@ -20,16 +21,16 @@ class _ModelRunnersPageState extends State<ModelRunnersPage> with TickerProvider
 
   Future<dynamic> _callListModelRetryIsolateApi(int interval0, int thread0) {
     return dlmri.callListModelResultsRetryIsolateApi(widget.autoRegLocal.getUserId(), interval0, thread0,
-                                                    order, orderDirection, 100);
+                                                    order, orderDirection, 100, widget.os);
   }
 
   @override
   Widget build(BuildContext context) {
     return ModelLists(pageTitle: "Model Runners",
-                      fssLslMLLoadDates: widget.lls.fssModelRunnersDates,
+                      fssLslMLLoadDates: widget.lls.modelRunnersDatesByOs(widget.os),
                       serializeMLLoadDates: widget.lls.serializeMRLoadDates,
                       deserializeMLLoadDates: widget.lls.deserializeMRLoads,
-                      lslModel: widget.lls.lslModelRunners,
+                      lslModel: widget.lls.modelRunnersByOs(widget.os),
                       serializeLllmra: widget.lls.serializeLllmraList,
                       deserializeLllmra: widget.lls.deserializeLllmList,
                       callListModelRetryIsolateApi: _callListModelRetryIsolateApi);

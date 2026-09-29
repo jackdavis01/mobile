@@ -8,7 +8,8 @@ import '../widgets/userlistswidget.dart';
 class UserRunnersPage extends StatefulWidget {
   final AutoRegLocal autoRegLocal;
   final ListsLocalStorage lls;
-  const UserRunnersPage({Key? key, required this.autoRegLocal, required this.lls}) : super(key: key);
+  final String os;
+  const UserRunnersPage({Key? key, required this.autoRegLocal, required this.lls, required this.os}) : super(key: key);
   @override
   State<UserRunnersPage> createState() => _UserRunnersPageState();
 }
@@ -21,16 +22,16 @@ class _UserRunnersPageState extends State<UserRunnersPage> with TickerProviderSt
 
   Future<dynamic> _callListUserRetryIsolateApi(int interval0, int thread0) {
     return dluri.callListUserResultsRetryIsolateApi(widget.autoRegLocal.getUserId(), interval0, thread0,
-                                                    order, orderDirection, 100);
+                                                    order, orderDirection, 100, widget.os);
   }
 
   @override
   Widget build(BuildContext context) {
     return UserLists(pageTitle: "User Runners",
-                     fssLslULLoadDates: widget.lls.fssUserRunnersDates,
+                     fssLslULLoadDates: widget.lls.userRunnersDatesByOs(widget.os),
                      serializeULLoadDates: widget.lls.serializeURLoadDates,
                      deserializeULLoadDates: widget.lls.deserializeURLoads,
-                     lslUser: widget.lls.lslUserRunners,
+                     lslUser: widget.lls.userRunnersByOs(widget.os),
                      serializeLllura: widget.lls.serializeLlluraList,
                      deserializeLllura: widget.lls.deserializeLlluList,
                      callListUserRetryIsolateApi: _callListUserRetryIsolateApi);

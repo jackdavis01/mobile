@@ -223,7 +223,7 @@ class _AdBannerState extends State<AdBanner> with ImpressionDataListener, IronSo
     debugPrint('onInitSuccess isAdQualityEnabled=${configuration.isAdQualityEnabled}');
     _lpbavController.doLoadActionInChild();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return

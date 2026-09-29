@@ -8,40 +8,43 @@ import '../middleware/customfloatingactionbuttonlocation.dart';
 import '../parameters/themedata.dart';
 
 class ModelLists extends StatefulWidget {
-
   final String pageTitle;
   final FSSLocalStringList fssLslMLLoadDates;
   final List<String> Function(List<List<String>> llsMLLoadDates) serializeMLLoadDates;
   final List<List<String>> Function(List<String> lsMLD, List<List<String>> initLsMLD) deserializeMLLoadDates;
   final LocalStringList lslModel;
   final List<String> Function(List<List<List<ModelResultsAnswer>>> lllMra) serializeLllmra;
-  final List<List<List<ModelResultsAnswer>>> Function(List<String> lsML, List<List<List<ModelResultsAnswer>>> initLlsML) deserializeLllmra;
+  final List<List<List<ModelResultsAnswer>>> Function(List<String> lsML, List<List<List<ModelResultsAnswer>>> initLlsML)
+      deserializeLllmra;
 
   final Future<dynamic> Function(int interval0, int threads0) callListModelRetryIsolateApi;
 
-  const ModelLists({Key? key, required this.pageTitle,
-                              required this.fssLslMLLoadDates,
-                              required this.serializeMLLoadDates,
-                              required this.deserializeMLLoadDates,
-                              required this.lslModel,
-                              required this.serializeLllmra,
-                              required this.deserializeLllmra,
-                              required this.callListModelRetryIsolateApi}) : super(key: key);
+  const ModelLists(
+      {Key? key,
+      required this.pageTitle,
+      required this.fssLslMLLoadDates,
+      required this.serializeMLLoadDates,
+      required this.deserializeMLLoadDates,
+      required this.lslModel,
+      required this.serializeLllmra,
+      required this.deserializeLllmra,
+      required this.callListModelRetryIsolateApi})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ModelListsState();
-
 }
 
-class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin {
-
+class _ModelListsState extends State<ModelLists> with TickerProviderStateMixin {
   late TabController _tabIntervalsController;
   late TabController _tabThreadsController;
   final int _iRefreshDelaySec = 300;
   bool _bRefreshDelayCompleted = true;
-  List<List<String>> llsMLLoadDates = [["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                       ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                       ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]];
+  List<List<String>> llsMLLoadDates = [
+    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
+    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
+    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]
+  ];
   bool _bHasMLLoadCompleted = false;
   List<List<List<ModelResultsAnswer>>> lllmra = [
     [[], [], [], []],
@@ -60,7 +63,8 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
       _ModelListsDataTable(lModelAnswer: [], threads: 2),
       _ModelListsDataTable(lModelAnswer: [], threads: 4),
       _ModelListsDataTable(lModelAnswer: [], threads: 8),
-    ],    [
+    ],
+    [
       _ModelListsDataTable(lModelAnswer: [], threads: 1),
       _ModelListsDataTable(lModelAnswer: [], threads: 2),
       _ModelListsDataTable(lModelAnswer: [], threads: 4),
@@ -91,17 +95,18 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
   }
 
   Future<void> _getLocalModelListsDates() async {
-    llsMLLoadDates = widget.deserializeMLLoadDates(
-      await widget.fssLslMLLoadDates.get(), [["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                              "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                             ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                              "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                             ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                              "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
+    llsMLLoadDates = widget.deserializeMLLoadDates(await widget.fssLslMLLoadDates.get(), [
+      ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
+      ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
+      ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]
+    ]);
   }
 
   bool _isTabLoadable() {
-    DateTime dtLoadDatesUTC = (DateTime.tryParse(llsMLLoadDates[_tabIntervalsController.index][_tabThreadsController.index]) ?? DateTime.utc(1980,1,1,0,0,0)).toUtc();
+    DateTime dtLoadDatesUTC =
+        (DateTime.tryParse(llsMLLoadDates[_tabIntervalsController.index][_tabThreadsController.index]) ??
+                DateTime.utc(1980, 1, 1, 0, 0, 0))
+            .toUtc();
     DateTime dtNow = DateTime.now().toUtc();
     Duration duDiff = dtNow.difference(dtLoadDatesUTC);
     bool isLoadable = (Duration(seconds: _iRefreshDelaySec - 1) < duDiff);
@@ -137,13 +142,16 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
 
   void _handleFloatingActionButtonPress() => _refreshModelList();
 
-  void _refreshModelList()  => _getModelList(_tabIntervalsController.index, _tabThreadsController.index);
+  void _refreshModelList() => _getModelList(_tabIntervalsController.index, _tabThreadsController.index);
 
   Future<void> _getModelList(int iIntervalTab, int iThreadTab) async {
-
     _bHasMLLoadCompleted = false;
 
-    List<List<List<ModelResultsAnswer>>> lllmra0 = widget.deserializeLllmra(await widget.lslModel.get(), [[[], [], [], []],[[], [], [], []],[[], [], [], []]]);
+    List<List<List<ModelResultsAnswer>>> lllmra0 = widget.deserializeLllmra(await widget.lslModel.get(), [
+      [[], [], [], []],
+      [[], [], [], []],
+      [[], [], [], []]
+    ]);
     if (mounted) {
       setState(() {
         lllmra = lllmra0;
@@ -151,8 +159,8 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
     }
 
     if (_isTabLoadable()) {
-      List<dynamic> ldValue =
-        await widget.callListModelRetryIsolateApi(_intervalTabToThreads(iIntervalTab), _threadTabToThreads(iThreadTab));
+      List<dynamic> ldValue = await widget.callListModelRetryIsolateApi(
+          _intervalTabToThreads(iIntervalTab), _threadTabToThreads(iThreadTab));
       bool success = ldValue[0];
       if (success) {
         Map<String, List<ModelResultsAnswer>> answer = ldValue[1];
@@ -171,16 +179,14 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
     llsMLLoadDates[iIntervalTab][iThreadTab] = DateTime.now().toUtc().toIso8601String();
     List<String> lsValue = widget.serializeMLLoadDates(llsMLLoadDates);
     widget.fssLslMLLoadDates.set(lsValue);
-  
+
     _startOrResetRealoadTimer();
     _bHasMLLoadCompleted = true;
-
   }
 
   Widget scrollableDataTable(int iIntervalTab, int iThreadTab) {
-    _ModelListsDataTable uldt = _ModelListsDataTable(
-        lModelAnswer: lllmra[iIntervalTab][iThreadTab],
-        threads: _threadTabToThreads(iThreadTab));
+    _ModelListsDataTable uldt =
+        _ModelListsDataTable(lModelAnswer: lllmra[iIntervalTab][iThreadTab], threads: _threadTabToThreads(iThreadTab));
     llmldt[iIntervalTab][iThreadTab] = uldt;
 
     return SingleChildScrollView(
@@ -198,20 +204,29 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
 
   int _intervalTabToThreads(int iThreadTab) {
     switch (iThreadTab) {
-      case 0: return 2; // Weekly
-      case 1: return 3; // Monthly
-      case 2: return 4; // Quarterly
-      default: return 1;
+      case 0:
+        return 2; // Weekly
+      case 1:
+        return 3; // Monthly
+      case 2:
+        return 4; // Quarterly
+      default:
+        return 1;
     }
   }
 
   int _threadTabToThreads(int iThreadTab) {
     switch (iThreadTab) {
-      case 0: return 1;
-      case 1: return 2;
-      case 2: return 4;
-      case 3: return 8;
-      default: return 1;
+      case 0:
+        return 1;
+      case 1:
+        return 2;
+      case 2:
+        return 4;
+      case 3:
+        return 8;
+      default:
+        return 1;
     }
   }
 
@@ -225,8 +240,7 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
         child: Scaffold(
           appBar: AppBar(
             backgroundColor: blueTheme.colorScheme.inversePrimary,
-            title: Padding(
-              padding: const EdgeInsets.only(top: 12.0), child: Text(widget.pageTitle)),
+            title: Padding(padding: const EdgeInsets.only(top: 12.0), child: Text(widget.pageTitle)),
             centerTitle: true,
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(32),
@@ -251,146 +265,152 @@ class _ModelListsState extends State<ModelLists>  with TickerProviderStateMixin 
               ),
             ),
           ),
-          body: Column(children: [
-            Expanded(child: TabBarView(
-              controller: _tabIntervalsController,
-              children: <Widget>[
-                DefaultTabController(
-                  length: 4,
-                  initialIndex: 0,
-                  child: Column(
-                    children: [
-                      TabBar(
-                        controller: _tabThreadsController,
-                        isScrollable: true,
-                        tabs: const [
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                            child: Text("1 Thread", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                            child: Text("2 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                            child: Text("4 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                            child: Text("8 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                          ),
-                        ],
-                      ),
-                      Expanded(
-                        child: TabBarView(
+          body: SafeArea(
+            top: false,
+            child: Column(children: [
+              Expanded(
+                  child: TabBarView(
+                controller: _tabIntervalsController,
+                children: <Widget>[
+                  DefaultTabController(
+                    length: 4,
+                    initialIndex: 0,
+                    child: Column(
+                      children: [
+                        TabBar(
                           controller: _tabThreadsController,
-                          children: <Widget>[
-                            scrollableDataTable(0, 0),
-                            scrollableDataTable(0, 1),
-                            scrollableDataTable(0, 2),
-                            scrollableDataTable(0, 3),
+                          isScrollable: true,
+                          tabs: const [
+                            Padding(
+                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
+                              child: Text("1 Thread", style: TextStyle(fontSize: 18.4), maxLines: 1),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
+                              child: Text("2 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
+                              child: Text("4 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
+                              child: Text("8 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
+                            ),
                           ],
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: TabBarView(
+                            controller: _tabThreadsController,
+                            children: <Widget>[
+                              scrollableDataTable(0, 0),
+                              scrollableDataTable(0, 1),
+                              scrollableDataTable(0, 2),
+                              scrollableDataTable(0, 3),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                DefaultTabController(
-                  length: 4,
-                  initialIndex: 0,
-                  child: Column(
-                    children: [
-                      TabBar(
-                        controller: _tabThreadsController,
-                        isScrollable: true,
-                        tabs: const [
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                            child: Text("1 Thread", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                            child: Text("2 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                            child: Text("4 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                            child: Text("8 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                          ),
-                        ],
-                      ),
-                      Expanded(
-                        child: TabBarView(
+                  DefaultTabController(
+                    length: 4,
+                    initialIndex: 0,
+                    child: Column(
+                      children: [
+                        TabBar(
                           controller: _tabThreadsController,
-                          children: <Widget>[
-                            scrollableDataTable(1, 0),
-                            scrollableDataTable(1, 1),
-                            scrollableDataTable(1, 2),
-                            scrollableDataTable(1, 3),
+                          isScrollable: true,
+                          tabs: const [
+                            Padding(
+                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
+                              child: Text("1 Thread", style: TextStyle(fontSize: 18.4), maxLines: 1),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
+                              child: Text("2 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
+                              child: Text("4 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
+                              child: Text("8 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
+                            ),
                           ],
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: TabBarView(
+                            controller: _tabThreadsController,
+                            children: <Widget>[
+                              scrollableDataTable(1, 0),
+                              scrollableDataTable(1, 1),
+                              scrollableDataTable(1, 2),
+                              scrollableDataTable(1, 3),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                DefaultTabController(
-                  length: 4,
-                  initialIndex: 0,
-                  child: Column(
-                    children: [
-                      TabBar(
-                        controller: _tabThreadsController,
-                        isScrollable: true,
-                        tabs: const [
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                            child: Text("1 Thread", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                            child: Text("2 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                            child: Text("4 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                            child: Text("8 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                          ),
-                        ],
-                      ),
-                      Expanded(
-                        child: TabBarView(
+                  DefaultTabController(
+                    length: 4,
+                    initialIndex: 0,
+                    child: Column(
+                      children: [
+                        TabBar(
                           controller: _tabThreadsController,
-                          children: <Widget>[
-                            scrollableDataTable(2, 0),
-                            scrollableDataTable(2, 1),
-                            scrollableDataTable(2, 2),
-                            scrollableDataTable(2, 3),
+                          isScrollable: true,
+                          tabs: const [
+                            Padding(
+                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
+                              child: Text("1 Thread", style: TextStyle(fontSize: 18.4), maxLines: 1),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
+                              child: Text("2 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
+                              child: Text("4 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
+                              child: Text("8 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
+                            ),
                           ],
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: TabBarView(
+                            controller: _tabThreadsController,
+                            children: <Widget>[
+                              scrollableDataTable(2, 0),
+                              scrollableDataTable(2, 1),
+                              scrollableDataTable(2, 2),
+                              scrollableDataTable(2, 3),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            )),
-            const AdBanner(),
-          ]),
+                ],
+              )),
+              const AdBanner(),
+            ]),
+          ),
           floatingActionButton: (_bRefreshDelayCompleted && _bHasMLLoadCompleted && _isTabLoadable())
-            ? ElevatedButton(onPressed: _handleFloatingActionButtonPress, child: const Icon(Icons.refresh_rounded, size: 36))
-            : null,
+              ? SafeArea(
+                  top: false,
+                  child: ElevatedButton(
+                      onPressed: _handleFloatingActionButtonPress, child: const Icon(Icons.refresh_rounded, size: 36)))
+              : null,
           floatingActionButtonLocation: CustomFloatingActionButtonLocation(0.0, -104.0),
         ),
       ),
     );
   }
-
 }
 
 const List<DataColumn> _kTableColumns = <DataColumn>[
@@ -455,15 +475,19 @@ class _ModelListsDataTable {
     final List<DataRow> ldr = [];
     for (int row = 0; row < nRows; row++) {
       _ModelListsRow mlr = _convertModelListsElementToDataTableRow(lModelAnswer, row);
-      ldr.add(
-        DataRow(cells: [
-          DataCell(Padding(padding: const EdgeInsets.only(right: 8), child: Text('${row + 1}', style: const TextStyle(fontSize: 17)))),
-          DataCell(Padding(padding: const EdgeInsets.only(right: 8), child: Text(mlr.modelName, style: const TextStyle(fontSize: 17)))),
-          DataCell(Padding(padding: const EdgeInsets.only(right: 12), child: Text('${mlr.runs}', style: const TextStyle(fontSize: 17)))),
-          DataCell(Text(mlr.best.toStringAsFixed(3), style: const TextStyle(fontSize: 17))),
-          DataCell(Text(mlr.average.toStringAsFixed(3), style: const TextStyle(fontSize: 17))),
-          DataCell(Text(mlr.worst.toStringAsFixed(3), style: const TextStyle(fontSize: 17))),
-        ]));
+      ldr.add(DataRow(cells: [
+        DataCell(Padding(
+            padding: const EdgeInsets.only(right: 8), child: Text('${row + 1}', style: const TextStyle(fontSize: 17)))),
+        DataCell(Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Text(mlr.modelName, style: const TextStyle(fontSize: 17)))),
+        DataCell(Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Text('${mlr.runs}', style: const TextStyle(fontSize: 17)))),
+        DataCell(Text(mlr.best.toStringAsFixed(3), style: const TextStyle(fontSize: 17))),
+        DataCell(Text(mlr.average.toStringAsFixed(3), style: const TextStyle(fontSize: 17))),
+        DataCell(Text(mlr.worst.toStringAsFixed(3), style: const TextStyle(fontSize: 17))),
+      ]));
     }
     return ldr;
   }

@@ -7,7 +7,7 @@ import '../widgets/messagedialogs.dart';
 class InAppReviewController {
 
   final InAppReview inAppReview = InAppReview.instance;
-  
+
   Future<bool> getEnabled() async { return (Duration(days: GV.iInAppReviewDelayDays) < DateTime.now().toUtc().difference((await getInAppReviewLocalDate()))); }
 
   Future<void> _requestReview(BuildContext context) async {

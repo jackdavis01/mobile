@@ -10,42 +10,52 @@ import '../parameters/globals.dart';
 import '../middleware/inappreview.dart';
 
 class UserCrownLists extends StatefulWidget {
-
   final String pageTitle;
   final FSSLocalStringList fssLslULLoadDates;
   final List<String> Function(List<List<String>> llsULLoadDates) serializeULLoadDates;
   final List<List<String>> Function(List<String> lsULD, List<List<String>> initLsULD) deserializeULLoadDates;
   final LocalStringList lslUser;
   final List<String> Function(List<List<List<UserResultsAnswer>>> lllUra) serializeLllura;
-  final List<List<List<UserResultsAnswer>>> Function(List<String> lsUL, List<List<List<UserResultsAnswer>>> initLlsUL) deserializeLllura;
+  final List<List<List<UserResultsAnswer>>> Function(List<String> lsUL, List<List<List<UserResultsAnswer>>> initLlsUL)
+      deserializeLllura;
 
   final Future<dynamic> Function() callListUserRetryIsolateApi;
 
-  const UserCrownLists({Key? key, required this.pageTitle,
-                             required this.fssLslULLoadDates,
-                             required this.serializeULLoadDates,
-                             required this.deserializeULLoadDates,
-                             required this.lslUser,
-                             required this.serializeLllura,
-                             required this.deserializeLllura,
-                             required this.callListUserRetryIsolateApi}) : super(key: key);
+  const UserCrownLists(
+      {Key? key,
+      required this.pageTitle,
+      required this.fssLslULLoadDates,
+      required this.serializeULLoadDates,
+      required this.deserializeULLoadDates,
+      required this.lslUser,
+      required this.serializeLllura,
+      required this.deserializeLllura,
+      required this.callListUserRetryIsolateApi})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _UserCrownListsState();
-
 }
 
-class _UserCrownListsState extends State<UserCrownLists>  with TickerProviderStateMixin {
-
+class _UserCrownListsState extends State<UserCrownLists> with TickerProviderStateMixin {
   final int _iRefreshDelaySec = 300;
   bool _bRefreshDelayCompleted = true;
   int _iPlacement = 0;
-  void fSetPlacement(int placement) { _iPlacement = placement; }
+  void fSetPlacement(int placement) {
+    _iPlacement = placement;
+  }
+
   InAppReviewController iarc = InAppReviewController();
-  List<List<String>> llsULLoadDates = [["1980-01-01T00:00:00.000Z"]];
+  List<List<String>> llsULLoadDates = [
+    ["1980-01-01T00:00:00.000Z"]
+  ];
   bool _bHasULLoadCompleted = false;
-  List<List<List<UserResultsAnswer>>> lllura = [[[]]];
-  List<List<_UserCrownListsDataTable>> lluldt = [[_UserCrownListsDataTable(lUserAnswer: [], threads: 0)]];
+  List<List<List<UserResultsAnswer>>> lllura = [
+    [[]]
+  ];
+  List<List<_UserCrownListsDataTable>> lluldt = [
+    [_UserCrownListsDataTable(lUserAnswer: [], threads: 0)]
+  ];
 
   @override
   void initState() {
@@ -57,12 +67,13 @@ class _UserCrownListsState extends State<UserCrownLists>  with TickerProviderSta
   }
 
   Future<void> _getLocalUserListsDates() async {
-    llsULLoadDates = widget.deserializeULLoadDates(
-      await widget.fssLslULLoadDates.get(), [["1980-01-01T00:00:00.000Z"]]);
+    llsULLoadDates = widget.deserializeULLoadDates(await widget.fssLslULLoadDates.get(), [
+      ["1980-01-01T00:00:00.000Z"]
+    ]);
   }
 
   bool _isTabLoadable() {
-    DateTime dtLoadDatesUTC = (DateTime.tryParse(llsULLoadDates[0][0]) ?? DateTime.utc(1980,1,1,0,0,0)).toUtc();
+    DateTime dtLoadDatesUTC = (DateTime.tryParse(llsULLoadDates[0][0]) ?? DateTime.utc(1980, 1, 1, 0, 0, 0)).toUtc();
     DateTime dtNow = DateTime.now().toUtc();
     Duration duDiff = dtNow.difference(dtLoadDatesUTC);
     bool isLoadable = (Duration(seconds: _iRefreshDelaySec - 1) < duDiff);
@@ -96,13 +107,14 @@ class _UserCrownListsState extends State<UserCrownLists>  with TickerProviderSta
 
   void _handleFloatingActionButtonPress() => _refreshUserList();
 
-  void _refreshUserList()  => _getUserList();
+  void _refreshUserList() => _getUserList();
 
   Future<void> _getUserList() async {
-
     _bHasULLoadCompleted = false;
 
-    List<List<List<UserResultsAnswer>>> lllura0 = widget.deserializeLllura(await widget.lslUser.get(), [[[]]]);
+    List<List<List<UserResultsAnswer>>> lllura0 = widget.deserializeLllura(await widget.lslUser.get(), [
+      [[]]
+    ]);
     if (mounted) {
       setState(() {
         lllura = lllura0;
@@ -110,8 +122,7 @@ class _UserCrownListsState extends State<UserCrownLists>  with TickerProviderSta
     }
 
     if (_isTabLoadable()) {
-      List<dynamic> ldValue =
-        await widget.callListUserRetryIsolateApi();
+      List<dynamic> ldValue = await widget.callListUserRetryIsolateApi();
       bool success = ldValue[0];
       if (success) {
         Map<String, List<UserResultsAnswer>> answer = ldValue[1];
@@ -130,16 +141,13 @@ class _UserCrownListsState extends State<UserCrownLists>  with TickerProviderSta
     llsULLoadDates[0][0] = DateTime.now().toUtc().toIso8601String();
     List<String> lsValue = widget.serializeULLoadDates(llsULLoadDates);
     widget.fssLslULLoadDates.set(lsValue);
-  
+
     _startOrResetRealoadTimer();
     _bHasULLoadCompleted = true;
-
   }
 
   Widget scrollableDataTable() {
-    _UserCrownListsDataTable uldt = _UserCrownListsDataTable(
-        lUserAnswer: lllura[0][0],
-        threads: 0);
+    _UserCrownListsDataTable uldt = _UserCrownListsDataTable(lUserAnswer: lllura[0][0], threads: 0);
     lluldt[0][0] = uldt;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -174,23 +182,27 @@ class _UserCrownListsState extends State<UserCrownLists>  with TickerProviderSta
         child: Scaffold(
           appBar: AppBar(
             backgroundColor: blueTheme.colorScheme.inversePrimary,
-            title: Padding(
-              padding: const EdgeInsets.only(top: 12.0), child: Text(widget.pageTitle)),
+            title: Padding(padding: const EdgeInsets.only(top: 12.0), child: Text(widget.pageTitle)),
             centerTitle: true,
           ),
-          body: Column(children: [
-            Expanded(child: scrollableDataTable()),
-            const AdBanner(),
-          ]),
+          body: SafeArea(
+            top: false,
+            child: Column(children: [
+              Expanded(child: scrollableDataTable()),
+              const AdBanner(),
+            ]),
+          ),
           floatingActionButton: (_bRefreshDelayCompleted && _bHasULLoadCompleted && _isTabLoadable())
-            ? ElevatedButton(onPressed: _handleFloatingActionButtonPress, child: const Icon(Icons.refresh_rounded, size: 36))
-            : null,
+              ? SafeArea(
+                  top: false,
+                  child: ElevatedButton(
+                      onPressed: _handleFloatingActionButtonPress, child: const Icon(Icons.refresh_rounded, size: 36)))
+              : null,
           floatingActionButtonLocation: CustomFloatingActionButtonLocation(0.0, -104.0),
         ),
       ),
     );
   }
-
 }
 
 const List<DataColumn> kTableColumns = <DataColumn>[
@@ -251,14 +263,23 @@ class _UserCrownListsDataTable {
       FontWeight fw = (uclr.me) ? FontWeight.bold : FontWeight.normal;
       String sMe = (uclr.me) ? " (me)" : "";
       if (uclr.me) setPlacement(row + 1);
-      ldr.add(
-        DataRow(cells: [
-          DataCell(Padding(padding: const EdgeInsets.only(right: 2), child: Text('${row + 1}', style: TextStyle(fontSize: 17, fontWeight: fw)))),
-          DataCell(Padding(padding: const EdgeInsets.only(right: 12), child: Text('${uclr.crowns}', style: TextStyle(fontSize: 17, fontWeight: fw)))),
-          DataCell(Padding(padding: const EdgeInsets.only(right: 8), child: Text(uclr.userName + sMe, style: TextStyle(fontSize: 17, fontWeight: fw)))),
-          DataCell(Padding(padding: const EdgeInsets.only(right: 8), child: Text(uclr.modelName, style: TextStyle(fontSize: 17, fontWeight: fw)))),
-          DataCell(Padding(padding: const EdgeInsets.only(right: 12), child: Text('${uclr.runs}', style: TextStyle(fontSize: 17, fontWeight: fw)))),
-        ]));
+      ldr.add(DataRow(cells: [
+        DataCell(Padding(
+            padding: const EdgeInsets.only(right: 2),
+            child: Text('${row + 1}', style: TextStyle(fontSize: 17, fontWeight: fw)))),
+        DataCell(Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Text('${uclr.crowns}', style: TextStyle(fontSize: 17, fontWeight: fw)))),
+        DataCell(Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Text(uclr.userName + sMe, style: TextStyle(fontSize: 17, fontWeight: fw)))),
+        DataCell(Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Text(uclr.modelName, style: TextStyle(fontSize: 17, fontWeight: fw)))),
+        DataCell(Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Text('${uclr.runs}', style: TextStyle(fontSize: 17, fontWeight: fw)))),
+      ]));
     }
     return ldr;
   }

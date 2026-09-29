@@ -21,7 +21,7 @@ class _UserCrownsPageState extends State<UserCrownsPage> with TickerProviderStat
 
   Future<dynamic> _callListUserRetryIsolateApi() {
     return dluri.callListUserResultsRetryIsolateApi(widget.autoRegLocal.getUserId(), 0, 0,
-                                                    order, orderDirection, 100);
+                                                    order, orderDirection, 100, 'b');
   }
 
   @override

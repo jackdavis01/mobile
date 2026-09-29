@@ -3,7 +3,7 @@ import '../middleware/rankings.dart';
 
 class RankRangeListTitle extends StatelessWidget {
   const RankRangeListTitle({Key? key}) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
     return const Center(child:

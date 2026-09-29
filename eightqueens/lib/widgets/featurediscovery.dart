@@ -61,7 +61,7 @@ class StartButtonDescribedFeatureOverlay extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => _StartButtonDescribedFeatureOverlayState();
-  
+
 }
 
 class _StartButtonDescribedFeatureOverlayState extends State<StartButtonDescribedFeatureOverlay> {
@@ -104,7 +104,7 @@ class ThreadDropdownDescribedFeatureOverlay extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => _ThreadDropdownDescribedFeatureOverlayState();
-  
+
 }
 
 class _ThreadDropdownDescribedFeatureOverlayState extends State<ThreadDropdownDescribedFeatureOverlay> {
@@ -143,7 +143,7 @@ class NavMenuDescribedFeatureOverlay extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => _NavMenuDescribedFeatureOverlayState();
-  
+
 }
 
 class _NavMenuDescribedFeatureOverlayState extends State<NavMenuDescribedFeatureOverlay> {
@@ -170,7 +170,7 @@ class CrownCollectDescribedFeatureOverlay extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => _CrownCollectDescribedFeatureOverlayState();
-  
+
 }
 
 class _CrownCollectDescribedFeatureOverlayState extends State<CrownCollectDescribedFeatureOverlay> {

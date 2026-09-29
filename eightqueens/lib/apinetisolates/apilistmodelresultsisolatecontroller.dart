@@ -47,7 +47,7 @@ class DioListModelResultsIsolate {
     }
     SendPort sendPort = ldInput[0];
     ListModelResultsDioPost lmrdp =
-        ListModelResultsDioPost(apiKey: GNet.apiKeyRailwayListMR, userId: ldInput[1], interval: ldInput[2], threads: ldInput[3], order: ldInput[4], orderDirection: ldInput[5], limit: ldInput[6]);
+      ListModelResultsDioPost(apiKey: GNet.apiKeyRailwayListMR, userId: ldInput[1], interval: ldInput[2], threads: ldInput[3], order: ldInput[4], orderDirection: ldInput[5], limit: ldInput[6], os: ldInput[7]);
     ListModelResultsDioResponse lmrdr = await ListModelResultsDioResponse.createListModelResultsDioPost(
         GNet.uriListModelResults,
         mBody: lmrdp.toMap());
@@ -55,7 +55,7 @@ class DioListModelResultsIsolate {
     sendPort.send(jsonEncode(lmrdr.toMap())); //sending data back to main thread's function
   }
 
-  Future<dynamic> _callListModelResultsIsolateApi(int userId0, int interval0, int threads0, int order0, int orderDirection0, int limit0, int nRetry) async {
+  Future<dynamic> _callListModelResultsIsolateApi(int userId0, int interval0, int threads0, int order0, int orderDirection0, int limit0, String os0, int nRetry) async {
     bool success = false;
     List<ModelResultsAnswer> list = [];
     Map<String, List<ModelResultsAnswer>> answer = { "list": list };
@@ -75,7 +75,8 @@ class DioListModelResultsIsolate {
       threads0,
       order0,
       orderDirection0,
-      limit0
+      limit0,
+      os0
     ]); //spawing/creating new thread as isolates.
     String sIsolateId = "$sIsolateKey-$nRetry-${isolateLMR.hashCode}";
     mrpiNetIsolates.putIfAbsent(sIsolateId, () => ReceivePortIsolate(receivePort: receivePort, isolate: isolateLMR));
@@ -113,14 +114,14 @@ class DioListModelResultsIsolate {
     return cMsg.future;
   }
 
-  Future<dynamic> callListModelResultsRetryIsolateApi(int userId0, int interval0, int threads0, int order0, int orderDirection0, int limit0) async {
+  Future<dynamic> callListModelResultsRetryIsolateApi(int userId0, int interval0, int threads0, int order0, int orderDirection0, int limit0, String os0) async {
     const int nMaxRetry = nTimeoutRequestRetry4ListModelResults;
-    List<dynamic> ldValue = await _callListModelResultsIsolateApi(userId0, interval0, threads0, order0, orderDirection0, limit0, 0);
+    List<dynamic> ldValue = await _callListModelResultsIsolateApi(userId0, interval0, threads0, order0, orderDirection0, limit0, os0, 0);
     bool success = ldValue[0];
     int iN = 1;
     while (!success && nMaxRetry >= iN) {
       await Future.delayed(const Duration(milliseconds: iTimeoutRetryDelayMs));
-      ldValue = await _callListModelResultsIsolateApi(userId0, interval0, threads0, limit0, order0, orderDirection0, iN);
+      ldValue = await _callListModelResultsIsolateApi(userId0, interval0, threads0, order0, orderDirection0, limit0, os0, iN);
       success = ldValue[0];
       iN++;
     }
@@ -138,12 +139,13 @@ class ListModelResultsDioPost {
   final int order;
   final int orderDirection;
   final int limit;
+  final String os;
 
-  ListModelResultsDioPost({required this.apiKey, required this.userId, required this.interval, required this.threads, required this.order, required this.orderDirection, required this.limit});
+  ListModelResultsDioPost({required this.apiKey, required this.userId, required this.interval, required this.threads, required this.order, required this.orderDirection, required this.limit, required this.os});
 
   factory ListModelResultsDioPost.fromMap(Map<String, dynamic> map) {
     return ListModelResultsDioPost(
-        apiKey: map['apiKey'], userId: map['userId'], interval: map['interval'], threads: map['threads'], order: map['order'], orderDirection: map['orderDirection'], limit: map['limit']);
+      apiKey: map['apiKey'], userId: map['userId'], interval: map['interval'], threads: map['threads'], order: map['order'], orderDirection: map['orderDirection'], limit: map['limit'], os: map['os'] ?? 'b');
   }
 
   Map<String,dynamic> toMap() {
@@ -155,6 +157,7 @@ class ListModelResultsDioPost {
     map["order"] = order;
     map["orderDirection"] = orderDirection;
     map["limit"] = limit;
+    map["os"] = os;
     return map;
   }
 }
@@ -201,7 +204,7 @@ class ListModelResultsDioResponse {
     DioResponse response;
     String input, decryptedResponse;
     Map<String, dynamic> mapDecodedResponse;
-  
+
     final dio = DioHttp(dioOptions);
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () =>
         HttpClient()..maxConnectionsPerHost = 16;

@@ -1,0 +1,17 @@
+name: feature_discovery
+description: >-
+  A Flutter package that implements Material Design Feature discovery
+  to show a description of specific features to new users.
+  (Custom fork with positioning fix)
+version: 0.14.2+custom
+publish_to: none
+
+environment:
+  sdk: '>=3.3.0-0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  provider: ^6.1.5+1
+  shared_preferences: ^2.5.3

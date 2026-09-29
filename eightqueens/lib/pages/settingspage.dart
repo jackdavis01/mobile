@@ -10,7 +10,6 @@ import '../apinetisolates/apiprofilehandlerisolatecontroller.dart';
 import 'infopage.dart';
 
 class SettingsPage extends StatefulWidget {
-
   final DioProfileHandlerIsolate dphi;
   final AutoRegLocal arl;
   final ListsLocalStorage lls;
@@ -18,7 +17,15 @@ class SettingsPage extends StatefulWidget {
   final HomeFeatureDiscovery hfd;
   final Future<void> Function() refreshParent;
 
-  const SettingsPage({Key? key, required this.dphi, required this.arl, required this.lls, required this.getDpi, required this.hfd, required this.refreshParent}) : super(key: key);
+  const SettingsPage(
+      {Key? key,
+      required this.dphi,
+      required this.arl,
+      required this.lls,
+      required this.getDpi,
+      required this.hfd,
+      required this.refreshParent})
+      : super(key: key);
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -67,11 +74,24 @@ class _SettingsPageState extends State<SettingsPage> {
         setState(() {
           _success = success;
           _available = available;
-          _usernameHelperText = (null == _success) ? _initUsernameHelperText : (_success!) ? _available ? 'Available (Max 22 chars)' : 'Not available' : 'Check the net';
-          _helperStyle = TextStyle(color: (null == _success) ? null : _available ? Colors.green : Colors.red);
-          _suffixIcon = (null == _success) ? null : _available
-            ? const Icon(Icons.check, color: Colors.green)
-            : const Icon(Icons.close, color: Colors.red);
+          _usernameHelperText = (null == _success)
+              ? _initUsernameHelperText
+              : (_success!)
+                  ? _available
+                      ? 'Available (Max 22 chars)'
+                      : 'Not available'
+                  : 'Check the net';
+          _helperStyle = TextStyle(
+              color: (null == _success)
+                  ? null
+                  : _available
+                      ? Colors.green
+                      : Colors.red);
+          _suffixIcon = (null == _success)
+              ? null
+              : _available
+                  ? const Icon(Icons.check, color: Colors.green)
+                  : const Icon(Icons.close, color: Colors.red);
         });
       });
     } else {
@@ -98,7 +118,7 @@ class _SettingsPageState extends State<SettingsPage> {
       available = newProfile.available;
     }
     return [success, available];
-  } 
+  }
 
   String? _textFormFieldValidator(String? value) {
     String userName = "";
@@ -114,7 +134,9 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  void _submitPressed() { _saveNewUsername(); }
+  void _submitPressed() {
+    _saveNewUsername();
+  }
 
   Future<void> _saveNewUsername() async {
     if (_formKey.currentState?.validate() ?? false) {
@@ -146,150 +168,169 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-
     widget.hfd.checkDiscoveryCompleted();
 
     return Theme(
-      data: blueTheme,
-      child: PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (bool didPop, Object? result) async {
-        if (didPop) {
-          return;
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Settings"),
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back), onPressed: () async {
-              _unfocusAndNavigatorPop();
-            }),
-          backgroundColor: blueTheme.colorScheme.inversePrimary,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.info),
-              tooltip: 'Info Page',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => InfoPage(dpi: widget.getDpi(), dphi: widget.dphi, arl: widget.arl, lls: widget.lls, refreshParent: widget.refreshParent)),
-                );
-              },
-            ),
-          ],
-        ),
-        //backgroundColor: Colors.blue[50],
-        body: Stack(alignment: AlignmentDirectional.bottomCenter, children: [
-          ListView(
-            children: <Widget>[
-              Align(
-                child: RoundedContainer(
-                  width: double.infinity,
-                  constraints: const BoxConstraints(minWidth: 296, maxWidth: 496),
-                  margin: const EdgeInsets.all(12),
-                  padding: const EdgeInsets.all(10),
-                  child: Form(key: _formKey, child:
-                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-                      Container(
-                        width: double.infinity,
-                        constraints: const BoxConstraints(minWidth: 276, maxWidth: 476),
-                        child: const Padding(
-                          padding: EdgeInsets.all(10),
-                          child: Text("User name:",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 32, bottom: 8),
-                        child: Text(_userName,
-                          textAlign: TextAlign.left,
-                          style: const TextStyle(fontSize: 17),
-                          overflow: TextOverflow.ellipsis)),
-                      (EAutoReged.reged == widget.arl.eAutoReged)
-                      ? RoundedContainer(
-                          width: double.infinity,
-                          backgroundcolor: Theme.of(context).hoverColor,
-                          constraints: const BoxConstraints(minWidth: 300, maxWidth: 500),
-                          margin: const EdgeInsets.all(6.0),
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: TextFormField(
-                                  controller: _usernameController,
-                                  validator: _textFormFieldValidator,
-                                  maxLength: 22,
-                                  keyboardType: TextInputType.name,
-                                  decoration: InputDecoration(
-                                    border: const UnderlineInputBorder(),
-                                    filled: true,
-                                    fillColor: Theme.of(context).cardColor,
-                                    icon: const Icon(Icons.person),
-                                    labelText: 'Enter your new user name',
-                                    hintText: _hintText,
-                                    helperText: _usernameHelperText,
-                                    helperStyle: _helperStyle,
-                                    suffixIcon: _suffixIcon,
-                                  ),
-                                )),
-                            ],
-                        ))
-                      : const SizedBox.shrink(),
-                      (EAutoReged.reged == widget.arl.eAutoReged)
-                      ? Align(child: Padding(padding: const EdgeInsets.only(top: 8), child:
-                            ElevatedButton(
-                              onPressed: ((_success ?? false) && _available) ? _submitPressed : null,
-                              child: const Text("Submit", style: TextStyle(fontSize: 18))
-                            ),
-                          ))
-                      : RoundedContainer(
-                          width: double.infinity,
-                          backgroundcolor: Theme.of(context).hoverColor,
-                          constraints: const BoxConstraints(minWidth: 300, maxWidth: 500),
-                          margin: const EdgeInsets.all(6.0),
-                          padding: const EdgeInsets.all(14.0),
-                          child: const Text('Hello, if you don\'t like the username "Me" and want to change it, '
-                                            'please submit a result first by running the test on, for example, '
-                                            '2 threads. After that, you will be able to change your username. '
-                                            'Don\'t forget to turn on the internet.',
-                                            textAlign: TextAlign.justify,
-                                            style: TextStyle(fontSize: 17)),
-                        ),
-                    ]),
-                  ),
+        data: blueTheme,
+        child: PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (bool didPop, Object? result) async {
+            if (didPop) {
+              return;
+            }
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text("Settings"),
+              centerTitle: true,
+              leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () async {
+                    _unfocusAndNavigatorPop();
+                  }),
+              backgroundColor: blueTheme.colorScheme.inversePrimary,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.info),
+                  tooltip: 'Info Page',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => InfoPage(
+                              dpi: widget.getDpi(),
+                              dphi: widget.dphi,
+                              arl: widget.arl,
+                              lls: widget.lls,
+                              refreshParent: widget.refreshParent)),
+                    );
+                  },
                 ),
-              ),
-              // Add the new RoundedContainer here
-              Center(child: RoundedContainer(
-                width: double.infinity,
-                backgroundcolor: Colors.white,
-                constraints: const BoxConstraints(minWidth: 296, maxWidth: 496),
-                margin: const EdgeInsets.all(12.0),
-                padding: const EdgeInsets.all(10.0),
-                child: Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Expanded(child: Text('Feature discovery:', style: TextStyle(fontSize: 17), maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis)),
-                    Switch(
-                      value: !widget.hfd.bHasAlreadyBeenCompleted,
-                      onChanged: (bool value) {
-                        setState(() {
-                          widget.hfd.setHasAlreadyBeenCompleted(!value);
-                        });
-                      },
+              ],
+            ),
+            //backgroundColor: Colors.blue[50],
+            body: SafeArea(
+              top: false,
+              child: Stack(alignment: AlignmentDirectional.bottomCenter, children: [
+                ListView(
+                  children: <Widget>[
+                    Align(
+                      child: RoundedContainer(
+                        width: double.infinity,
+                        constraints: const BoxConstraints(minWidth: 296, maxWidth: 496),
+                        margin: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(10),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
+                            Container(
+                                width: double.infinity,
+                                constraints: const BoxConstraints(minWidth: 276, maxWidth: 476),
+                                child: const Padding(
+                                    padding: EdgeInsets.all(10),
+                                    child: Text("User name:",
+                                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))),
+                            Padding(
+                                padding: const EdgeInsets.only(left: 32, bottom: 8),
+                                child: Text(_userName,
+                                    textAlign: TextAlign.left,
+                                    style: const TextStyle(fontSize: 17),
+                                    overflow: TextOverflow.ellipsis)),
+                            (EAutoReged.reged == widget.arl.eAutoReged)
+                                ? RoundedContainer(
+                                    width: double.infinity,
+                                    backgroundcolor: Theme.of(context).hoverColor,
+                                    constraints: const BoxConstraints(minWidth: 300, maxWidth: 500),
+                                    margin: const EdgeInsets.all(6.0),
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Padding(
+                                            padding: const EdgeInsets.only(top: 4),
+                                            child: TextFormField(
+                                              controller: _usernameController,
+                                              validator: _textFormFieldValidator,
+                                              maxLength: 22,
+                                              keyboardType: TextInputType.name,
+                                              decoration: InputDecoration(
+                                                border: const UnderlineInputBorder(),
+                                                filled: true,
+                                                fillColor: Theme.of(context).cardColor,
+                                                icon: const Icon(Icons.person),
+                                                labelText: 'Enter your new user name',
+                                                hintText: _hintText,
+                                                helperText: _usernameHelperText,
+                                                helperStyle: _helperStyle,
+                                                suffixIcon: _suffixIcon,
+                                              ),
+                                            )),
+                                      ],
+                                    ))
+                                : const SizedBox.shrink(),
+                            (EAutoReged.reged == widget.arl.eAutoReged)
+                                ? Align(
+                                    child: Padding(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: ElevatedButton(
+                                        onPressed: ((_success ?? false) && _available) ? _submitPressed : null,
+                                        child: const Text("Submit", style: TextStyle(fontSize: 18))),
+                                  ))
+                                : RoundedContainer(
+                                    width: double.infinity,
+                                    backgroundcolor: Theme.of(context).hoverColor,
+                                    constraints: const BoxConstraints(minWidth: 300, maxWidth: 500),
+                                    margin: const EdgeInsets.all(6.0),
+                                    padding: const EdgeInsets.all(14.0),
+                                    child: const Text(
+                                        'Hello, if you don\'t like the username "Me" and want to change it, '
+                                        'please submit a result first by running the test on, for example, '
+                                        '2 threads. After that, you will be able to change your username. '
+                                        'Don\'t forget to turn on the internet.',
+                                        textAlign: TextAlign.justify,
+                                        style: TextStyle(fontSize: 17)),
+                                  ),
+                          ]),
+                        ),
+                      ),
                     ),
+                    // Add the new RoundedContainer here
+                    Center(
+                        child: RoundedContainer(
+                      width: double.infinity,
+                      backgroundcolor: Colors.white,
+                      constraints: const BoxConstraints(minWidth: 296, maxWidth: 496),
+                      margin: const EdgeInsets.all(12.0),
+                      padding: const EdgeInsets.all(10.0),
+                      child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Expanded(
+                                  child: Text('Feature discovery:',
+                                      style: TextStyle(fontSize: 17),
+                                      maxLines: 1,
+                                      softWrap: false,
+                                      overflow: TextOverflow.ellipsis)),
+                              Switch(
+                                value: !widget.hfd.bHasAlreadyBeenCompleted,
+                                onChanged: (bool value) {
+                                  setState(() {
+                                    widget.hfd.setHasAlreadyBeenCompleted(!value);
+                                  });
+                                },
+                              ),
+                            ],
+                          )),
+                    )),
+                    const SizedBox(height: 64), // ad banner place
                   ],
-                )),
-              )),
-              const SizedBox(height: 64), // ad banner place
-            ],
+                ),
+                const AdBanner(),
+              ]),
+            ),
           ),
-          const AdBanner(),
-        ]),
-      ),
-    ));
+        ));
   }
-
 }

@@ -22,6 +22,41 @@ class ListsLocalStorage {
   FSSLocalStringList fssUserCrownsDates = FSSLocalStringList(fssGlobal, 'usercrownsdates', []);
   LocalStringList lslUserCrowns = LocalStringList(spGlobal, 'usercrowns', []);
 
+    String _osSuffix(String os) {
+    if (os == 'a' || os == 'i') return '_$os';
+    return '';
+    }
+
+    FSSLocalStringList userResultsDatesByOs(String os) =>
+      os == 'b' ? fssUserResultsDates : FSSLocalStringList(fssGlobal, 'userresultsdates${_osSuffix(os)}', []);
+    LocalStringList userResultsByOs(String os) =>
+      os == 'b' ? lslUserResults : LocalStringList(spGlobal, 'userresults${_osSuffix(os)}', []);
+
+    FSSLocalStringList modelResultsDatesByOs(String os) =>
+      os == 'b' ? fssModelResultsDates : FSSLocalStringList(fssGlobal, 'modelresultsdates${_osSuffix(os)}', []);
+    LocalStringList modelResultsByOs(String os) =>
+      os == 'b' ? lslModelResults : LocalStringList(spGlobal, 'modelresults${_osSuffix(os)}', []);
+
+    FSSLocalStringList userRunnersDatesByOs(String os) =>
+      os == 'b' ? fssUserRunnersDates : FSSLocalStringList(fssGlobal, 'userrunnersdates${_osSuffix(os)}', []);
+    LocalStringList userRunnersByOs(String os) =>
+      os == 'b' ? lslUserRunners : LocalStringList(spGlobal, 'userrunners${_osSuffix(os)}', []);
+
+    FSSLocalStringList modelRunnersDatesByOs(String os) =>
+      os == 'b' ? fssModelRunnersDates : FSSLocalStringList(fssGlobal, 'modelrunnersdates${_osSuffix(os)}', []);
+    LocalStringList modelRunnersByOs(String os) =>
+      os == 'b' ? lslModelRunners : LocalStringList(spGlobal, 'modelrunners${_osSuffix(os)}', []);
+
+    FSSLocalStringList userWorstResultsDatesByOs(String os) =>
+      os == 'b' ? fssUserWorstResultsDates : FSSLocalStringList(fssGlobal, 'userworstresultsdates${_osSuffix(os)}', []);
+    LocalStringList userWorstResultsByOs(String os) =>
+      os == 'b' ? lslUserWorstResults : LocalStringList(spGlobal, 'userworstresults${_osSuffix(os)}', []);
+
+    FSSLocalStringList modelWorstResultsDatesByOs(String os) =>
+      os == 'b' ? fssModelWorstResultsDates : FSSLocalStringList(fssGlobal, 'modelworstresultsdates${_osSuffix(os)}', []);
+    LocalStringList modelWorstResultsByOs(String os) =>
+      os == 'b' ? lslModelWorstResults : LocalStringList(spGlobal, 'modelworstresults${_osSuffix(os)}', []);
+
   void clearLocalListDates() {
     List<String> lsValueUR = serializeURLoadDates([["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
