@@ -1,20 +1,56 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:ironsource_mediation/ironsource_mediation.dart';
+import 'package:unity_levelplay_mediation/unity_levelplay_mediation.dart';
 import '../parameters/ads.dart' as ads;
 import '../middleware/deviceinfoplus.dart';
 
+/// Space pages reserve below their content for a [_kDefaultBannerHeight] banner.
+const double _kMinBannerSpace = 64;
+const double _kDefaultBannerHeight = 50;
+
 class AdBanner extends StatefulWidget {
   const AdBanner({Key? key}) : super(key: key);
+
+  /// Height of the last loaded AdMob banner. Large anchored adaptive banners
+  /// can be up to 150 dp tall, so layouts must follow it instead of a constant.
+  static final ValueNotifier<double> height = ValueNotifier<double>(_kDefaultBannerHeight);
+
+  /// Extra height needed beyond what pages reserve for a [_kDefaultBannerHeight] banner.
+  static double _extraHeight(double bannerHeight) => math.max(0, bannerHeight - _kDefaultBannerHeight);
 
   @override
   State<StatefulWidget> createState()  => _AdBannerState();
 }
 
-class _AdBannerState extends State<AdBanner> with ImpressionDataListener, IronSourceInitializationListener, LevelPlayInitListener {
+/// Keeps the end of scrollable content clear of the bottom [AdBanner].
+class AdBannerSpace extends StatelessWidget {
+  const AdBannerSpace({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<double>(
+      valueListenable: AdBanner.height,
+      builder: (context, bannerHeight, _) =>
+          SizedBox(height: _kMinBannerSpace + AdBanner._extraHeight(bannerHeight)));
+}
+
+/// Lifts a floating action button above the bottom [AdBanner].
+class AdBannerFabLift extends StatelessWidget {
+  final Widget child;
+  const AdBannerFabLift({Key? key, required this.child}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<double>(
+      valueListenable: AdBanner.height,
+      builder: (context, bannerHeight, child) =>
+          Padding(padding: EdgeInsets.only(bottom: AdBanner._extraHeight(bannerHeight)), child: child),
+      child: child);
+}
+
+class _AdBannerState extends State<AdBanner> with LevelPlayImpressionDataListener, LevelPlayInitListener {
 
   /// Ad Provider Systems Initialization Section -------------------------------------------///
 
@@ -52,8 +88,8 @@ class _AdBannerState extends State<AdBanner> with ImpressionDataListener, IronSo
     });
 
     final AnchoredAdaptiveBannerAdSize? size =
-        await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
-            MediaQuery.of(context).size.width.truncate());
+        await AdSize.getLargeAnchoredAdaptiveBannerAdSize(
+            MediaQuery.sizeOf(context).width.truncate());
 
     if (size == null) {
       debugPrint('Unable to get height of anchored banner.');
@@ -75,6 +111,7 @@ class _AdBannerState extends State<AdBanner> with ImpressionDataListener, IronSo
             _anchoredAdaptiveAd = ad as BannerAd;
             _isAdMobLoaded = true;
           });
+          AdBanner.height.value = size.height.toDouble();
         },
         onAdFailedToLoad: (Ad ad, LoadAdError error) {
           debugPrint('Anchored adaptive banner failedToLoad: $error');
@@ -134,30 +171,30 @@ class _AdBannerState extends State<AdBanner> with ImpressionDataListener, IronSo
     return;
   }
 
-  /// Enables debug mode for IronSource adapters.
+  /// Enables debug mode for LevelPlay adapters.
   /// Validates integration.
   Future<void> enableDebug() async {
-    await IronSource.setAdaptersDebug(true);
+    await LevelPlay.setAdaptersDebug(true);
     // this function doesn't have to be awaited
-    IronSource.validateIntegration();
+    LevelPlay.validateIntegration();
   }
 
-  /// Sets regulation parameters for IronSource.
+  /// Sets regulation parameters for LevelPlay.
   Future<void> setRegulationParams() async {
     // GDPR
-    await IronSource.setConsent(true);
-    await IronSource.setMetaData({
-      // CCPA
-      'do_not_sell': ['false'],
-      // COPPA
-      'is_child_directed': ['false'],
+    await LevelPlayPrivacySettings.setGDPRConsent(true);
+    // CCPA (true = user opted out of sale)
+    await LevelPlayPrivacySettings.setCCPA(false);
+    // COPPA (true = child-directed)
+    await LevelPlayPrivacySettings.setCOPPA(false);
+    await LevelPlay.setMetaData({
       'is_test_suite': ['enable']
     });
 
     return;
   }
 
-  /// Initialize iron source SDK.
+  /// Initialize LevelPlay (ironSource) SDK.
   Future<void> initIronSource() async {
     final appKey = Platform.isAndroid
         ? "2032760fd"
@@ -165,23 +202,15 @@ class _AdBannerState extends State<AdBanner> with ImpressionDataListener, IronSo
         ? "2032a866d"
         : throw Exception("Unsupported Platform");
     try {
-      IronSource.setFlutterVersion('3.27.4');
-      IronSource.addImpressionDataListener(this);
+      LevelPlay.setFlutterVersion('3.47.9');
+      LevelPlay.addImpressionDataListener(this);
       await enableDebug();
-      await IronSource.shouldTrackNetworkState(true);
 
       // GDPR, CCPA, COPPA etc
       await setRegulationParams();
 
       // Segment info
       // await setSegment();
-
-      // GAID, IDFA, IDFV
-      String id = await IronSource.getAdvertiserId();
-      debugPrint('AdvertiserID: $id');
-
-      // Do not use AdvertiserID for this.
-      await IronSource.setUserId(ads.appUserId);
 
       // Authorization Request for IDFA use
       if (Platform.isIOS) {
@@ -190,8 +219,9 @@ class _AdBannerState extends State<AdBanner> with ImpressionDataListener, IronSo
 
       // Finally, initialize
       // LevelPlay Init
-      List<AdFormat> legacyAdFormats = [AdFormat.BANNER, AdFormat.REWARDED, AdFormat.INTERSTITIAL, AdFormat.NATIVE_AD];
-      final initRequest = LevelPlayInitRequest(appKey: appKey, legacyAdFormats: legacyAdFormats);
+      final initRequest = LevelPlayInitRequest.builder(appKey)
+        .withUserId(ads.appUserId)
+        .build();
       await LevelPlay.init(initRequest: initRequest, initListener: this);
     } on PlatformException catch (e) {
       debugPrint("$e");
@@ -202,14 +232,8 @@ class _AdBannerState extends State<AdBanner> with ImpressionDataListener, IronSo
 
   /// ImpressionData listener --------------------------------------------------///
   @override
-  void onImpressionSuccess(ImpressionData? impressionData) {
+  void onImpressionSuccess(LevelPlayImpressionData impressionData) {
     debugPrint('Impression Data: $impressionData');
-  }
-
-  /// Initialization listener --------------------------------------------------///
-  @override
-  void onInitializationComplete() {
-    debugPrint('onInitializationComplete');
   }
 
   /// LevelPlay Init listener --------------------------------------------------///

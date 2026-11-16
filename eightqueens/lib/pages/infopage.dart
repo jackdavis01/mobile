@@ -40,7 +40,7 @@ class _InfoPageState extends State<InfoPage> {
   String version = "";
   String buildNumber = "";
   String buildMode = "";
-  final String platform = 'Flutter 3.41.6';
+  final String platform = 'Flutter 3.47.9';
   final String platformPrerelease = '-';
   final String platformChannel = 'stable';
   final String author = 'Jack Davis';
@@ -61,6 +61,7 @@ class _InfoPageState extends State<InfoPage> {
   final String _initCodeHintText = 'code ';
   String _codeHintText = "";
   Widget? _codeSuffixIcon;
+  bool _bPopping = false;
 
   @override
   initState() {
@@ -186,7 +187,7 @@ class _InfoPageState extends State<InfoPage> {
         String username = profile.userName;
         int crowns = profile.credit;
         await widget.arl.setUserIdLocal(userId, await widget.arl.oUdid.get(), 3);
-        widget.arl.setUserNameLocal(username);
+        await widget.arl.setUserNameLocal(username);
         await widget.arl.saveUserCrownLocal(crowns);
         _codeController.clear();
         await widget.refreshParent();
@@ -209,9 +210,11 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Future<void> _unfocusAndNavigatorPop() async {
+    if (_bPopping) return;
+    _bPopping = true;
     FocusScope.of(context).unfocus();
     await Future.delayed(const Duration(milliseconds: 300));
-    Navigator.pop(context);
+    if (mounted) Navigator.pop(context);
   }
 
   @override
@@ -231,6 +234,7 @@ class _InfoPageState extends State<InfoPage> {
           if (didPop) {
             return;
           }
+          _unfocusAndNavigatorPop();
         },
         child: Scaffold(
             appBar: AppBar(
@@ -645,7 +649,7 @@ class _InfoPageState extends State<InfoPage> {
                                         )))
                                 : const SizedBox.shrink(),
                             const SizedBox(height: 20),
-                            const SizedBox(height: 64), // ad banner place
+                            const AdBannerSpace(), // ad banner place
                           ]),
                         ]))
                   ]),

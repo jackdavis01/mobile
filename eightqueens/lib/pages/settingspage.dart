@@ -44,6 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final String _initHintText = 'My funny name 🙂';
   String _hintText = "";
   Widget? _suffixIcon;
+  bool _bPopping = false;
 
   @override
   void initState() {
@@ -148,7 +149,7 @@ class _SettingsPageState extends State<SettingsPage> {
       bool updated = newProfile.updated;
       if (success && updated) {
         String newUsername = newProfile.newUsername;
-        widget.arl.setUserNameLocal(newUsername);
+        await widget.arl.setUserNameLocal(newUsername);
         _usernameController.clear();
         await widget.refreshParent();
         setState(() {
@@ -161,9 +162,11 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _unfocusAndNavigatorPop() async {
+    if (_bPopping) return;
+    _bPopping = true;
     FocusScope.of(context).unfocus();
     await Future.delayed(const Duration(milliseconds: 300));
-    Navigator.pop(context);
+    if (mounted) Navigator.pop(context);
   }
 
   @override
@@ -178,6 +181,7 @@ class _SettingsPageState extends State<SettingsPage> {
             if (didPop) {
               return;
             }
+            _unfocusAndNavigatorPop();
           },
           child: Scaffold(
             appBar: AppBar(
@@ -324,7 +328,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             ],
                           )),
                     )),
-                    const SizedBox(height: 64), // ad banner place
+                    const AdBannerSpace(), // ad banner place
                   ],
                 ),
                 const AdBanner(),

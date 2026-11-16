@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 3.0.3066+3066
+version: 3.0.3069+3069
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -36,15 +36,16 @@ dependencies:
       url: https://github.com/google/flutter-desktop-embedding.git
       path: plugins/window_size
   url_launcher: ^6.3.0
+  share_plus: ^11.1.0
   js: ^0.6.4
-  google_mobile_ads: ^5.3.1
-  ironsource_mediation: ^3.1.0
+  google_mobile_ads: ^9.2.0
+  unity_levelplay_mediation: ^9.5.0
   device_info_plus: ^11.2.0
   dio: ^5.7.0
   shared_preferences: ^2.3.5
   flutter_secure_storage: ^9.2.3
   flutter_udid: ^4.0.0
-  font_awesome_flutter: ^10.8.0
+  font_awesome_flutter: ^11.0.0
   # Use local fixed fork copied from doglist
   feature_discovery:
     path: lib/custom_packages/feature_discovery
@@ -70,6 +71,10 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
+  # unity_levelplay_mediation and flutter_secure_storage still use CocoaPods only,
+  # which conflicts with SPM-based plugins.
+  config:
+    enable-swift-package-manager: false
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

@@ -2,7 +2,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:ironsource_mediation/ironsource_mediation.dart';
+import 'package:unity_levelplay_mediation/unity_levelplay_mediation.dart';
 import '../parameters/ads.dart' as ads;
 import '../parameters/themedata.dart';
 import '../widgets/messagedialogs.dart';
@@ -18,7 +18,7 @@ class ContributionPage extends StatefulWidget {
   _ContributionPageState createState() => _ContributionPageState();
 }
 
-class _ContributionPageState extends State<ContributionPage> with ImpressionDataListener, IronSourceInitializationListener, LevelPlayInitListener {
+class _ContributionPageState extends State<ContributionPage> with LevelPlayImpressionDataListener, LevelPlayInitListener {
   static const AdRequest request = AdRequest(
     keywords: <String>['foo', 'bar'],
     contentUrl: 'http://foo.com/bar.html',
@@ -278,14 +278,8 @@ class _ContributionPageState extends State<ContributionPage> with ImpressionData
 
   /// ImpressionData listener --------------------------------------------------///
   @override
-  void onImpressionSuccess(ImpressionData? impressionData) {
+  void onImpressionSuccess(LevelPlayImpressionData impressionData) {
     debugPrint('Impression Data: $impressionData');
-  }
-
-  /// Initialization listener --------------------------------------------------///
-  @override
-  void onInitializationComplete() {
-    debugPrint('onInitializationComplete');
   }
 
   /// LevelPlay Init listener --------------------------------------------------///
@@ -314,30 +308,30 @@ class _ContributionPageState extends State<ContributionPage> with ImpressionData
     return;
   }
 
-  /// Enables debug mode for IronSource adapters.
+  /// Enables debug mode for LevelPlay adapters.
   /// Validates integration.
   Future<void> enableDebug() async {
-    await IronSource.setAdaptersDebug(true);
+    await LevelPlay.setAdaptersDebug(true);
     // this function doesn't have to be awaited
-    IronSource.validateIntegration();
+    LevelPlay.validateIntegration();
   }
 
-  /// Sets regulation parameters for IronSource.
+  /// Sets regulation parameters for LevelPlay.
   Future<void> setRegulationParams() async {
     // GDPR
-    await IronSource.setConsent(true);
-    await IronSource.setMetaData({
-      // CCPA
-      'do_not_sell': ['false'],
-      // COPPA
-      'is_child_directed': ['false'],
+    await LevelPlayPrivacySettings.setGDPRConsent(true);
+    // CCPA (true = user opted out of sale)
+    await LevelPlayPrivacySettings.setCCPA(false);
+    // COPPA (true = child-directed)
+    await LevelPlayPrivacySettings.setCOPPA(false);
+    await LevelPlay.setMetaData({
       'is_test_suite': ['enable']
     });
 
     return;
   }
 
-  /// Initialize iron source SDK.
+  /// Initialize LevelPlay (ironSource) SDK.
   Future<void> initIronSource() async {
     final appKey = Platform.isAndroid
         ? "2032760fd"
@@ -345,23 +339,15 @@ class _ContributionPageState extends State<ContributionPage> with ImpressionData
         ? "2032a866d"
         : throw Exception("Unsupported Platform");
     try {
-      IronSource.setFlutterVersion('3.24.5');
-      IronSource.addImpressionDataListener(this);
+      LevelPlay.setFlutterVersion('3.47.9');
+      LevelPlay.addImpressionDataListener(this);
       await enableDebug();
-      await IronSource.shouldTrackNetworkState(true);
 
       // GDPR, CCPA, COPPA etc
       await setRegulationParams();
 
       // Segment info
       // await setSegment();
-
-      // GAID, IDFA, IDFV
-      String id = await IronSource.getAdvertiserId();
-      debugPrint('AdvertiserID: $id');
-
-      // Do not use AdvertiserID for this.
-      await IronSource.setUserId(ads.appUserId);
 
       // Authorization Request for IDFA use
       if (Platform.isIOS) {
@@ -370,8 +356,9 @@ class _ContributionPageState extends State<ContributionPage> with ImpressionData
 
       // Finally, initialize
       // LevelPlay Init
-      List<AdFormat> legacyAdFormats = [AdFormat.BANNER, AdFormat.REWARDED, AdFormat.INTERSTITIAL, AdFormat.NATIVE_AD];
-      final initRequest = LevelPlayInitRequest(appKey: appKey, legacyAdFormats: legacyAdFormats);
+      final initRequest = LevelPlayInitRequest.builder(appKey)
+        .withUserId(ads.appUserId)
+        .build();
       await LevelPlay.init(initRequest: initRequest, initListener: this);
     } on PlatformException catch (e) {
       debugPrint("$e");

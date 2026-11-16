@@ -4,6 +4,7 @@ import 'localstorage.dart';
 import '../middleware/fsstorage.dart';
 import '../apinetisolates/apilistuserresultsisolatecontroller.dart';
 import '../apinetisolates/apilistmodelresultsisolatecontroller.dart';
+import '../parameters/statisticsinterval.dart';
 
 class ListsLocalStorage {
 
@@ -57,48 +58,22 @@ class ListsLocalStorage {
     LocalStringList modelWorstResultsByOs(String os) =>
       os == 'b' ? lslModelWorstResults : LocalStringList(spGlobal, 'modelworstresults${_osSuffix(os)}', []);
 
+  static List<List<String>> emptyStatisticsLoadDates() => List.generate(
+      StatisticsInterval.values.length,
+      (_) => List.filled(4, "1980-01-01T00:00:00.000Z"));
+
   void clearLocalListDates() {
-    List<String> lsValueUR = serializeURLoadDates([["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                   ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                   ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
+    List<String> lsValueUR = serializeURLoadDates(emptyStatisticsLoadDates());
     fssUserResultsDates.set(lsValueUR);
-    List<String> lsValueMR = serializeMRLoadDates([["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                   ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                   ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                    "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
+    List<String> lsValueMR = serializeMRLoadDates(emptyStatisticsLoadDates());
     fssModelResultsDates.set(lsValueMR);
-    List<String> lsValueURu = serializeURLoadDates([["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
+    List<String> lsValueURu = serializeURLoadDates(emptyStatisticsLoadDates());
     fssUserRunnersDates.set(lsValueURu);
-    List<String> lsValueMRu = serializeMRLoadDates([["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
+    List<String> lsValueMRu = serializeMRLoadDates(emptyStatisticsLoadDates());
     fssModelRunnersDates.set(lsValueMRu);
-    List<String> lsValueUWR = serializeURLoadDates([["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
+    List<String> lsValueUWR = serializeURLoadDates(emptyStatisticsLoadDates());
     fssUserWorstResultsDates.set(lsValueUWR);
-    List<String> lsValueMWR = serializeMRLoadDates([["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-                                                    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z",
-                                                     "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]]);
+    List<String> lsValueMWR = serializeMRLoadDates(emptyStatisticsLoadDates());
     fssModelWorstResultsDates.set(lsValueMWR);
     List<String> lsValueUC = serializeMRLoadDates([["1980-01-01T00:00:00.000Z"]]);
     fssUserCrownsDates.set(lsValueUC);

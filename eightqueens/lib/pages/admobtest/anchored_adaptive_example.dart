@@ -53,8 +53,8 @@ class _AnchoredAdaptiveExampleState extends State<AnchoredAdaptiveExample> {
     });
 
     final AnchoredAdaptiveBannerAdSize? size =
-        await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
-            MediaQuery.of(context).size.width.truncate());
+        await AdSize.getLargeAnchoredAdaptiveBannerAdSize(
+            MediaQuery.sizeOf(context).width.truncate());
 
     if (size == null) {
       debugPrint('Unable to get height of anchored banner.');

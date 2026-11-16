@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:ironsource_mediation/ironsource_mediation.dart';
+import 'package:unity_levelplay_mediation/unity_levelplay_mediation.dart';
 import '../parameters/ads.dart' as ads;
 import '../parameters/themedata.dart';
 import '../apinetisolates/apiprofilehandlerisolatecontroller.dart';
@@ -28,7 +28,7 @@ class CrownCollectionPage extends StatefulWidget {
   _CrownCollectionPageState createState() => _CrownCollectionPageState();
 }
 
-class _CrownCollectionPageState extends State<CrownCollectionPage> with ImpressionDataListener, IronSourceInitializationListener, LevelPlayInitListener {
+class _CrownCollectionPageState extends State<CrownCollectionPage> with LevelPlayImpressionDataListener, LevelPlayInitListener {
 
   final int maxFailedLoadAttempts = 3;
 
@@ -49,13 +49,13 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
       _createRewardedAd();
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         _refreshCrown();
-        if (GV.bFirstCrownCollectionMessage) {
-          if (1 > widget.iInterval) {
+        if (1 > widget.iInterval) {
+          if (GV.bFirstCrownCollectionMessage) {
             GV.bFirstCrownCollectionMessage = false;
             _showAdQuestion(context);
-          } else {
-            _showIntevalListsAdQuestion(context, widget.iInterval);
           }
+        } else if (GV.bFirstIntervalCrownCollectionMessage) {
+          _showIntevalListsAdQuestion(context, widget.iInterval);
         }
         await initIronSource();
       });
@@ -98,12 +98,12 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
   Future<void> _showIntevalListsAdQuestion(BuildContext context, int iInterval) async {
     if (context.mounted) {
       if (ModalRoute.of(context)?.isCurrent == true) {
-        String sInterval = (1 == iInterval) ? "Monthy" : (2 == iInterval) ? "Quarterly" : "Yearly";
+        String sInterval = (1 == iInterval) ? "Monthly" : (2 == iInterval) ? "Quarterly" : "Yearly";
         await info2ButtonDialog(
           context,
           false,
           MainAxisAlignment.spaceBetween,
-          (1 == iInterval) ? "Monthy List" : (2 == iInterval) ? "Quarterly List" : "Crown Collection",
+          (1 == iInterval) ? "Monthly List" : (2 == iInterval) ? "Quarterly List" : "Crown Collection",
           "Would you like to be included in the " + sInterval + " Top List? Then watch an Ad.",
           "Later",
           "Inclusion",
@@ -218,30 +218,30 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
     return;
   }
 
-  /// Enables debug mode for IronSource adapters.
+  /// Enables debug mode for LevelPlay adapters.
   /// Validates integration.
   Future<void> enableDebug() async {
-    await IronSource.setAdaptersDebug(true);
+    await LevelPlay.setAdaptersDebug(true);
     // this function doesn't have to be awaited
-    IronSource.validateIntegration();
+    LevelPlay.validateIntegration();
   }
 
-  /// Sets regulation parameters for IronSource.
+  /// Sets regulation parameters for LevelPlay.
   Future<void> setRegulationParams() async {
     // GDPR
-    await IronSource.setConsent(true);
-    await IronSource.setMetaData({
-      // CCPA
-      'do_not_sell': ['false'],
-      // COPPA
-      'is_child_directed': ['false'],
+    await LevelPlayPrivacySettings.setGDPRConsent(true);
+    // CCPA (true = user opted out of sale)
+    await LevelPlayPrivacySettings.setCCPA(false);
+    // COPPA (true = child-directed)
+    await LevelPlayPrivacySettings.setCOPPA(false);
+    await LevelPlay.setMetaData({
       'is_test_suite': ['enable']
     });
 
     return;
   }
 
-  /// Initialize iron source SDK.
+  /// Initialize LevelPlay (ironSource) SDK.
   Future<void> initIronSource() async {
     final appKey = Platform.isAndroid
         ? "2032760fd"
@@ -249,20 +249,12 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
         ? "2032a866d"
         : throw Exception("Unsupported Platform");
     try {
-      IronSource.setFlutterVersion('3.29.0');
-      IronSource.addImpressionDataListener(this);
+      LevelPlay.setFlutterVersion('3.47.9');
+      LevelPlay.addImpressionDataListener(this);
       await enableDebug();
-      await IronSource.shouldTrackNetworkState(true);
 
       // GDPR, CCPA, COPPA etc
       await setRegulationParams();
-
-      // GAID, IDFA, IDFV
-      String id = await IronSource.getAdvertiserId();
-      debugPrint('AdvertiserID: $id');
-
-      // Do not use AdvertiserID for this.
-      await IronSource.setUserId(ads.appUserId);
 
       // Authorization Request for IDFA use
       if (Platform.isIOS) {
@@ -271,9 +263,7 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
 
       // Finally, initialize
       // LevelPlay Init
-      List<AdFormat> legacyAdFormats = [AdFormat.REWARDED];
       final initRequest = LevelPlayInitRequest.builder(appKey)
-        .withLegacyAdFormats(legacyAdFormats)
         .withUserId(ads.appUserId)
         .build();
       await LevelPlay.init(initRequest: initRequest, initListener: this);
@@ -284,7 +274,7 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
 
   /// ImpressionData listener --------------------------------------------------///
   @override
-  void onImpressionSuccess(ImpressionData? impressionData) {
+  void onImpressionSuccess(LevelPlayImpressionData impressionData) {
     debugPrint('Impression Data: $impressionData');
   }
 
@@ -292,12 +282,6 @@ class _CrownCollectionPageState extends State<CrownCollectionPage> with Impressi
   @override
   void onInitFailed(LevelPlayInitError error) {
     debugPrint('onInitFailed ${error.errorMessage}');
-  }
-
-  /// Initialization listener --------------------------------------------------///
-  @override
-  void onInitializationComplete() {
-    debugPrint('onInitializationComplete');
   }
 
   @override

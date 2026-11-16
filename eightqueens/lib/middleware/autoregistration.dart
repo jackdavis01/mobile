@@ -24,13 +24,16 @@ class AutoRegMiddleware {
       if (Platform.isAndroid) { os = 'a'; } else if (Platform.isIOS) { os = 'i'; }
       if (os.isNotEmpty) {
         List<dynamic> ldValue = await dari.callRequestAutoRegRetryIsolateApi(sModelCode, os, build, udid, iThreads, iResult);
-        success = ldValue[0];
+        success = ldValue[0] == true &&
+            ldValue[2] is List &&
+            (ldValue[2] as List).isEmpty &&
+            ldValue[5] == 0;
         if (success) {
           AutoRegAnswer answer = ldValue[1];
           int userId = int.tryParse(answer.userId) ?? -4;
-          autoRegLocal.setUserIdLocal(userId, udid, ls);
+          await autoRegLocal.setUserIdLocal(userId, udid, ls);
           String userName = answer.userName;
-          autoRegLocal.setUserNameLocal(userName);
+          await autoRegLocal.setUserNameLocal(userName);
           int userCrown = answer.credit;
           await autoRegLocal.saveUserCrownLocal(userCrown);
         }
@@ -154,7 +157,9 @@ class AutoRegLocal {
     await _setEAutoReged(_iUserId);
   }
 
-  void setUserNameLocal(String sUserName) { regedUserNameLocal.set(sUserName); }
+  Future<void> setUserNameLocal(String sUserName) async {
+    await regedUserNameLocal.set(sUserName);
+  }
 
   Future<String> getUserName() async => await regedUserNameLocal.get();
 

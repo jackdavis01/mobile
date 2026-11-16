@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import '../apinetisolates/apilistmodelresultsisolatecontroller.dart';
 import '../middleware/fsstorage.dart';
 import '../middleware/localstorage.dart';
+import '../middleware/listslocalstorage.dart';
 import 'adhandler.dart';
 import '../middleware/customfloatingactionbuttonlocation.dart';
 import '../parameters/themedata.dart';
+import '../parameters/statisticsinterval.dart';
 
 class ModelLists extends StatefulWidget {
   final String pageTitle;
@@ -40,42 +42,22 @@ class _ModelListsState extends State<ModelLists> with TickerProviderStateMixin {
   late TabController _tabThreadsController;
   final int _iRefreshDelaySec = 300;
   bool _bRefreshDelayCompleted = true;
-  List<List<String>> llsMLLoadDates = [
-    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-    ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]
-  ];
+  List<List<String>> llsMLLoadDates = ListsLocalStorage.emptyStatisticsLoadDates();
   bool _bHasMLLoadCompleted = false;
-  List<List<List<ModelResultsAnswer>>> lllmra = [
-    [[], [], [], []],
-    [[], [], [], []],
-    [[], [], [], []]
-  ];
-  List<List<_ModelListsDataTable>> llmldt = [
-    [
+  List<List<List<ModelResultsAnswer>>> lllmra =
+      List.generate(StatisticsInterval.values.length, (_) => [[], [], [], []]);
+  List<List<_ModelListsDataTable>> llmldt =
+      List.generate(StatisticsInterval.values.length, (_) => [
       _ModelListsDataTable(lModelAnswer: [], threads: 1),
       _ModelListsDataTable(lModelAnswer: [], threads: 2),
       _ModelListsDataTable(lModelAnswer: [], threads: 4),
       _ModelListsDataTable(lModelAnswer: [], threads: 8),
-    ],
-    [
-      _ModelListsDataTable(lModelAnswer: [], threads: 1),
-      _ModelListsDataTable(lModelAnswer: [], threads: 2),
-      _ModelListsDataTable(lModelAnswer: [], threads: 4),
-      _ModelListsDataTable(lModelAnswer: [], threads: 8),
-    ],
-    [
-      _ModelListsDataTable(lModelAnswer: [], threads: 1),
-      _ModelListsDataTable(lModelAnswer: [], threads: 2),
-      _ModelListsDataTable(lModelAnswer: [], threads: 4),
-      _ModelListsDataTable(lModelAnswer: [], threads: 8),
-    ],
-  ];
+    ]);
 
   @override
   void initState() {
     super.initState();
-    _tabIntervalsController = TabController(length: 3, vsync: this);
+    _tabIntervalsController = TabController(length: StatisticsInterval.values.length, vsync: this);
     _tabIntervalsController.addListener(_handleTabSelection);
     _tabThreadsController = TabController(length: 4, vsync: this);
     _tabThreadsController.addListener(_handleTabSelection);
@@ -95,11 +77,8 @@ class _ModelListsState extends State<ModelLists> with TickerProviderStateMixin {
   }
 
   Future<void> _getLocalModelListsDates() async {
-    llsMLLoadDates = widget.deserializeMLLoadDates(await widget.fssLslMLLoadDates.get(), [
-      ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-      ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"],
-      ["1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z", "1980-01-01T00:00:00.000Z"]
-    ]);
+    llsMLLoadDates = widget.deserializeMLLoadDates(
+        await widget.fssLslMLLoadDates.get(), ListsLocalStorage.emptyStatisticsLoadDates());
   }
 
   bool _isTabLoadable() {
@@ -147,11 +126,9 @@ class _ModelListsState extends State<ModelLists> with TickerProviderStateMixin {
   Future<void> _getModelList(int iIntervalTab, int iThreadTab) async {
     _bHasMLLoadCompleted = false;
 
-    List<List<List<ModelResultsAnswer>>> lllmra0 = widget.deserializeLllmra(await widget.lslModel.get(), [
-      [[], [], [], []],
-      [[], [], [], []],
-      [[], [], [], []]
-    ]);
+    List<List<List<ModelResultsAnswer>>> lllmra0 = widget.deserializeLllmra(
+        await widget.lslModel.get(),
+        List.generate(StatisticsInterval.values.length, (_) => [[], [], [], []]));
     if (mounted) {
       setState(() {
         lllmra = lllmra0;
@@ -160,7 +137,7 @@ class _ModelListsState extends State<ModelLists> with TickerProviderStateMixin {
 
     if (_isTabLoadable()) {
       List<dynamic> ldValue = await widget.callListModelRetryIsolateApi(
-          _intervalTabToThreads(iIntervalTab), _threadTabToThreads(iThreadTab));
+          StatisticsInterval.values[iIntervalTab].apiValue, _threadTabToThreads(iThreadTab));
       bool success = ldValue[0];
       if (success) {
         Map<String, List<ModelResultsAnswer>> answer = ldValue[1];
@@ -202,19 +179,6 @@ class _ModelListsState extends State<ModelLists> with TickerProviderStateMixin {
     );
   }
 
-  int _intervalTabToThreads(int iThreadTab) {
-    switch (iThreadTab) {
-      case 0:
-        return 2; // Weekly
-      case 1:
-        return 3; // Monthly
-      case 2:
-        return 4; // Quarterly
-      default:
-        return 1;
-    }
-  }
-
   int _threadTabToThreads(int iThreadTab) {
     switch (iThreadTab) {
       case 0:
@@ -248,19 +212,12 @@ class _ModelListsState extends State<ModelLists> with TickerProviderStateMixin {
                 padding: const EdgeInsets.only(bottom: 3.0),
                 controller: _tabIntervalsController,
                 isScrollable: true,
-                tabs: const <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                    child: Text("Weekly", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                    child: Text("Monthly", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                    child: Text("Quarterly", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                  ),
+                tabs: <Widget>[
+                  for (final interval in StatisticsInterval.values)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5.0, bottom: 8.0),
+                      child: Text(interval.label, style: const TextStyle(fontSize: 18.4), maxLines: 1),
+                    ),
                 ],
               ),
             ),
@@ -272,6 +229,7 @@ class _ModelListsState extends State<ModelLists> with TickerProviderStateMixin {
                   child: TabBarView(
                 controller: _tabIntervalsController,
                 children: <Widget>[
+                  for (int iIntervalTab = 0; iIntervalTab < StatisticsInterval.values.length; iIntervalTab++)
                   DefaultTabController(
                     length: 4,
                     initialIndex: 0,
@@ -303,92 +261,8 @@ class _ModelListsState extends State<ModelLists> with TickerProviderStateMixin {
                           child: TabBarView(
                             controller: _tabThreadsController,
                             children: <Widget>[
-                              scrollableDataTable(0, 0),
-                              scrollableDataTable(0, 1),
-                              scrollableDataTable(0, 2),
-                              scrollableDataTable(0, 3),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  DefaultTabController(
-                    length: 4,
-                    initialIndex: 0,
-                    child: Column(
-                      children: [
-                        TabBar(
-                          controller: _tabThreadsController,
-                          isScrollable: true,
-                          tabs: const [
-                            Padding(
-                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                              child: Text("1 Thread", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                              child: Text("2 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                              child: Text("4 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                              child: Text("8 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                            ),
-                          ],
-                        ),
-                        Expanded(
-                          child: TabBarView(
-                            controller: _tabThreadsController,
-                            children: <Widget>[
-                              scrollableDataTable(1, 0),
-                              scrollableDataTable(1, 1),
-                              scrollableDataTable(1, 2),
-                              scrollableDataTable(1, 3),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  DefaultTabController(
-                    length: 4,
-                    initialIndex: 0,
-                    child: Column(
-                      children: [
-                        TabBar(
-                          controller: _tabThreadsController,
-                          isScrollable: true,
-                          tabs: const [
-                            Padding(
-                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                              child: Text("1 Thread", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                              child: Text("2 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                              child: Text("4 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 5.0, bottom: 8.0),
-                              child: Text("8 Threads", style: TextStyle(fontSize: 18.4), maxLines: 1),
-                            ),
-                          ],
-                        ),
-                        Expanded(
-                          child: TabBarView(
-                            controller: _tabThreadsController,
-                            children: <Widget>[
-                              scrollableDataTable(2, 0),
-                              scrollableDataTable(2, 1),
-                              scrollableDataTable(2, 2),
-                              scrollableDataTable(2, 3),
+                              for (int iThreadTab = 0; iThreadTab < 4; iThreadTab++)
+                                scrollableDataTable(iIntervalTab, iThreadTab),
                             ],
                           ),
                         ),
@@ -401,10 +275,11 @@ class _ModelListsState extends State<ModelLists> with TickerProviderStateMixin {
             ]),
           ),
           floatingActionButton: (_bRefreshDelayCompleted && _bHasMLLoadCompleted && _isTabLoadable())
-              ? SafeArea(
-                  top: false,
-                  child: ElevatedButton(
-                      onPressed: _handleFloatingActionButtonPress, child: const Icon(Icons.refresh_rounded, size: 36)))
+              ? AdBannerFabLift(
+                  child: SafeArea(
+                      top: false,
+                      child: ElevatedButton(
+                          onPressed: _handleFloatingActionButtonPress, child: const Icon(Icons.refresh_rounded, size: 36))))
               : null,
           floatingActionButtonLocation: CustomFloatingActionButtonLocation(0.0, -104.0),
         ),

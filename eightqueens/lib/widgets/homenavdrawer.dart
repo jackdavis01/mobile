@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../middleware/autoregistration.dart';
 import '../middleware/deviceinfoplus.dart';
 import '../middleware/listslocalstorage.dart';
+import '../middleware/appstats.dart';
 import '../apinetisolates/apiprofilehandlerisolatecontroller.dart';
 import '../widgets/featurediscovery.dart';
 import '../pages/settingspage.dart';
@@ -17,6 +18,7 @@ import '../pages/modelworstresultspage.dart';
 import '../pages/usercrownspage.dart';
 import '../pages/crowncollectionpage.dart';
 import '../pages/infopage.dart';
+import '../pages/appstatspage.dart';
 
 class HomeNavDrawer extends StatefulWidget {
 
@@ -323,6 +325,14 @@ class _HomeNavDrawerState extends State<HomeNavDrawer> {
               : () { showRunTestFirstTextDialog(context); },
           )
         : const SizedBox.shrink(),
+        if (appStatsSupported)
+          ListTile(
+            leading: const Icon(Icons.bar_chart),
+            minLeadingWidth: 0,
+            title: const Text('App Stats', style: TextStyle(fontSize: 18.0)),
+            onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const AppStatsPage())),
+          ),
         ListTile(
           leading: const Icon(Icons.settings),
           minLeadingWidth: 0,

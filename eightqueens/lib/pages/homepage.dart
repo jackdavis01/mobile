@@ -21,6 +21,7 @@ import '../middleware/rankings.dart';
 import '../middleware/autoregistration.dart';
 import '../middleware/insertresultsorautoreg.dart';
 import '../middleware/listslocalstorage.dart';
+import '../middleware/appstats.dart';
 import '../widgets/homenavdrawer.dart';
 import '../widgets/boxwidgets.dart';
 import '../widgets/featurediscovery.dart';
@@ -82,7 +83,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
   bool _b5secWaitStarted = false;
   bool _bResultPageOpened = false;
   bool _insertResultOrAutoRegStarted = false;
-  Duration _dElapsedSended = const Duration(days: 0);
+  AppStatsMeasurement? _statsMeasurement;
   bool _bThereWasWaitOrPause = false;
 
   final GlobalKey<ResultPageState> _resultPageKey = GlobalKey();
@@ -165,7 +166,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
       if (success) {
         String userName = profile.userName;
         int credit = profile.credit;
-        arl.setUserNameLocal(userName);
+        await arl.setUserNameLocal(userName);
         await arl.saveUserCrownLocal(credit);
         _refreshCrown();
       }
@@ -205,6 +206,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
   }
 
   Future<void> _startStepCounter() async {
+    _statsMeasurement = null;
+    _insertResultOrAutoRegStarted = false;
     if (1 == _iddThreads) {
       _nThreadsStarted = 1;
       if (!_foundation.kIsWeb) {
@@ -434,6 +437,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
       _liPos = <int>[1, 1, 1, 1, 1, 1, 1, 1];
       _bResultPageOpened = false;
       _insertResultOrAutoRegStarted = false;
+      _statsMeasurement = null;
     });
     setState(() {});
   }
@@ -505,6 +509,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
         findSolution.resume();
       }
     }
+    _recordCompletedMeasurement();
     setState(() {});
     await Future.delayed(Duration.zero);
   }
@@ -552,6 +557,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
         multiThreadedFindSolution.resume();
       }
     }
+    _recordCompletedMeasurement();
     setState(() {});
     await Future.delayed(Duration.zero);
   }
@@ -672,6 +678,27 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
     }
     setState(() {});
     await Future.delayed(Duration.zero);
+  }
+
+  void _recordCompletedMeasurement() {
+    if (appStatsSupported &&
+        _statsMeasurement == null &&
+        _stepCounter == pow(8, 8) &&
+        _dElapsed > Duration.zero) {
+      _statsMeasurement = AppStatsStore.instance.completeMeasurement(
+          canSubmit: !_bThereWasWaitOrPause);
+    }
+  }
+
+  Future<void> _submitCompletedBenchmark(
+      AppStatsMeasurement measurement, int threads, Duration elapsed) async {
+    final build = int.tryParse(_dpi.buildNumber) ?? -20;
+    final success = await iroarm.insertResultOrAutoReg(build, threads, elapsed,
+        measurement: measurement);
+    if (success) {
+      if (mounted) _refreshCrown();
+      _lls.clearLocalListDates();
+    }
   }
 
   void onChangedDDWait(dynamic newValue) {
@@ -983,6 +1010,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
                               arl: arl,
                               lls: _lls,
                               refreshParent: _refreshCrown,
+                              measurement: _statsMeasurement,
+                              completed: _stepCounter == pow(8, 8),
                             )),
                   );
                 }
@@ -996,26 +1025,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteA
                 }
                 if (pow(8, 8) == _stepCounter && !_bResultPageOpened) {
                   _bResultPageOpened = true;
-                  _openResultPage(cResult0);
+                  if (mounted &&
+                      (!appStatsSupported || ModalRoute.of(context)?.isCurrent == true)) {
+                    _openResultPage(cResult0);
+                  }
                 }
                 _b5secWaitStarted = false;
               }
 
               Future<void> _callInsertResultsOrAutoRegAfterWait() async {
+                final measurement = _statsMeasurement;
+                final threads = _nThreadsStarted;
+                final elapsed = _dElapsed;
+                if (measurement == null || !measurement.canSubmit) return;
                 await Future.delayed(const Duration(milliseconds: 1000));
-                if (!_bStart &&
+                if (identical(measurement, _statsMeasurement) &&
+                    !_bStart &&
                     pow(8, 8) == _stepCounter &&
-                    const Duration(milliseconds: 0) < _dElapsed &&
-                    _dElapsedSended != _dElapsed &&
+                    measurement.status != AppStatsSubmission.recorded &&
                     !_bThereWasWaitOrPause) {
-                  int iBuild = int.tryParse(_dpi.buildNumber) ?? -20;
-                  bool success = await iroarm.insertResultOrAutoReg(iBuild, _nThreadsStarted, _dElapsed);
-                  if (success) {
-                    _dElapsedSended = _dElapsed;
-                    _insertResultOrAutoRegStarted = false;
-                    _refreshCrown();
-                    _lls.clearLocalListDates();
-                  }
+                  await _submitCompletedBenchmark(measurement, threads, elapsed);
                 }
               }
 

@@ -193,10 +193,11 @@ class _UserCrownListsState extends State<UserCrownLists> with TickerProviderStat
             ]),
           ),
           floatingActionButton: (_bRefreshDelayCompleted && _bHasULLoadCompleted && _isTabLoadable())
-              ? SafeArea(
-                  top: false,
-                  child: ElevatedButton(
-                      onPressed: _handleFloatingActionButtonPress, child: const Icon(Icons.refresh_rounded, size: 36)))
+              ? AdBannerFabLift(
+                  child: SafeArea(
+                      top: false,
+                      child: ElevatedButton(
+                          onPressed: _handleFloatingActionButtonPress, child: const Icon(Icons.refresh_rounded, size: 36))))
               : null,
           floatingActionButtonLocation: CustomFloatingActionButtonLocation(0.0, -104.0),
         ),

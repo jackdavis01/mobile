@@ -1,7 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ironsource_mediation/ironsource_mediation.dart';
+import 'package:unity_levelplay_mediation/unity_levelplay_mediation.dart';
 import './utils.dart';
 import './horizontal_buttons.dart';
 
@@ -14,7 +14,7 @@ class IronSourceTestPage extends StatefulWidget {
   State<IronSourceTestPage> createState() => _IronSourceTestPageState();
 }
 
-class _IronSourceTestPageState extends State<IronSourceTestPage> with ImpressionDataListener, IronSourceInitializationListener, LevelPlayInitListener{
+class _IronSourceTestPageState extends State<IronSourceTestPage> with LevelPlayImpressionDataListener, LevelPlayInitListener{
 
   @override
   void initState() {
@@ -40,43 +40,41 @@ class _IronSourceTestPageState extends State<IronSourceTestPage> with Impression
     return;
   }
 
-  /// Enables debug mode for IronSource adapters.
+  /// Enables debug mode for LevelPlay adapters.
   /// Validates integration.
   Future<void> enableDebug() async {
-    await IronSource.setAdaptersDebug(true);
+    await LevelPlay.setAdaptersDebug(true);
     // this function doesn't have to be awaited
-    IronSource.validateIntegration();
+    LevelPlay.validateIntegration();
   }
 
-  /// Sets user segment params sample information for IronSource.
+  /// Sets user segment params sample information for LevelPlay.
   /*Future<void> setSegment() async {
-    final segment = IronSourceSegment();
-    segment.age = 20;
-    segment.gender = IronSourceUserGender.Male;
+    final segment = LevelPlaySegment();
     segment.level = 3;
     segment.isPaying = false;
-    segment.userCreationDateInMillis = DateTime.now().millisecondsSinceEpoch;
+    segment.userCreationDate = DateTime.now().millisecondsSinceEpoch;
     segment.iapTotal = 1000;
     segment.setCustom(key: 'DemoCustomKey', value: 'DemoCustomVal');
-    await IronSource.setSegment(segment);
+    await LevelPlay.setSegment(segment);
   }*/
 
-  /// Sets regulation parameters for IronSource.
+  /// Sets regulation parameters for LevelPlay.
   Future<void> setRegulationParams() async {
     // GDPR
-    await IronSource.setConsent(true);
-    await IronSource.setMetaData({
-      // CCPA
-      'do_not_sell': ['false'],
-      // COPPA
-      'is_child_directed': ['false'],
+    await LevelPlayPrivacySettings.setGDPRConsent(true);
+    // CCPA (true = user opted out of sale)
+    await LevelPlayPrivacySettings.setCCPA(false);
+    // COPPA (true = child-directed)
+    await LevelPlayPrivacySettings.setCOPPA(false);
+    await LevelPlay.setMetaData({
       'is_test_suite': ['enable']
     });
 
     return;
   }
 
-  /// Initialize iron source SDK.
+  /// Initialize LevelPlay (ironSource) SDK.
   Future<void> init() async {
     final appKey = Platform.isAndroid
         ? "2032760fd"
@@ -84,23 +82,15 @@ class _IronSourceTestPageState extends State<IronSourceTestPage> with Impression
         ? "2032a866d"
         : throw Exception("Unsupported Platform");
     try {
-      IronSource.setFlutterVersion('3.29.0');
-      IronSource.addImpressionDataListener(this);
+      LevelPlay.setFlutterVersion('3.47.9');
+      LevelPlay.addImpressionDataListener(this);
       await enableDebug();
-      await IronSource.shouldTrackNetworkState(true);
 
       // GDPR, CCPA, COPPA etc
       await setRegulationParams();
 
       // Segment info
       // await setSegment();
-
-      // GAID, IDFA, IDFV
-      String id = await IronSource.getAdvertiserId();
-      debugPrint('AdvertiserID: $id');
-
-      // Do not use AdvertiserID for this.
-      await IronSource.setUserId(appUserId);
 
       // Authorization Request for IDFA use
       if (Platform.isIOS) {
@@ -109,8 +99,9 @@ class _IronSourceTestPageState extends State<IronSourceTestPage> with Impression
 
       // Finally, initialize
       // LevelPlay Init
-      List<AdFormat> legacyAdFormats = [AdFormat.BANNER, AdFormat.REWARDED, AdFormat.INTERSTITIAL, AdFormat.NATIVE_AD];
-      final initRequest = LevelPlayInitRequest(appKey: appKey, legacyAdFormats: legacyAdFormats);
+      final initRequest = LevelPlayInitRequest.builder(appKey)
+        .withUserId(appUserId)
+        .build();
       await LevelPlay.init(initRequest: initRequest, initListener: this);
     } on PlatformException catch (e) {
       debugPrint("$e");
@@ -136,7 +127,7 @@ class _IronSourceTestPageState extends State<IronSourceTestPage> with Impression
               Utils.spacerLarge,
               const LevelPlayNativeAdViewSection(),
               Utils.spacerLarge,
-              if (Platform.isIOS) const IOSSection()
+              const TestSuiteSection()
             ],
           ),
         ),
@@ -146,14 +137,8 @@ class _IronSourceTestPageState extends State<IronSourceTestPage> with Impression
 
   /// ImpressionData listener --------------------------------------------------///
   @override
-  void onImpressionSuccess(ImpressionData? impressionData) {
+  void onImpressionSuccess(LevelPlayImpressionData impressionData) {
     debugPrint('Impression Data: $impressionData');
-  }
-
-  /// Initialization listener --------------------------------------------------///
-  @override
-  void onInitializationComplete() {
-    debugPrint('onInitializationComplete');
   }
 
   /// LevelPlay Init listener --------------------------------------------------///
@@ -508,22 +493,22 @@ class _LevelPlayNativeAdsSection extends State<LevelPlayNativeAdViewSection> wit
   // LevelPlay NativeAd listener
 
   @override
-  void onAdClicked(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
-    debugPrint('onAdLoaded - adInfo: $adInfo');
+  void onAdClicked(LevelPlayNativeAd nativeAd, AdInfo adInfo) {
+    debugPrint('onAdClicked - adInfo: $adInfo');
   }
 
   @override
-  void onAdImpression(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
-    debugPrint('onAdLoaded - adInfo: $adInfo');
+  void onAdImpression(LevelPlayNativeAd nativeAd, AdInfo adInfo) {
+    debugPrint('onAdImpression - adInfo: $adInfo');
   }
 
   @override
-  void onAdLoadFailed(LevelPlayNativeAd? nativeAd, IronSourceError? error) {
+  void onAdLoadFailed(LevelPlayNativeAd nativeAd, IronSourceError error) {
     debugPrint('onAdLoadFailed - error: $error');
   }
 
   @override
-  void onAdLoaded(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
+  void onAdLoaded(LevelPlayNativeAd nativeAd, AdInfo adInfo) {
     debugPrint('onAdLoaded - nativeAd: $_nativeAd, adInfo: $adInfo');
     setState(() {
       _nativeAd = nativeAd;
@@ -531,62 +516,16 @@ class _LevelPlayNativeAdsSection extends State<LevelPlayNativeAdViewSection> wit
   }
 }
 
-/// IOS Section ----------------------------------------------------------------///
-class IOSSection extends StatefulWidget {
-  const IOSSection({Key? key}) : super(key: key);
-
-  @override
-  _IOSSectionState createState() => _IOSSectionState();
-}
-
-class _IOSSectionState extends State<IOSSection> with IronSourceConsentViewListener {
-  @override
-  void initState() {
-    super.initState();
-    IronSource.setConsentViewListener(this);
-  }
-
-  Future<void> _loadConsentView() async =>await IronSource.loadConsentViewWithType('pre');
-
-  Future<void> _getConversionValue(BuildContext context) async {
-    final cv = await IronSource.getConversionValue();
-    Utils.showTextDialog(context, "ConversionValue", cv.toString());
-  }
+/// Test Suite Section ---------------------------------------------------------///
+class TestSuiteSection extends StatelessWidget {
+  const TestSuiteSection({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      const Text("iOS 14", style: Utils.headingStyle),
-      HorizontalButtons([ButtonInfo("Get Conversion Value", () => _getConversionValue(context))]),
-      HorizontalButtons([ButtonInfo("Load Consent View", () => _loadConsentView)])
+      const Text("Integration Test Suite", style: Utils.headingStyle),
+      // Requires the 'is_test_suite' metadata set before init and a successful init.
+      HorizontalButtons([ButtonInfo("Launch Test Suite", () => LevelPlay.launchTestSuite())]),
     ]);
-  }
-
-  @override
-  void consentViewDidAccept(String consentViewType) {
-    debugPrint('consentViewDidAccept consentViewType:$consentViewType');
-  }
-
-  @override
-  void consentViewDidFailToLoad(IronSourceConsentViewError error) {
-    debugPrint('consentViewDidFailToLoad error:$error');
-  }
-
-  @override
-  void consentViewDidFailToShow(IronSourceConsentViewError error) {
-    debugPrint('consentViewDidFailToShow error:$error');
-  }
-
-  @override
-  void consentViewDidLoadSuccess(String consentViewType) {
-    debugPrint('consentViewDidLoadSuccess consentViewType:$consentViewType');
-    if (mounted) {
-      IronSource.showConsentViewWithType(consentViewType);
-    }
-  }
-
-  @override
-  void consentViewDidShowSuccess(String consentViewType) {
-    debugPrint('consentViewDidLoadSuccess consentViewType:$consentViewType');
   }
 }

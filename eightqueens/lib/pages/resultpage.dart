@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollDirection;
 import '../apinetisolates/apiprofilehandlerisolatecontroller.dart';
 import '../middleware/autoregistration.dart';
+import '../middleware/appstats.dart';
 import '../middleware/listslocalstorage.dart';
 import 'admobtest/admobtestpage.dart';
 import 'ironsourcetest/ironsourcetestpage.dart';
@@ -14,6 +15,8 @@ import 'crowncollectionpage.dart';
 import '../widgets/globalwidgets.dart';
 import '../widgets/rankrangelist.dart';
 import '../widgets/adhandler.dart';
+import '../widgets/resultsharepanel.dart';
+import '../parameters/resultshare.dart';
 
 class ResultPage extends StatefulWidget {
   final int speed;
@@ -27,6 +30,8 @@ class ResultPage extends StatefulWidget {
   final AutoRegLocal arl;
   final ListsLocalStorage lls;
   final Future<void> Function() refreshParent;
+  final AppStatsMeasurement? measurement;
+  final bool completed;
 
   const ResultPage(
       {Key? key,
@@ -40,13 +45,15 @@ class ResultPage extends StatefulWidget {
       required this.dphi,
       required this.arl,
       required this.lls,
-      required this.refreshParent})
+      required this.refreshParent,
+      this.measurement,
+      this.completed = false})
       : super(key: key);
   @override
   ResultPageState createState() => ResultPageState();
 }
 
-class ResultPageState extends State<ResultPage> {
+class ResultPageState extends State<ResultPage> with WidgetsBindingObserver {
   void _openContributionPage() =>
       Navigator.push(context, MaterialPageRoute(builder: (context) => const ContributionPage()));
 
@@ -57,10 +64,18 @@ class ResultPageState extends State<ResultPage> {
 
   ScrollController scrollController = ScrollController();
   bool _userScrolled = false;
+  bool _sharingStarted = false;
+  AppLifecycleState? _lifecycle;
+
+  bool get _canRunTimers => mounted && !_sharingStarted &&
+      (_lifecycle == null || _lifecycle == AppLifecycleState.resumed) &&
+      ModalRoute.of(context)?.isCurrent == true;
 
   @override
   void initState() {
     super.initState();
+    _lifecycle = WidgetsBinding.instance.lifecycleState;
+    WidgetsBinding.instance.addObserver(this);
     scrollController.addListener(_scrollListener);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _autoScrollAfterWait();
@@ -70,9 +85,15 @@ class ResultPageState extends State<ResultPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     scrollController.removeListener(_scrollListener);
     scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _lifecycle = state;
   }
 
   void _scrollListener() {
@@ -85,22 +106,23 @@ class ResultPageState extends State<ResultPage> {
 
   Future<void> _autoScrollAfterWait() async {
     await Future.delayed(const Duration(milliseconds: 5000));
-    if (mounted && !_userScrolled) {
-      scrollController.animateTo(420, duration: const Duration(milliseconds: 1000), curve: Curves.easeInOut);
+    if (_canRunTimers && !_userScrolled && scrollController.hasClients) {
+      final target = 420.0.clamp(0.0, scrollController.position.maxScrollExtent);
+      scrollController.animateTo(target, duration: const Duration(milliseconds: 1000), curve: Curves.easeInOut);
     }
   }
 
   Future<void> _collectCrownsAfterWait() async {
     if (!kIsWeb && (Platform.isIOS || 10.0 <= dAndroidVersion)) {
       await Future.delayed(const Duration(milliseconds: 10000));
-      if (mounted && GV.bFirstIntervalCrownCollectionMessage) {
+      if (_canRunTimers && GV.bFirstIntervalCrownCollectionMessage) {
         int iCrown = await widget.arl.getUserCrown();
         int iInterval = (2 > iCrown)
             ? 1
             : (3 > iCrown)
                 ? 2
                 : 0;
-        if (0 < iInterval) {
+        if (_canRunTimers && 0 < iInterval) {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -139,7 +161,19 @@ class ResultPageState extends State<ResultPage> {
         backgroundColor: Colors.blue.shade50,
         body: SafeArea(
           top: false,
-          child: Stack(
+          child: LayoutBuilder(builder: (context, constraints) => Column(
+            children: [
+              if (resultSharingSupported)
+                ResultSharePanel(
+                  threads: widget.threads,
+                  elapsed: widget.elapsed,
+                  completed: widget.completed,
+                  availableHeight: constraints.maxHeight,
+                  readUsername: widget.arl.getUserName,
+                  measurement: widget.measurement,
+                  onInteraction: () { _sharingStarted = true; },
+                ),
+              Expanded(child: Stack(
             alignment: AlignmentDirectional.bottomCenter,
             children: <Widget>[
               ListView(physics: const BouncingScrollPhysics(), controller: scrollController, children: <Widget>[
@@ -260,12 +294,14 @@ class ResultPageState extends State<ResultPage> {
                           const SizedBox(height: 20),
                           const RankRangeListTitle(),
                           RankRangeList(),
-                          const SizedBox(height: 64), // ad banner place
+                          const AdBannerSpace(), // ad banner place
                         ]))
               ]),
               const AdBanner(),
             ],
-          ),
+              )),
+            ],
+          )),
         ));
   }
 }
